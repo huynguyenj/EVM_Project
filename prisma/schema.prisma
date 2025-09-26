@@ -1,0 +1,411 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+/**Staff table*/
+model Staff {
+  id Int @id @default(autoincrement())
+  username String @unique @db.VarChar(50)
+  password String 
+  fullname String? @db.VarChar(60)
+  email String @unique
+  phone String? @db.VarChar(15)
+  address String? 
+  avatar String?
+  createAt DateTime @db.Date @default(now())
+  isActive Boolean  @default(true)
+  isDeleted Boolean @default(false)
+  agencyId Int?
+  agency Agency? @relation(fields: [agencyId], references: [id])
+  feedback Feedback[]
+  role Role_Staff[]
+  order Order[]
+  tokenId Int? @unique
+  token Token? @relation(fields: [tokenId], references: [id])
+  @@map("staffs")
+}
+/**Token table*/
+model Token {
+  id Int @id @default(autoincrement())
+  accessToken String
+  refreshToken String
+  createAt DateTime @db.Date
+  staff Staff?
+  @@map("token")
+}
+/**Role and Permission table*/
+model Role_Staff {
+  staffId Int
+  staff Staff @relation(fields: [staffId], references: [id])
+  roleId Int
+  role Role @relation(fields: [roleId], references: [id])
+  @@id([staffId, roleId])
+  @@map("role_staff")
+}
+model Role {
+  id Int @id @default(autoincrement())
+  roleName String
+  isActive Boolean @default(true)
+  isDeleted Boolean @default(false)
+  staff Role_Staff[]
+  permissions Role_Permission[]
+  @@map("role")
+}
+model Role_Permission {
+  roleId Int
+  role Role @relation(fields: [roleId], references: [id])
+  permissionId Int
+  permission Permission @relation(fields: [permissionId], references: [id])
+  @@id([roleId, permissionId])
+  @@map("role_permission")
+}
+model Permission { 
+  id Int @id @default(autoincrement())
+  permissionName String
+  isActive Boolean
+  isDeleted Boolean
+  roles Role_Permission[]
+}
+
+/**Agency table */
+model Agency {
+  id Int @id @default(autoincrement())
+  name String @db.VarChar(50)
+  location String
+  address String
+  contactInfo String
+  status AgencyStatus
+  staffs Staff[]
+  order Order[]
+  transferContract Transfer_Contract[]
+  driveTrial Drive_Trial[]
+  revenue Revenue?
+  contract Contract?
+}
+
+enum AgencyStatus {
+  Active
+  Inactive
+}
+
+/**Revenue table*/
+model Revenue {
+  id Int @id @default(autoincrement())
+  total Float
+  createAt DateTime @db.Date
+  updateAt DateTime @db.Date
+  agencyId Int @unique
+  agency Agency @relation(fields: [agencyId], references: [id])
+}
+
+/**Contract table*/
+model Transfer_Contract {
+  id Int @id @default(autoincrement())
+  title String
+  content String
+  policy String
+  quantity Int
+  status TransferContractStatus
+  createAt DateTime @db.Date
+  expiredAt DateTime @db.Date
+  agencyId Int
+  agency Agency @relation(fields: [agencyId], references: [id])
+  warehouseId Int
+  warehouse Warehouse @relation(fields: [warehouseId], references: [id])
+  electricMotorbikeId Int
+  electricMotorbike Electric_Motorbike @relation(fields: [electricMotorbikeId], references: [id])
+  agencyDebt Agency_Debt?
+}
+
+enum TransferContractStatus {
+  valid
+  expired
+  cancel
+}
+
+model Contract {
+  id Int @id @default(autoincrement())
+  title String
+  content String
+  policy String
+  wholesalePrice Float
+  bulkPrice Float
+  discount Float
+  agencyId Int @unique
+  agency Agency @relation(fields: [agencyId], references: [id])
+}
+/**Agency debt table*/
+model Agency_Debt {
+  id Int @id @default(autoincrement())
+  amount Float
+  duration String
+  startAt DateTime @db.Date
+  endAt DateTime @db.Date
+  isCompleted Boolean
+  transferContractId Int @unique
+  transferContract Transfer_Contract @relation(fields: [transferContractId], references: [id])
+}
+
+model Agency_Paid_Process {
+  id Int @id @default(autoincrement())
+  amount Float
+  paidAt DateTime @db.Date
+}
+/**Warehouse and Inventory*/
+model Warehouse {
+  id Int @id @default(autoincrement())
+  location String
+  address String
+  name String
+  isActive Boolean
+  motorbikes Inventory[]
+  transferContract Transfer_Contract[]
+}
+model Inventory { 
+  electricMotorbikeId Int
+  electricMotorbike Electric_Motorbike @relation(fields: [electricMotorbikeId], references: [id])
+  warehouseId Int
+  warehouse Warehouse @relation(fields: [warehouseId], references: [id])
+  quantity BigInt
+  stockDate DateTime @db.Date
+  lastUpdate DateTime @db.Date
+  @@id([electricMotorbikeId, warehouseId])
+}
+/**Customer*/
+model Customer {
+  id Int @id @default(autoincrement())
+  name String @db.VarChar(50)
+  address String
+  phone String @db.VarChar(20)
+  email String @unique
+  credentialId Int @unique
+  dob DateTime @db.Date
+  feedback Feedback[]
+  orders Order[]
+  customerDebt Customer_Debt[]
+  voucher Voucher[]
+}
+/**Customer debt table*/
+model Customer_Debt {
+  id Int @id @default(autoincrement())
+  amount Float
+  duration String
+  startAt DateTime @db.Date
+  endAt DateTime @db.Date
+  isCompleted Boolean
+  customerId Int
+  customer Customer @relation(fields: [customerId], references: [id])
+  paidProcess Paid_Process[]
+}
+
+model Paid_Process {
+  id Int @id @default(autoincrement())
+  amount Float
+  paidAt DateTime @db.Date
+  customerDebtId Int
+  customerDebt Customer_Debt @relation(fields: [id], references: [id])
+}
+
+/**Voucher table*/
+model Voucher {
+  id Int @id @default(autoincrement())
+  percentReduce Float
+  description String
+  expiredDate DateTime @db.Date
+  usageLimit Float
+  customerId Int
+  customer Customer @relation(fields: [customerId], references: [id])
+}
+
+/**Feedback table*/
+model Feedback {
+  id Int @id @default(autoincrement())
+  title String
+  content String
+  image String?
+  createAt DateTime @db.Date
+  isResolve Boolean
+  isDeleted Boolean
+  customerId Int
+  customer Customer @relation(fields: [customerId], references: [id])
+  staffId Int
+  staff Staff @relation(fields: [staffId], references: [id])
+}
+
+/**Drive trial table*/
+model Drive_Trial {
+  id Int @id @default(autoincrement())
+  fullname String @db.VarChar(50)
+  email String
+  phone String @db.VarChar(20)
+  driveDate DateTime @db.Date
+  driveTime DateTime @db.Time()
+  status DriveStatus
+  electricMotorbikeId Int @unique
+  electricMotorbike Electric_Motorbike @relation(fields: [electricMotorbikeId], references: [id])
+  agencyId Int
+  agency Agency @relation(fields: [agencyId], references: [id])
+}
+
+enum DriveStatus {
+  pending
+  accept
+  cancel
+  finish
+}
+
+/**Electric motorbike table*/
+model Electric_Motorbike {
+  id Int @id @default(autoincrement())
+  name String
+  price Float
+  description String
+  model String
+  makeFrom String
+  version String
+  isDeleted Boolean
+  driveTrial Drive_Trial?
+  configuration Configuration?
+  appearance Appearance?
+  safeFeature Safe_Feature?
+  battery Battery?
+  colors Motorbike_Color[]
+  warehouse Inventory[]
+  orders Order[]
+  transferContract Transfer_Contract[]
+}
+
+model Configuration {
+  id Int @id @default(autoincrement())
+  motorType String
+  speedLimit String
+  maximumCapacity Int
+  electricMotorbikeId Int @unique
+  electricMotorbike Electric_Motorbike @relation(fields: [electricMotorbikeId], references: [id])
+}
+
+model Motorbike_Color {
+  motorbikeId Int
+  motorbike Electric_Motorbike @relation(fields: [motorbikeId], references: [id])
+  colorId Int
+  color Color @relation(fields: [colorId], references: [id])
+  @@id([motorbikeId, colorId])
+}
+
+model Color {
+  id Int @id @default(autoincrement())
+  colorType String
+  motorbikes Motorbike_Color[] 
+}
+
+model Appearance {
+  id Int @id @default(autoincrement())
+  length Float
+  width Float
+  height Float
+  weight Float
+  undercarriageDistance Float
+  storageLimit Float
+  electricMotorbikeId Int @unique
+  electricMotorbike Electric_Motorbike @relation(fields: [electricMotorbikeId], references: [id])
+}
+
+model Safe_Feature {
+  id Int @id @default(autoincrement())
+  brake String
+  lock String
+  electricMotorbikeId Int @unique
+  electricMotorbike Electric_Motorbike @relation(fields: [electricMotorbikeId], references: [id])
+}
+
+model Battery {
+  id Int @id @default(autoincrement())
+  type String
+  capacity String
+  chargeTime String
+  chargeType String
+  energyConsumption String
+  limit String
+  electricMotorbikeId Int @unique
+  electricMotorbike Electric_Motorbike @relation(fields: [electricMotorbikeId], references: [id])
+}
+
+/**Order table*/
+model Order {
+  id Int @id @default(autoincrement())
+  type OrderType
+  price Float
+  address Float
+  orderDate DateTime @db.Date
+  customerId Int
+  customer Customer @relation(fields: [customerId], references: [id])
+  staffId Int
+  staff Staff @relation(fields: [staffId], references: [id])
+  agencyId Int
+  agency Agency @relation(fields: [agencyId], references: [id])
+  electricMotorbikeId Int @unique
+  electricMotorbike Electric_Motorbike @relation(fields: [electricMotorbikeId], references: [id])
+  payment Payment?
+  shipment Shipment?
+}
+
+enum OrderType {
+  order
+  pre_order
+}
+
+/**Payment table*/
+model Payment {
+  id Int @id @default(autoincrement())
+  paymentMethod PaymentMethod
+  amount Float
+  status PaymentStatus
+  paidAt DateTime @db.Date
+  orderId Int @unique
+  order Order @relation(fields: [orderId], references: [id])
+}
+
+enum PaymentStatus {
+  fail
+  success
+  processing
+  cancel
+}
+
+enum PaymentMethod {
+  bank
+  pay_full
+  instalment
+}
+/**Shipment table*/
+model Shipment {
+  id Int @id @default(autoincrement())
+  trackingNumber BigInt
+  carrier String
+  shippedAt DateTime @db.Date
+  deliveredAt DateTime @db.Date
+  status ShipmentStatus
+  orderId Int @unique
+  order Order @relation(fields: [orderId], references: [id])
+}
+
+enum ShipmentStatus {
+  pending
+  shipped
+  delivered
+  cancel
+}
+
