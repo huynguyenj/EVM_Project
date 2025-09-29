@@ -3,6 +3,8 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { StaffModule } from './staff/staff.module';
 import { ConfigModule } from '@nestjs/config';
+import { RoleModule } from './role/role.module';
+import { PermissionModule } from './permission/permission.module';
 import * as Joi from 'joi';
 import authConfig from './config/auth.config';
 
@@ -21,6 +23,8 @@ import authConfig from './config/auth.config';
     PrismaModule,
     AuthModule,
     StaffModule,
+    RoleModule,
+    PermissionModule,
   ],
 })
 export class AppModule {}

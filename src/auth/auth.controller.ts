@@ -7,7 +7,7 @@ import {
   Req,
   Res,
 } from '@nestjs/common';
-import { type SignIn, type CreateAccount } from './dto';
+import { SignIn, CreateAccountDto } from './dto';
 import { AuthService } from './auth.service';
 import { type Request, type Response } from 'express';
 
@@ -15,7 +15,7 @@ import { type Request, type Response } from 'express';
 export class AuthController {
   constructor(private authService: AuthService) {}
   @Post('create')
-  async createAccount(@Body() createAccountDto: CreateAccount) {
+  async createAccount(@Body() createAccountDto: CreateAccountDto) {
     const data = await this.authService.createAccount(createAccountDto);
     return {
       data: data,

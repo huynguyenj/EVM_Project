@@ -21,5 +21,6 @@ import authConfig from 'src/config/auth.config';
   ],
   providers: [AuthService],
   controllers: [AuthController],
+  exports: [AuthService],
 })
 export class AuthModule {}

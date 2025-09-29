@@ -1,9 +1,14 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { type ConfigType } from '@nestjs/config';
 import authConfig from 'src/config/auth.config';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { StaffService } from 'src/staff/staff.service';
-import { CreateAccount, JwtPayload, SignIn } from './dto';
+import { CreateAccountDto, JwtPayload, SignIn } from './dto';
 import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 
@@ -16,7 +21,12 @@ export class AuthService {
     private staffService: StaffService,
     private jwtService: JwtService,
   ) {}
-  async createAccount(createAccountDto: CreateAccount) {
+  async createAccount(createAccountDto: CreateAccountDto) {
+    const isStaffAccountExisted = await this.staffService.getStaffByEmail(
+      createAccountDto.email,
+    );
+    if (isStaffAccountExisted)
+      throw new BadRequestException('This email already existed!');
     const data = {
       ...createAccountDto,
       password: await this.hashPassword(createAccountDto.password),
@@ -32,9 +42,21 @@ export class AuthService {
   }
 
   async signIn(signInDto: SignIn) {
+    const staffInformation = await this.staffService.getStaffByEmail(
+      signInDto.email,
+    );
+
+    if (!staffInformation)
+      throw new BadRequestException('This account is not existed!');
+    const isPasswordMatch = await bcrypt.compare(
+      signInDto.password,
+      staffInformation.password,
+    );
+    if (!isPasswordMatch)
+      throw new UnauthorizedException('Wrong password please try again!');
     const payload: JwtPayload = {
-      userId: 1,
-      role: 'admin',
+      userId: staffInformation.id,
+      roles: staffInformation.role.map((role) => role.roleId),
     };
     const accessToken = await this.signInAccessToken(payload);
     const refreshToken = await this.signInRefreshToken(payload);
@@ -45,14 +67,16 @@ export class AuthService {
   }
 
   async getNewAccessToken(refreshToken: string) {
-    const isValid = await this.jwtService.verifyAsync<JwtPayload>(refreshToken);
-    console.log(isValid);
-    if (!isValid) {
+    const payload = await this.jwtService.verifyAsync<JwtPayload>(refreshToken);
+    const staffInformation = await this.staffService.getStaffById(
+      payload.userId,
+    );
+    if (!payload) {
       throw new UnauthorizedException();
     }
     const newAccessToken = await this.signInAccessToken({
       userId: 1,
-      role: 'admin',
+      roles: staffInformation?.role.map((role) => role.roleId) || [],
     });
     return newAccessToken;
   }
