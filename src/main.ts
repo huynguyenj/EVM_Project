@@ -1,11 +1,15 @@
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { AllExceptionFilter } from './exception/all.exception.filter';
+import { ErrorExceptionFilter } from './exception/error.exception.filter';
 import { ConfigService } from '@nestjs/config';
 import cookieParser from 'cookie-parser';
 import { ValidationPipe } from '@nestjs/common';
 import { ValidationError } from 'class-validator';
-import { ValidationPipeException } from './exception/validation-pipe.exception';
+import {
+  HttpExceptionFilter,
+  ValidateExceptionFilter,
+  ValidationPipeException,
+} from './exception';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -25,7 +29,11 @@ async function bootstrap() {
     }),
   );
   app.use(cookieParser());
-  app.useGlobalFilters(new AllExceptionFilter(httpAdapter, config));
+  app.useGlobalFilters(
+    new ErrorExceptionFilter(httpAdapter, config),
+    new HttpExceptionFilter(httpAdapter, config),
+    new ValidateExceptionFilter(),
+  );
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

@@ -2,15 +2,17 @@ import {
   BadRequestException,
   Inject,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { type ConfigType } from '@nestjs/config';
 import authConfig from 'src/config/auth.config';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { StaffService } from 'src/staff/staff.service';
-import { CreateAccountDto, JwtPayload, SignIn } from './dto';
+import { CreateAccountDto, SignIn } from './dto';
 import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
+import { JwtPayload } from './types/jwt.payload';
 
 @Injectable()
 export class AuthService {
@@ -21,6 +23,7 @@ export class AuthService {
     private staffService: StaffService,
     private jwtService: JwtService,
   ) {}
+
   async createAccount(createAccountDto: CreateAccountDto) {
     const isStaffAccountExisted = await this.staffService.getStaffByEmail(
       createAccountDto.email,
@@ -33,6 +36,7 @@ export class AuthService {
     };
     return await this.staffService.createStaff(data);
   }
+
   async hashPassword(password: string): Promise<string> {
     const hashPassword = await bcrypt.hash(
       password,
@@ -42,21 +46,17 @@ export class AuthService {
   }
 
   async signIn(signInDto: SignIn) {
-    const staffInformation = await this.staffService.getStaffByEmail(
-      signInDto.email,
-    );
-
-    if (!staffInformation)
-      throw new BadRequestException('This account is not existed!');
+    const staffInfo = await this.staffService.getStaffByEmail(signInDto.email);
+    if (!staffInfo) throw new NotFoundException('This account is not existed!');
     const isPasswordMatch = await bcrypt.compare(
       signInDto.password,
-      staffInformation.password,
+      staffInfo.password,
     );
     if (!isPasswordMatch)
       throw new UnauthorizedException('Wrong password please try again!');
     const payload: JwtPayload = {
-      userId: staffInformation.id,
-      roles: staffInformation.role.map((role) => role.roleId),
+      userId: staffInfo.id,
+      roles: staffInfo.roleNames,
     };
     const accessToken = await this.signInAccessToken(payload);
     const refreshToken = await this.signInRefreshToken(payload);
@@ -64,21 +64,6 @@ export class AuthService {
       accessToken,
       refreshToken,
     };
-  }
-
-  async getNewAccessToken(refreshToken: string) {
-    const payload = await this.jwtService.verifyAsync<JwtPayload>(refreshToken);
-    const staffInformation = await this.staffService.getStaffById(
-      payload.userId,
-    );
-    if (!payload) {
-      throw new UnauthorizedException();
-    }
-    const newAccessToken = await this.signInAccessToken({
-      userId: 1,
-      roles: staffInformation?.role.map((role) => role.roleId) || [],
-    });
-    return newAccessToken;
   }
 
   async signInAccessToken(payload: JwtPayload) {
@@ -91,5 +76,20 @@ export class AuthService {
     return await this.jwtService.signAsync(payload, {
       expiresIn: this.authSettings.jwtRefreshTokenExpired,
     });
+  }
+
+  async getNewAccessToken(refreshToken: string) {
+    const payload = await this.jwtService.verifyAsync<JwtPayload>(
+      refreshToken,
+      { secret: this.authSettings.jwtSecret },
+    );
+    if (!payload) throw new UnauthorizedException();
+    const staffInfo = await this.staffService.getStaffById(payload.userId);
+    if (!staffInfo) throw new NotFoundException('Account is not found!');
+    const newAccessToken = await this.signInAccessToken({
+      userId: staffInfo.id,
+      roles: staffInfo.roleNames,
+    });
+    return newAccessToken;
   }
 }

@@ -24,8 +24,3 @@ export class CreateAccountDto {
   @IsArray()
   role?: number[];
 }
-
-export interface JwtPayload {
-  userId: number;
-  roles: number[];
-}
