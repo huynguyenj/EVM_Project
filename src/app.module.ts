@@ -7,6 +7,8 @@ import { RoleModule } from './role/role.module';
 import { PermissionModule } from './permission/permission.module';
 import * as Joi from 'joi';
 import authConfig from './config/auth.config';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard, RoleGuard } from './auth/guard';
 
 @Module({
   imports: [
@@ -25,6 +27,16 @@ import authConfig from './config/auth.config';
     StaffModule,
     RoleModule,
     PermissionModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RoleGuard,
+    },
   ],
 })
 export class AppModule {}

@@ -37,14 +37,6 @@ export class AuthService {
     return await this.staffService.createStaff(data);
   }
 
-  async hashPassword(password: string): Promise<string> {
-    const hashPassword = await bcrypt.hash(
-      password,
-      this.authSettings.hashSalt,
-    );
-    return hashPassword;
-  }
-
   async signIn(signInDto: SignIn) {
     const staffInfo = await this.staffService.getStaffByEmail(signInDto.email);
     if (!staffInfo) throw new NotFoundException('This account is not existed!');
@@ -60,12 +52,70 @@ export class AuthService {
     };
     const accessToken = await this.signInAccessToken(payload);
     const refreshToken = await this.signInRefreshToken(payload);
+    await this.saveToken(staffInfo.id, accessToken, refreshToken);
     return {
       accessToken,
       refreshToken,
     };
   }
 
+  async saveToken(id: number, accessToken: string, refreshToken: string) {
+    const isTokenWithIdExisted = await this.prisma.token.findUnique({
+      where: {
+        staffId: id,
+      },
+    });
+    if (isTokenWithIdExisted) {
+      await this.prisma.token.update({
+        where: {
+          staffId: id,
+        },
+        data: {
+          accessToken: accessToken,
+          refreshToken: refreshToken,
+          createAt: new Date(),
+        },
+      });
+    } else {
+      await this.prisma.token.create({
+        data: {
+          accessToken: accessToken,
+          refreshToken: refreshToken,
+          createAt: new Date(),
+          staffId: id,
+        },
+      });
+    }
+    return;
+  }
+
+  async deleteToken(id: number) {
+    await this.prisma.token.delete({
+      where: {
+        staffId: id,
+      },
+    });
+    return;
+  }
+  async hashPassword(password: string): Promise<string> {
+    const hashPassword = await bcrypt.hash(
+      password,
+      this.authSettings.hashSalt,
+    );
+    return hashPassword;
+  }
+
+  async getToken(id: number) {
+    const tokens = await this.prisma.token.findUnique({
+      where: {
+        staffId: id,
+      },
+    });
+    return {
+      accessToken: tokens?.accessToken,
+      refreshToken: tokens?.refreshToken,
+    };
+  }
   async signInAccessToken(payload: JwtPayload) {
     return await this.jwtService.signAsync(payload, {
       expiresIn: this.authSettings.jwtAccessTokenExpired,

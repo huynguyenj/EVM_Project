@@ -11,6 +11,7 @@ import { JwtService } from '@nestjs/jwt';
 import authConfig from 'src/config/auth.config';
 import { AuthenticationRequest } from '../types/request.extend.type';
 import { JwtPayload } from '../types/jwt.payload';
+import { AuthService } from '../auth.service';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
@@ -19,6 +20,7 @@ export class JwtAuthGuard implements CanActivate {
     @Inject(authConfig.KEY)
     private authSettings: ConfigType<typeof authConfig>,
     private reflector: Reflector,
+    private authService: AuthService,
   ) {}
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest<AuthenticationRequest>();
@@ -38,10 +40,12 @@ export class JwtAuthGuard implements CanActivate {
       const payload = await this.jwtService.verifyAsync<JwtPayload>(token, {
         secret: this.authSettings.jwtSecret,
       });
+      const { accessToken } = await this.authService.getToken(payload.userId);
+      if (!accessToken) throw new Error('This token is expired');
       req.user = payload;
       return true;
-    } catch {
-      throw new UnauthorizedException('Token is invalid or expired!');
+    } catch (error) {
+      throw new UnauthorizedException(error);
     }
   }
 }

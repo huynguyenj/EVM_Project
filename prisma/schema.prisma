@@ -33,8 +33,7 @@ model Staff {
   feedback Feedback[]
   role Role_Staff[]
   order Order[]
-  tokenId Int? @unique
-  token Token? @relation(fields: [tokenId], references: [id])
+  token Token? 
   @@map("staffs")
 }
 /**Token table*/
@@ -43,7 +42,8 @@ model Token {
   accessToken String
   refreshToken String
   createAt DateTime @db.Date
-  staff Staff?
+  staffId Int @unique
+  staff Staff @relation(fields: [staffId], references: [id])
   @@map("token")
 }
 /**Role and Permission table*/
