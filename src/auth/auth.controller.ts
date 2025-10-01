@@ -26,7 +26,7 @@ export class AuthController {
   ) {}
 
   @Post('create')
-  @Roles(Role.admin)
+  @Roles(Role.ADMIN)
   async createAccount(@Body() createAccountDto: CreateAccountDto) {
     const data = await this.authService.createAccount(createAccountDto);
     return {

@@ -1,7 +1,7 @@
 export enum Role {
-  dealer_staff = 'Dealer Staff',
-  dealer_manager = 'Dealer Manager',
-  evm_staff = 'Evm Staff',
-  customer = 'Customer',
-  admin = 'Admin',
+  DEALER_STAFF = 'Dealer Staff',
+  DEALER_MANAGER = 'Dealer Manager',
+  EVM_STAFF = 'Evm Staff',
+  CUSTOMER = 'Customer',
+  ADMIN = 'Admin',
 }

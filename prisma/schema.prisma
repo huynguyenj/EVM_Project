@@ -271,13 +271,13 @@ enum DriveStatus {
 /**Electric motorbike table*/
 model Electric_Motorbike {
   id Int @id @default(autoincrement())
-  name String
-  price Float
-  description String
-  model String
-  makeFrom String
-  version String
-  isDeleted Boolean
+  name String @db.VarChar(200)
+  price Float 
+  description String @db.Text()
+  model String @db.VarChar(200)
+  makeFrom String @db.VarChar(100)
+  version String  @db.VarChar(100)
+  isDeleted Boolean @default(false)
   driveTrial Drive_Trial?
   configuration Configuration?
   appearance Appearance?
@@ -287,15 +287,17 @@ model Electric_Motorbike {
   warehouse Inventory[]
   orders Order[]
   transferContract Transfer_Contract[]
+  @@map("electric_motorbikes")
 }
 
 model Configuration {
   id Int @id @default(autoincrement())
-  motorType String
-  speedLimit String
+  motorType String @db.VarChar(200)
+  speedLimit String @db.VarChar(200)
   maximumCapacity Int
   electricMotorbikeId Int @unique
   electricMotorbike Electric_Motorbike @relation(fields: [electricMotorbikeId], references: [id])
+  @@map("configurations")
 }
 
 model Motorbike_Color {
@@ -304,12 +306,14 @@ model Motorbike_Color {
   colorId Int
   color Color @relation(fields: [colorId], references: [id])
   @@id([motorbikeId, colorId])
+  @@map("motorbike_color")
 }
 
 model Color {
   id Int @id @default(autoincrement())
-  colorType String
+  colorType String @db.VarChar(200)
   motorbikes Motorbike_Color[] 
+  @@map("colors")
 }
 
 model Appearance {
@@ -322,26 +326,29 @@ model Appearance {
   storageLimit Float
   electricMotorbikeId Int @unique
   electricMotorbike Electric_Motorbike @relation(fields: [electricMotorbikeId], references: [id])
+  @@map("appearances")
 }
 
 model Safe_Feature {
   id Int @id @default(autoincrement())
-  brake String
-  lock String
+  brake String @db.VarChar(200)
+  lock String @db.VarChar(200)
   electricMotorbikeId Int @unique
   electricMotorbike Electric_Motorbike @relation(fields: [electricMotorbikeId], references: [id])
+  @@map("safe_features")
 }
 
 model Battery {
   id Int @id @default(autoincrement())
-  type String
-  capacity String
-  chargeTime String
-  chargeType String
-  energyConsumption String
-  limit String
+  type String @db.VarChar(200)
+  capacity String @db.VarChar(200)
+  chargeTime String @db.VarChar(200)
+  chargeType String @db.VarChar(200)
+  energyConsumption String @db.VarChar(200)
+  limit String @db.VarChar(200)
   electricMotorbikeId Int @unique
   electricMotorbike Electric_Motorbike @relation(fields: [electricMotorbikeId], references: [id])
+  @@map("batteries")
 }
 
 /**Order table*/
