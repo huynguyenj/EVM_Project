@@ -90,9 +90,13 @@ export class AuthService {
   }
 
   async deleteToken(id: number) {
-    await this.prisma.token.delete({
+    await this.prisma.token.update({
       where: {
         staffId: id,
+      },
+      data: {
+        accessToken: undefined,
+        refreshToken: undefined,
       },
     });
     return;

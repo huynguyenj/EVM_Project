@@ -9,7 +9,7 @@ import * as Joi from 'joi';
 import authConfig from './config/auth.config';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard, RoleGuard } from './auth/guard';
-import { MotorbikeModule } from './motorbike/motorbike.module';
+import { VehicleModule } from './vehicle/vehicle.module';
 
 @Module({
   imports: [
@@ -28,7 +28,7 @@ import { MotorbikeModule } from './motorbike/motorbike.module';
     StaffModule,
     RoleModule,
     PermissionModule,
-    MotorbikeModule,
+    VehicleModule,
   ],
   providers: [
     {

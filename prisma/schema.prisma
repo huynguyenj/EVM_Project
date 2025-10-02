@@ -313,7 +313,16 @@ model Color {
   id Int @id @default(autoincrement())
   colorType String @db.VarChar(200)
   motorbikes Motorbike_Color[] 
+  imageUrl Image_Color_Vehicle[]
   @@map("colors")
+}
+
+model Image_Color_Vehicle {
+  id Int @id @default(autoincrement())
+  imageUrl String
+  colorId Int
+  color Color @relation(fields: [colorId], references: [id])
+  @@map("image_color_vehicle")
 }
 
 model Appearance {
