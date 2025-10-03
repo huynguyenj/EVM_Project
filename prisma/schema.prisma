@@ -18,7 +18,7 @@ datasource db {
 /**Staff table*/
 model Staff {
   id Int @id @default(autoincrement())
-  username String @unique @db.VarChar(50)
+  username String @unique @db.VarChar(60)
   password String 
   fullname String? @db.VarChar(60)
   email String @unique
@@ -33,8 +33,7 @@ model Staff {
   feedback Feedback[]
   role Role_Staff[]
   order Order[]
-  tokenId Int? @unique
-  token Token? @relation(fields: [tokenId], references: [id])
+  token Token? 
   @@map("staffs")
 }
 /**Token table*/
@@ -43,7 +42,8 @@ model Token {
   accessToken String
   refreshToken String
   createAt DateTime @db.Date
-  staff Staff?
+  staffId Int @unique
+  staff Staff @relation(fields: [staffId], references: [id])
   @@map("token")
 }
 /**Role and Permission table*/
@@ -78,6 +78,7 @@ model Permission {
   isActive Boolean
   isDeleted Boolean
   roles Role_Permission[]
+  @@map("permissions")
 }
 
 /**Agency table */
@@ -270,13 +271,13 @@ enum DriveStatus {
 /**Electric motorbike table*/
 model Electric_Motorbike {
   id Int @id @default(autoincrement())
-  name String
-  price Float
-  description String
-  model String
-  makeFrom String
-  version String
-  isDeleted Boolean
+  name String @db.VarChar(200)
+  price Float 
+  description String @db.Text()
+  model String @db.VarChar(200)
+  makeFrom String @db.VarChar(100)
+  version String  @db.VarChar(100)
+  isDeleted Boolean @default(false)
   driveTrial Drive_Trial?
   configuration Configuration?
   appearance Appearance?
@@ -286,15 +287,17 @@ model Electric_Motorbike {
   warehouse Inventory[]
   orders Order[]
   transferContract Transfer_Contract[]
+  @@map("electric_motorbikes")
 }
 
 model Configuration {
   id Int @id @default(autoincrement())
-  motorType String
-  speedLimit String
+  motorType String @db.VarChar(200)
+  speedLimit String @db.VarChar(200)
   maximumCapacity Int
   electricMotorbikeId Int @unique
   electricMotorbike Electric_Motorbike @relation(fields: [electricMotorbikeId], references: [id])
+  @@map("configurations")
 }
 
 model Motorbike_Color {
@@ -303,12 +306,23 @@ model Motorbike_Color {
   colorId Int
   color Color @relation(fields: [colorId], references: [id])
   @@id([motorbikeId, colorId])
+  @@map("motorbike_color")
 }
 
 model Color {
   id Int @id @default(autoincrement())
-  colorType String
+  colorType String @db.VarChar(200)
   motorbikes Motorbike_Color[] 
+  imageUrl Image_Color_Vehicle[]
+  @@map("colors")
+}
+
+model Image_Color_Vehicle {
+  id Int @id @default(autoincrement())
+  imageUrl String
+  colorId Int
+  color Color @relation(fields: [colorId], references: [id])
+  @@map("image_color_vehicle")
 }
 
 model Appearance {
@@ -321,26 +335,29 @@ model Appearance {
   storageLimit Float
   electricMotorbikeId Int @unique
   electricMotorbike Electric_Motorbike @relation(fields: [electricMotorbikeId], references: [id])
+  @@map("appearances")
 }
 
 model Safe_Feature {
   id Int @id @default(autoincrement())
-  brake String
-  lock String
+  brake String @db.VarChar(200)
+  lock String @db.VarChar(200)
   electricMotorbikeId Int @unique
   electricMotorbike Electric_Motorbike @relation(fields: [electricMotorbikeId], references: [id])
+  @@map("safe_features")
 }
 
 model Battery {
   id Int @id @default(autoincrement())
-  type String
-  capacity String
-  chargeTime String
-  chargeType String
-  energyConsumption String
-  limit String
+  type String @db.VarChar(200)
+  capacity String @db.VarChar(200)
+  chargeTime String @db.VarChar(200)
+  chargeType String @db.VarChar(200)
+  energyConsumption String @db.VarChar(200)
+  limit String @db.VarChar(200)
   electricMotorbikeId Int @unique
   electricMotorbike Electric_Motorbike @relation(fields: [electricMotorbikeId], references: [id])
+  @@map("batteries")
 }
 
 /**Order table*/
