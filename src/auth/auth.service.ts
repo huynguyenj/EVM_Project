@@ -101,7 +101,7 @@ export class AuthService {
     });
     return;
   }
-  async hashPassword(password: string): Promise<string> {
+  async hashPassword(password: string) {
     const hashPassword = await bcrypt.hash(
       password,
       this.authSettings.hashSalt,

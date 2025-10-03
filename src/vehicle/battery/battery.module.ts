@@ -4,6 +4,7 @@ import { BatteryController } from './battery.controller';
 
 @Module({
   providers: [BatteryService],
-  controllers: [BatteryController]
+  controllers: [BatteryController],
+  exports: [BatteryService],
 })
 export class BatteryModule {}

@@ -14,8 +14,8 @@ import { Role } from 'src/auth/types/role.enum';
 import { MotorbikeService } from './motorbike.service';
 import { CreateMotorbikeDto } from './dto';
 import { Prisma } from 'generated/prisma';
-import { type MotorbikeRequestParam } from './types/motorbike.param';
 import { Motorbike } from './decorators/motorbike.decorator';
+import { type MotorbikeRequestQuery } from './types/motorbike.param';
 
 @Controller('motorbike')
 export class MotorbikeController {
@@ -33,11 +33,9 @@ export class MotorbikeController {
 
   @Get()
   @SetMetadata('public', true)
-  async getAllMotorbike(@Motorbike() pagination: MotorbikeRequestParam) {
-    const motorbikeList = await this.motorbikeService.getAllMotorbike(
-      pagination.page,
-      pagination.limit,
-    );
+  async getAllMotorbike(@Motorbike() motorbikeParams: MotorbikeRequestQuery) {
+    const motorbikeList =
+      await this.motorbikeService.getAllMotorbike(motorbikeParams);
     return {
       message: 'Get list motorbikes successfully!',
       data: motorbikeList,
@@ -47,7 +45,7 @@ export class MotorbikeController {
   @Get('admin')
   @SetMetadata('public', true)
   async getAllMotorbikeForAdmin(
-    @Motorbike() motorbikeParams: MotorbikeRequestParam,
+    @Motorbike() motorbikeParams: MotorbikeRequestQuery,
   ) {
     const motorbikeList =
       await this.motorbikeService.getMotorbikeAdmin(motorbikeParams);

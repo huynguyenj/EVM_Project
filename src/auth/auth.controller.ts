@@ -30,7 +30,7 @@ export class AuthController {
   async createAccount(@Body() createAccountDto: CreateAccountDto) {
     const data = await this.authService.createAccount(createAccountDto);
     return {
-      data: data,
+      data: { ...data, password: undefined },
       message: 'Create account successfully',
     };
   }
@@ -50,6 +50,7 @@ export class AuthController {
   }
 
   @Get('token')
+  @SetMetadata('public', true)
   async getNewAccessToken(@Req() req: Request) {
     const newToken = await this.authService.getNewAccessToken(
       req.cookies.refreshToken as string,

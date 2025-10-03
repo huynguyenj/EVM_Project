@@ -1,1 +1,1 @@
-export * from './pagination.param.type';
+export * from './pagination.query.type';
