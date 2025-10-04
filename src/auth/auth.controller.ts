@@ -9,13 +9,11 @@ import {
   Res,
   SetMetadata,
 } from '@nestjs/common';
-import { SignIn, CreateAccountDto } from './dto';
+import { SignIn } from './dto';
 import { AuthService } from './auth.service';
 import { type Request, type Response } from 'express';
-import { Roles } from './decorators/roles.decorators';
-import { Role } from './types/role.enum';
 import { UserId } from 'src/common/decorator/userId.decorator';
-import authConfig from 'src/config/auth.config';
+import authConfig from 'src/common/config/auth.config';
 import type { ConfigType } from '@nestjs/config';
 
 @Controller('auth')
@@ -24,16 +22,6 @@ export class AuthController {
     private authService: AuthService,
     @Inject(authConfig.KEY) private authSettings: ConfigType<typeof authConfig>,
   ) {}
-
-  @Post('create')
-  @Roles(Role.ADMIN)
-  async createAccount(@Body() createAccountDto: CreateAccountDto) {
-    const data = await this.authService.createAccount(createAccountDto);
-    return {
-      data: { ...data, password: undefined },
-      message: 'Create account successfully',
-    };
-  }
 
   @Post('signin')
   @SetMetadata('public', true)

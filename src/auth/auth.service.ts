@@ -1,15 +1,13 @@
 import {
-  BadRequestException,
   Inject,
   Injectable,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { type ConfigType } from '@nestjs/config';
-import authConfig from 'src/config/auth.config';
+import authConfig from 'src/common/config/auth.config';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { StaffService } from 'src/staff/staff.service';
-import { CreateAccountDto, SignIn } from './dto';
+import { SignIn } from './dto';
 import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './types/jwt.payload';
@@ -20,25 +18,11 @@ export class AuthService {
     private prisma: PrismaService,
     @Inject(authConfig.KEY)
     private authSettings: ConfigType<typeof authConfig>,
-    private staffService: StaffService,
     private jwtService: JwtService,
   ) {}
 
-  async createAccount(createAccountDto: CreateAccountDto) {
-    const isStaffAccountExisted = await this.staffService.getStaffByEmail(
-      createAccountDto.email,
-    );
-    if (isStaffAccountExisted)
-      throw new BadRequestException('This email already existed!');
-    const data = {
-      ...createAccountDto,
-      password: await this.hashPassword(createAccountDto.password),
-    };
-    return await this.staffService.createStaff(data);
-  }
-
   async signIn(signInDto: SignIn) {
-    const staffInfo = await this.staffService.getStaffByEmail(signInDto.email);
+    const staffInfo = await this.validateEmail(signInDto.email);
     if (!staffInfo) throw new NotFoundException('This account is not existed!');
     const isPasswordMatch = await bcrypt.compare(
       signInDto.password,
@@ -48,7 +32,7 @@ export class AuthService {
       throw new UnauthorizedException('Wrong password please try again!');
     const payload: JwtPayload = {
       userId: staffInfo.id,
-      roles: staffInfo.roleNames,
+      roles: staffInfo.role.map((role) => role.role.roleName),
     };
     const accessToken = await this.signInAccessToken(payload);
     const refreshToken = await this.signInRefreshToken(payload);
@@ -133,17 +117,61 @@ export class AuthService {
   }
 
   async getNewAccessToken(refreshToken: string) {
-    const payload = await this.jwtService.verifyAsync<JwtPayload>(
-      refreshToken,
-      { secret: this.authSettings.jwtSecret },
-    );
-    if (!payload) throw new UnauthorizedException();
-    const staffInfo = await this.staffService.getStaffById(payload.userId);
-    if (!staffInfo) throw new NotFoundException('Account is not found!');
-    const newAccessToken = await this.signInAccessToken({
-      userId: staffInfo.id,
-      roles: staffInfo.roleNames,
+    try {
+      const payload = await this.jwtService.verifyAsync<JwtPayload>(
+        refreshToken,
+        { secret: this.authSettings.jwtSecret },
+      );
+      const staffInfo = await this.validateId(payload.userId);
+      if (!staffInfo) throw new NotFoundException('Account is not found!');
+      const newAccessToken = await this.signInAccessToken({
+        userId: staffInfo.id,
+        roles: staffInfo.role.map((role) => role.role.roleName),
+      });
+      return newAccessToken;
+    } catch {
+      throw new UnauthorizedException('Refresh token is invalid!');
+    }
+  }
+
+  async validateEmail(email: string) {
+    const staffInfo = await this.prisma.staff.findUnique({
+      where: {
+        email: email,
+      },
+      include: {
+        role: {
+          include: {
+            role: {
+              select: {
+                roleName: true,
+              },
+            },
+          },
+        },
+      },
     });
-    return newAccessToken;
+    return staffInfo;
+  }
+
+  async validateId(id: number) {
+    const staffInfo = await this.prisma.staff.findUnique({
+      where: {
+        id: id,
+        isDeleted: false,
+      },
+      include: {
+        role: {
+          include: {
+            role: {
+              select: {
+                roleName: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    return staffInfo;
   }
 }

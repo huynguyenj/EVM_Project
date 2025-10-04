@@ -8,7 +8,7 @@ import {
 import { type ConfigType } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
-import authConfig from 'src/config/auth.config';
+import authConfig from 'src/common/config/auth.config';
 import { AuthenticationRequest } from '../types/request.extend.type';
 import { JwtPayload } from '../types/jwt.payload';
 import { AuthService } from '../auth.service';
