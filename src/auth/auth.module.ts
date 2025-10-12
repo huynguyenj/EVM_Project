@@ -9,12 +9,12 @@ import authConfig from 'src/common/config/auth.config';
   imports: [
     JwtModule.registerAsync({
       global: true,
+      inject: [authConfig.KEY],
       useFactory: (authSettings: ConfigType<typeof authConfig>) => {
         return {
           secret: authSettings.jwtSecret,
         };
       },
-      inject: [authConfig.KEY],
     }),
   ],
   providers: [AuthService],
