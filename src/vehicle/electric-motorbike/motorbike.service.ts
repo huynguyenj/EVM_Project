@@ -91,6 +91,8 @@ export class MotorbikeService {
         battery: true,
         configuration: true,
         safeFeature: true,
+        colors: true,
+        images: true,
       },
     });
     return motorbikeData;

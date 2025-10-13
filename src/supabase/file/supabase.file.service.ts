@@ -4,7 +4,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import supabaseConfig from 'src/common/config/supabase.config';
 
 @Injectable()
-export class FileService {
+export class SupabaseFileService {
   private bucketName: string;
   constructor(
     @Inject('SUPABASE_CLIENT')
@@ -14,6 +14,7 @@ export class FileService {
   ) {
     this.bucketName = supabaseSetting.bucket_name;
   }
+
   async uploadFile(file: Express.Multer.File, path: string) {
     const { error } = await this.supabaseClient.storage
       .from(this.bucketName)
@@ -30,26 +31,14 @@ export class FileService {
       .getPublicUrl(path);
     return imageUrl.data.publicUrl;
   }
-  async getMultipleFile(fileLists: Express.Multer.File[], path: string) {
-    const imageUrlList: string[] = [];
-    for (const file of fileLists) {
-      const { error } = await this.supabaseClient.storage
-        .from(this.bucketName)
-        .upload(path, file.buffer, {
-          contentType: file.mimetype,
-          upsert: true,
-        });
-      if (error)
-        throw new Error(
-          `Some thing wrong with supabase storage: ${error.message}`,
-        );
-      const imageUrl = this.supabaseClient.storage
-        .from(this.bucketName)
-        .getPublicUrl(path);
-      imageUrlList.push(imageUrl.data.publicUrl);
-    }
-    return imageUrlList;
+
+  async deleteFile(path: string) {
+    const decodeUrl = decodeURIComponent(path);
+    const deletePath = decodeUrl.split(`/${this.bucketName}/`)[1];
+    await this.supabaseClient.storage
+      .from(this.bucketName)
+      .remove([deletePath]);
+    return;
   }
-  async deleteFile() {}
   async getSingleFile() {}
 }

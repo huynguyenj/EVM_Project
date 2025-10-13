@@ -2,7 +2,7 @@ import { Global, Module } from '@nestjs/common';
 import supabaseConfig from 'src/common/config/supabase.config';
 import { ConfigType } from '@nestjs/config';
 import { createClient } from '@supabase/supabase-js';
-import { FileModule } from './file/file.module';
+import { SupabaseFileModule } from './file/supabase.file.module';
 
 @Global() // make it global and any module can use no need to imports
 @Module({
@@ -15,7 +15,7 @@ import { FileModule } from './file/file.module';
       },
     },
   ],
+  imports: [SupabaseFileModule],
   exports: ['SUPABASE_CLIENT'],
-  imports: [FileModule],
 })
 export class SupabaseModule {}

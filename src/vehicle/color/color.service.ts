@@ -19,6 +19,15 @@ export class ColorService {
     return colorList;
   }
 
+  async getColorById(colorId: number) {
+    const color = await this.prisma.color.findUnique({
+      where: {
+        id: colorId,
+      },
+    });
+    return color;
+  }
+
   async updateColor(colorId: number, updateColorDto: Prisma.ColorUpdateInput) {
     const updatedData = await this.prisma.color.update({
       where: {

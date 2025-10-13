@@ -17,5 +17,6 @@ import { SafeFeatureModule } from '../safe-feature/safe-feature.module';
     BatteryModule,
     SafeFeatureModule,
   ],
+  exports: [MotorbikeService],
 })
 export class MotorbikeModule {}
