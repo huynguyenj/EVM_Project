@@ -5,6 +5,7 @@ import { ColorModule } from './color/color.module';
 import { AppearanceModule } from './appearance/appearance.module';
 import { SafeFeatureModule } from './safe-feature/safe-feature.module';
 import { BatteryModule } from './battery/battery.module';
+import { ImagesModule } from './images/images.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { BatteryModule } from './battery/battery.module';
     AppearanceModule,
     SafeFeatureModule,
     BatteryModule,
+    ImagesModule,
   ],
 })
 export class VehicleModule {}

@@ -284,6 +284,7 @@ model Electric_Motorbike {
   safeFeature Safe_Feature?
   battery Battery?
   colors Motorbike_Color[]
+  images Motorbike_Image[]
   warehouse Inventory[]
   orders Order[]
   transferContract Transfer_Contract[]
@@ -305,26 +306,25 @@ model Motorbike_Color {
   motorbike Electric_Motorbike @relation(fields: [motorbikeId], references: [id])
   colorId Int
   color Color @relation(fields: [colorId], references: [id])
+  imageUrl String @db.Text()
   @@id([motorbikeId, colorId])
   @@map("motorbike_color")
 }
 
 model Color {
   id Int @id @default(autoincrement())
-  colorType String @db.VarChar(200)
+  colorType String @db.VarChar(200) @unique()
   motorbikes Motorbike_Color[] 
-  imageUrl Image_Color_Vehicle[]
   @@map("colors")
 }
 
-model Image_Color_Vehicle {
+model Motorbike_Image {
   id Int @id @default(autoincrement())
-  imageUrl String
-  colorId Int
-  color Color @relation(fields: [colorId], references: [id])
-  @@map("image_color_vehicle")
+  imageUrl String @db.Text()
+  motorbikeId Int
+  electricMotorbike Electric_Motorbike @relation(fields: [motorbikeId], references: [id])
+  @@map("motorbike_images")
 }
-
 model Appearance {
   id Int @id @default(autoincrement())
   length Float

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateMotorbikeDto } from './dto';
 import { Prisma } from 'generated/prisma';
-import { MotorbikeRequestParam } from './types/motorbike.param';
+import { MotorbikeRequestQuery } from './types/motorbike.param';
 
 @Injectable()
 export class MotorbikeService {
@@ -15,19 +15,35 @@ export class MotorbikeService {
     return motorbikeData;
   }
 
-  async getAllMotorbike(page: number, limit: number) {
-    const skipData = (page - 1) * limit;
+  async getAllMotorbike(motorbikeParams: MotorbikeRequestQuery) {
+    const skipData = (motorbikeParams.page - 1) * motorbikeParams.limit;
+    const filters: any[] = [{ isDeleted: false }];
+    if (motorbikeParams.model) {
+      filters.push({
+        model: { contains: motorbikeParams.model, mode: 'insensitive' },
+      });
+    }
+    if (motorbikeParams.makeFrom) {
+      filters.push({
+        makeFrom: { contains: motorbikeParams.makeFrom, mode: 'insensitive' },
+      });
+    }
     const motorbikeList = await this.prisma.electric_Motorbike.findMany({
       skip: skipData,
-      take: limit,
-      where: {
-        isDeleted: false,
-      },
+      take: motorbikeParams.limit,
+      where: filters.length > 0 ? { AND: filters } : {},
     });
-    return motorbikeList;
+    return {
+      motorbikeList,
+      paginationInfo: {
+        page: motorbikeParams.page,
+        limit: motorbikeParams.limit,
+        total: await this.getTotalMotorbikeNotCountDeleted(),
+      },
+    };
   }
 
-  async getMotorbikeAdmin(motorbikeParams: MotorbikeRequestParam) {
+  async getMotorbikeAdmin(motorbikeParams: MotorbikeRequestQuery) {
     const skipData = (motorbikeParams.page - 1) * motorbikeParams.limit;
     const filters: any[] = [];
     if (motorbikeParams.model) {
@@ -45,7 +61,14 @@ export class MotorbikeService {
       take: motorbikeParams.limit,
       where: filters.length > 0 ? { AND: filters } : {},
     });
-    return motorbikeList;
+    return {
+      motorbikeList,
+      paginationInfo: {
+        page: motorbikeParams.page,
+        limit: motorbikeParams.limit,
+        total: await this.getTotalMotorbikeCountDeleted(),
+      },
+    };
   }
 
   async getTotalMotorbikeNotCountDeleted() {
@@ -62,6 +85,24 @@ export class MotorbikeService {
     const motorbikeData = await this.prisma.electric_Motorbike.findUnique({
       where: {
         id: motorbikeId,
+      },
+      include: {
+        appearance: true,
+        battery: true,
+        configuration: true,
+        safeFeature: true,
+        colors: {
+          select: {
+            imageUrl: true,
+            color: {
+              select: {
+                id: true,
+                colorType: true,
+              },
+            },
+          },
+        },
+        images: true,
       },
     });
     return motorbikeData;
