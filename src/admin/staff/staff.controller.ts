@@ -72,6 +72,28 @@ export class StaffController {
     };
   }
 
+  @Post(':staffId/assign/:agencyId')
+  @ApiOperation({ summary: 'Assign staff to agency' })
+  @ApiResponseDocument(
+    HttpStatus.OK,
+    ResponseAccountDto,
+    'Assign agency to staff successfully!',
+  )
+  async assignAgencyToManager(
+    @Param('staffId', ParseIntPipe) staffId: number,
+    @Param('agencyId', ParseIntPipe) agencyId: number,
+  ) {
+    const updatedData = await this.staffService.updateAgencyForStaff(
+      staffId,
+      agencyId,
+    );
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Assign agency to staff successfully!',
+      data: updatedData,
+    };
+  }
+
   @Get(':staffId')
   @ApiOperation({ summary: 'Get staff information' })
   @HttpCode(200)

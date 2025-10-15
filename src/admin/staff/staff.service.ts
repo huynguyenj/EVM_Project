@@ -154,4 +154,56 @@ export class StaffService {
       data: { isDeleted: true },
     });
   }
+
+  async updateAgencyForStaff(staffId: number, agencyId: number) {
+    const staffInfo = await this.prisma.staff.findUnique({
+      where: {
+        id: staffId,
+      },
+      include: {
+        role: {
+          include: {
+            role: {
+              select: {
+                roleName: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    if (
+      !staffInfo?.role.some(
+        (item) => item.role.roleName.toLocaleLowerCase() === 'dealer manager',
+      )
+    )
+      throw new BadRequestException(
+        'This staff is not dealer manager! Please try with dealer manager',
+      );
+    const updatedData = await this.prisma.staff.update({
+      where: {
+        id: staffId,
+      },
+      data: {
+        agencyId: agencyId,
+      },
+      include: {
+        role: {
+          select: {
+            role: {
+              select: {
+                roleName: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return {
+      ...updatedData,
+      password: undefined,
+      role: updatedData.role.map((item) => item.role.roleName),
+    };
+  }
 }

@@ -85,16 +85,17 @@ model Permission {
 model Agency {
   id Int @id @default(autoincrement())
   name String @db.VarChar(50)
-  location String
-  address String
-  contactInfo String
-  status AgencyStatus
+  location String @db.VarChar(200)
+  address String @db.VarChar(200)
+  contactInfo String @db.Text
+  status AgencyStatus @default(Active)
   staffs Staff[]
   order Order[]
   transferContract Transfer_Contract[]
   driveTrial Drive_Trial[]
   revenue Revenue?
   contract Contract?
+  @@map("agencies")
 }
 
 enum AgencyStatus {
@@ -110,6 +111,7 @@ model Revenue {
   updateAt DateTime @db.Date
   agencyId Int @unique
   agency Agency @relation(fields: [agencyId], references: [id])
+  @@map("revenue")
 }
 
 /**Contract table*/
@@ -129,6 +131,7 @@ model Transfer_Contract {
   electricMotorbikeId Int
   electricMotorbike Electric_Motorbike @relation(fields: [electricMotorbikeId], references: [id])
   agencyDebt Agency_Debt?
+  @@map("transfer_contract")
 }
 
 enum TransferContractStatus {
@@ -147,6 +150,7 @@ model Contract {
   discount Float
   agencyId Int @unique
   agency Agency @relation(fields: [agencyId], references: [id])
+  @@map("contract")
 }
 /**Agency debt table*/
 model Agency_Debt {
