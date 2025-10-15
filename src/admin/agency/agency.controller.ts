@@ -9,7 +9,7 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/auth/decorators/roles.decorators';
 import { Role } from 'src/auth/types/role.enum';
 import { AgencyService } from './agency.service';
@@ -27,6 +27,7 @@ import { AgencyQuery } from './decorator';
 import { ApiResponseDocumentPagination } from 'src/common/decorator/swagger-decorator/api.response.document.pagination';
 
 @ApiBearerAuth('access-token')
+@ApiTags('Admin - Agency Management')
 @Roles(Role.ADMIN)
 @Controller('agency')
 export class AgencyController {

@@ -9,7 +9,7 @@ import { ApiResponseDocumentArray } from 'src/common/decorator';
 
 @Controller('role')
 @ApiBearerAuth('access-token')
-@ApiTags('Admin-role')
+@ApiTags('Admin - Role Management')
 @Roles(Role.ADMIN)
 export class RoleController {
   constructor(private roleService: RoleService) {}

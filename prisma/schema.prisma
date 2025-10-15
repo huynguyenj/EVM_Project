@@ -172,21 +172,23 @@ model Agency_Paid_Process {
 /**Warehouse and Inventory*/
 model Warehouse {
   id Int @id @default(autoincrement())
-  location String
-  address String
-  name String
-  isActive Boolean
+  location String @db.VarChar(200)
+  address String  @db.VarChar(300)
+  name String @db.VarChar(150)
+  isActive Boolean @default(true)
   motorbikes Inventory[]
   transferContract Transfer_Contract[]
+  @@map("warehouses")
 }
 model Inventory { 
   electricMotorbikeId Int
   electricMotorbike Electric_Motorbike @relation(fields: [electricMotorbikeId], references: [id])
   warehouseId Int
   warehouse Warehouse @relation(fields: [warehouseId], references: [id])
-  quantity BigInt
+  quantity Int
   stockDate DateTime @db.Date
   lastUpdate DateTime @db.Date
+  @@map("inventory")
   @@id([electricMotorbikeId, warehouseId])
 }
 /**Customer*/

@@ -23,7 +23,7 @@ import { ApiResponseDocumentPagination } from 'src/common/decorator/swagger-deco
 
 @ApiBearerAuth('access-token')
 @Controller('admin/staff')
-@ApiTags('Admin-Staff')
+@ApiTags('Admin - Staff Management')
 @Roles(Role.ADMIN)
 export class StaffController {
   constructor(private staffService: StaffService) {}

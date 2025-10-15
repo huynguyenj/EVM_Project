@@ -11,6 +11,7 @@ import { VehicleModule } from './vehicle/vehicle.module';
 import { AdminModule } from './admin/admin.module';
 import { DealerManagerModule } from './dealer-manager/dealer-manager.module';
 import { SupabaseModule } from './supabase/supabase.module';
+import { EvmStaffModule } from './evm-staff/evm-staff.module';
 import supabaseConfig from './common/config/supabase.config';
 
 @Module({
@@ -32,6 +33,7 @@ import supabaseConfig from './common/config/supabase.config';
     AdminModule,
     DealerManagerModule,
     SupabaseModule,
+    EvmStaffModule,
   ],
   providers: [
     {
