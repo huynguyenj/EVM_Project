@@ -75,6 +75,9 @@ export class StaffService {
     const staffList = await this.prisma.staff.findMany({
       skip: skipData,
       take: staffQuery.limit,
+      where: {
+        agencyId: agencyId,
+      },
       include: {
         role: {
           include: {
@@ -107,15 +110,6 @@ export class StaffService {
   async getTotalStaffAgency(agencyId: number) {
     return await this.prisma.staff.count({
       where: {
-        role: {
-          some: {
-            role: {
-              OR: [
-                { roleName: { contains: 'Dealer Staff', mode: 'insensitive' } },
-              ],
-            },
-          },
-        },
         agencyId: agencyId,
       },
     });

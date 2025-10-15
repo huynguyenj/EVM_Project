@@ -16,6 +16,7 @@ import { MotorbikeService } from './motorbike.service';
 import {
   CreateMotorbikeDto,
   FilterResponseDto,
+  MotorbikeDetailResponseDto,
   MotorbikeResponseDto,
   UpdateMotorbikeDto,
   UpdateMotorbikeResponseDto,
@@ -109,10 +110,11 @@ export class MotorbikeController {
   }
 
   @Get(':id')
+  @SetMetadata('public', true)
   @ApiOperation({ summary: 'Get motorbike detail' })
   @ApiResponseDocument(
     HttpStatus.OK,
-    MotorbikeResponseDto,
+    MotorbikeDetailResponseDto,
     'Get motorbike detail successfully!',
   )
   @SetMetadata('public', true)

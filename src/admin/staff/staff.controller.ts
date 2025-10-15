@@ -23,7 +23,7 @@ import { ApiResponseDocumentPagination } from 'src/common/decorator/swagger-deco
 
 @ApiBearerAuth('access-token')
 @Controller('admin/staff')
-@ApiTags('Admin-Staff')
+@ApiTags('Admin - Staff Management')
 @Roles(Role.ADMIN)
 export class StaffController {
   constructor(private staffService: StaffService) {}
@@ -69,6 +69,28 @@ export class StaffController {
       message: 'Get all staff successfully',
       data: staffList.staffList,
       paginationInfo: staffList.paginationInfo,
+    };
+  }
+
+  @Post(':staffId/assign/:agencyId')
+  @ApiOperation({ summary: 'Assign staff to agency' })
+  @ApiResponseDocument(
+    HttpStatus.OK,
+    ResponseAccountDto,
+    'Assign agency to staff successfully!',
+  )
+  async assignAgencyToManager(
+    @Param('staffId', ParseIntPipe) staffId: number,
+    @Param('agencyId', ParseIntPipe) agencyId: number,
+  ) {
+    const updatedData = await this.staffService.updateAgencyForStaff(
+      staffId,
+      agencyId,
+    );
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Assign agency to staff successfully!',
+      data: updatedData,
     };
   }
 
