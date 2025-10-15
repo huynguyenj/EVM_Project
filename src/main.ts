@@ -10,6 +10,7 @@ import {
   ValidateExceptionFilter,
   ValidationPipeException,
 } from './common/exception';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -35,6 +36,27 @@ async function bootstrap() {
     new HttpExceptionFilter(httpAdapter, config),
     new ValidateExceptionFilter(),
   );
+
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('EVM System') // Tên swagger
+    .setDescription('API documents cho hệ thống EVM') //description
+    .setVersion('1.0') //Version
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        in: 'header',
+        name: 'Authorization',
+        description: 'Enter JWT token, e.g. Bearer <your_token>',
+      },
+      'access-token',
+    ) //Bearer token set up
+    .build();
+  const documentFactory = () =>
+    SwaggerModule.createDocument(app, swaggerConfig);
+
+  SwaggerModule.setup('api', app, documentFactory);
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

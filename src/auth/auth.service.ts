@@ -38,6 +38,7 @@ export class AuthService {
     const refreshToken = await this.signInRefreshToken(payload);
     await this.saveToken(staffInfo.id, accessToken, refreshToken);
     return {
+      data: staffInfo,
       accessToken,
       refreshToken,
     };

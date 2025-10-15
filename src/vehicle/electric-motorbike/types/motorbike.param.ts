@@ -1,6 +1,7 @@
 import { PaginationRequestQuery } from 'src/common/types';
-
-export interface MotorbikeRequestQuery extends PaginationRequestQuery {
+export class MotorbikeRequestQuery implements PaginationRequestQuery {
+  limit: number;
+  page: number;
   model: string | undefined;
   makeFrom: string | undefined;
 }

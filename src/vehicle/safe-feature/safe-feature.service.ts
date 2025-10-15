@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateSafeFeatureDto } from './dto';
 import { Prisma } from 'generated/prisma';
@@ -11,6 +15,13 @@ export class SafeFeatureService {
     vehicleId: number,
     createSafeFeatureDto: CreateSafeFeatureDto,
   ) {
+    const isDataExisted = await this.prisma.safe_Feature.findUnique({
+      where: {
+        electricMotorbikeId: vehicleId,
+      },
+    });
+    if (isDataExisted)
+      throw new BadRequestException('This vehicle already have safe feature!');
     const safeFeature = await this.prisma.safe_Feature.create({
       data: {
         ...createSafeFeatureDto,
@@ -24,6 +35,10 @@ export class SafeFeatureService {
     const safeFeatures = await this.prisma.safe_Feature.findUnique({
       where: { electricMotorbikeId: vehicleId },
     });
+    if (!safeFeatures)
+      throw new NotFoundException(
+        'Not found safe feature with this motorbike!',
+      );
     return safeFeatures;
   }
 

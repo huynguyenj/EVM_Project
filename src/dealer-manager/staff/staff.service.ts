@@ -1,4 +1,9 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { type ConfigType } from '@nestjs/config';
 import authConfig from 'src/common/config/auth.config';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -40,16 +45,20 @@ export class StaffService {
     return staffInformationCreated;
   }
 
-  async getRoleStaff() {
-    const role = await this.prisma.role.findMany({
+  async getRoleDealerStaff() {
+    const role = await this.prisma.role.findFirst({
       select: {
         roleName: true,
         id: true,
       },
       where: {
-        roleName: 'Dealer staff',
+        roleName: {
+          contains: 'Dealer Staff',
+          mode: 'insensitive',
+        },
       },
     });
+    if (!role) throw new NotFoundException('Not found dealer staff role');
     return role;
   }
 
@@ -76,18 +85,6 @@ export class StaffService {
             },
           },
         },
-      },
-      where: {
-        role: {
-          some: {
-            role: {
-              OR: [
-                { roleName: { contains: 'Dealer staff', mode: 'insensitive' } },
-              ],
-            },
-          },
-        },
-        agencyId: agencyId,
       },
     });
     return {
@@ -150,7 +147,11 @@ export class StaffService {
       },
       data: staffInfo,
     });
-    return staffData;
+    const responseData = {
+      ...staffData,
+      password: undefined,
+    };
+    return responseData;
   }
 
   async deleteStaffAgency(staffId: number) {

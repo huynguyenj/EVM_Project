@@ -45,7 +45,6 @@ export class ImagesService {
         },
       });
     } else {
-      console.log(imageUrl);
       await this.prisma.motorbike_Color.create({
         data: {
           imageUrl: imageUrl,
@@ -61,7 +60,6 @@ export class ImagesService {
     files: Array<Express.Multer.File>,
     motorbikeId: number,
   ) {
-    console.log(files);
     const motorbike =
       await this.motorbikeService.getMotorbikeDetail(motorbikeId);
     const imageUrlList = await Promise.all(
@@ -81,7 +79,11 @@ export class ImagesService {
         }),
       ),
     );
-    return imageUrlList;
+    return imageUrlList.map((image) => {
+      return {
+        imageUrl: image,
+      };
+    });
   }
 
   async getColorFile(motorbikeId: number, colorId: number) {

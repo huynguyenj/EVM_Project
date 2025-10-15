@@ -1,2 +1,3 @@
-export * from './create-battery-dto';
-export * from './update-battery-dto';
+export * from './request/create-battery-dto';
+export * from './response/battery-response-dto';
+export * from './request/update-battery-dto';

@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Prisma } from 'generated/prisma';
 import { PrismaService } from 'src/prisma/prisma.service';
 
@@ -6,9 +10,16 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class ColorService {
   constructor(private prisma: PrismaService) {}
   async createColor(colorType: string) {
+    const isColorExisted = await this.prisma.color.findUnique({
+      where: {
+        colorType: colorType,
+      },
+    });
+    if (isColorExisted)
+      throw new BadRequestException('This color already created!');
     const colorCreatedData = await this.prisma.color.create({
       data: {
-        colorType: colorType,
+        colorType: colorType.toLowerCase(),
       },
     });
     return colorCreatedData;
@@ -25,6 +36,7 @@ export class ColorService {
         id: colorId,
       },
     });
+    if (!color) throw new NotFoundException('Not found the color!');
     return color;
   }
 

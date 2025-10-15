@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma } from 'generated/prisma';
 import { CreateBatteryDto } from './dto';
@@ -8,6 +12,13 @@ export class BatteryService {
   constructor(private prisma: PrismaService) {}
 
   async createBattery(vehicleId: number, createBatteryDto: CreateBatteryDto) {
+    const isBatteryExisted = await this.prisma.battery.findUnique({
+      where: {
+        electricMotorbikeId: vehicleId,
+      },
+    });
+    if (isBatteryExisted)
+      throw new BadRequestException('This battery already existed!');
     const createdBattery = await this.prisma.battery.create({
       data: {
         ...createBatteryDto,
@@ -21,6 +32,8 @@ export class BatteryService {
     const battery = await this.prisma.battery.findUnique({
       where: { electricMotorbikeId: vehicleId },
     });
+    if (!battery)
+      throw new NotFoundException('Can not found battery of this motorbike!');
     return battery;
   }
 

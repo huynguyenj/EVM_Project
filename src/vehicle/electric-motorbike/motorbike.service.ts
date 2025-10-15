@@ -91,7 +91,17 @@ export class MotorbikeService {
         battery: true,
         configuration: true,
         safeFeature: true,
-        colors: true,
+        colors: {
+          select: {
+            imageUrl: true,
+            color: {
+              select: {
+                id: true,
+                colorType: true,
+              },
+            },
+          },
+        },
         images: true,
       },
     });

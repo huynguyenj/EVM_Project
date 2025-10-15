@@ -1,5 +1,9 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { PaginationRequestQuery } from 'src/common/types';
 
-export interface ManagerQuery extends PaginationRequestQuery {
-  role: string | undefined;
+export class ManagerQuery implements PaginationRequestQuery {
+  @ApiProperty({ example: 1, description: 'Items limit per page' })
+  limit: number;
+  @ApiProperty({ example: 1, description: 'Page number' })
+  page: number;
 }

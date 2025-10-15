@@ -37,7 +37,10 @@ export class StaffService {
         },
       },
     });
-    return staffInformationCreated;
+    const responseData = await this.getStaffByIdAdmin(
+      staffInformationCreated.id,
+    );
+    return responseData;
   }
 
   async hashPassword(password: string) {
@@ -46,6 +49,38 @@ export class StaffService {
       this.authSettings.hashSalt,
     );
     return hashPassword;
+  }
+
+  async getStaffByIdAdmin(staffId: number) {
+    const staffInfo = await this.prisma.staff.findUnique({
+      where: {
+        id: staffId,
+      },
+      select: {
+        id: true,
+        username: true,
+        fullname: true,
+        phone: true,
+        address: true,
+        email: true,
+        isActive: true,
+        isDeleted: true,
+        avatar: true,
+        createAt: true,
+        agencyId: true,
+        role: {
+          select: {
+            role: {
+              select: {
+                roleName: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    if (!staffInfo) throw new BadRequestException('Can not find staff');
+    return staffInfo;
   }
 
   async updateStaffInfoAdmin(

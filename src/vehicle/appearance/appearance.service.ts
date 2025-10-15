@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma } from 'generated/prisma';
 import { CreateAppearanceDto } from './dto';
@@ -14,7 +18,8 @@ export class AppearanceService {
     const isDataExist = await this.prisma.appearance.findUnique({
       where: { electricMotorbikeId: vehicleId },
     });
-    if (isDataExist) return;
+    if (isDataExist)
+      throw new BadRequestException('This motorbike already have appearance!');
     const appearanceData = await this.prisma.appearance.create({
       data: {
         ...createAppearanceDto,
@@ -25,9 +30,12 @@ export class AppearanceService {
   }
 
   async getAppearanceByVehicleId(vehicleId: number) {
-    return await this.prisma.appearance.findUnique({
+    const appearance = await this.prisma.appearance.findUnique({
       where: { electricMotorbikeId: vehicleId },
     });
+    if (!appearance)
+      throw new NotFoundException('Not found appearance with this motorbike!');
+    return appearance;
   }
 
   async deleteAppearanceByVehicleId(vehicleId: number) {

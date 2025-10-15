@@ -313,7 +313,7 @@ model Motorbike_Color {
 
 model Color {
   id Int @id @default(autoincrement())
-  colorType String @db.VarChar(200)
+  colorType String @db.VarChar(200) @unique()
   motorbikes Motorbike_Color[] 
   @@map("colors")
 }
