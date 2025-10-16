@@ -43,7 +43,7 @@ export class WarehouseInventoryService {
     const skipData = (inventoryQuery.page - 1) * inventoryQuery.limit;
     const dataList = await this.prisma.inventory.findMany({
       skip: skipData,
-      take: inventoryQuery.page,
+      take: inventoryQuery.limit,
     });
     return {
       data: dataList,

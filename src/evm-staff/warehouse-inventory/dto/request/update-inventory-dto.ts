@@ -1,11 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDate, IsNumber, IsOptional } from 'class-validator';
+import { IsDate, IsNumber, IsOptional, IsPositive } from 'class-validator';
 
 export class UpdateInventoryDto {
   @ApiProperty({ example: 100 })
   @IsNumber()
+  @IsPositive()
   @IsOptional()
-  quantity: number;
+  quantity?: number;
 
   @ApiProperty({
     example: '2025-10-12T14:30:00.000Z',
@@ -15,5 +16,5 @@ export class UpdateInventoryDto {
   })
   @IsDate()
   @IsOptional()
-  stockDate: Date;
+  stockDate?: Date;
 }

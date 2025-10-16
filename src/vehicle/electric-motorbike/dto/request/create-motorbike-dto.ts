@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsPositive, IsString } from 'class-validator';
 
 export class CreateMotorbikeDto {
   @IsString()
@@ -8,6 +8,7 @@ export class CreateMotorbikeDto {
   name: string;
 
   @IsNumber()
+  @IsPositive()
   @IsNotEmpty()
   @ApiProperty({ default: 150000, example: 150000 })
   price: number;

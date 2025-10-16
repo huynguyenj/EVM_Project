@@ -94,7 +94,9 @@ model Agency {
   transferContract Transfer_Contract[]
   driveTrial Drive_Trial[]
   revenue Revenue?
-  contract Contract?
+  pricePolicy Price_Policy[]
+  discountPolicy Discount_Policy[]
+  promotion Promotion[]
   @@map("agencies")
 }
 
@@ -140,18 +142,82 @@ enum TransferContractStatus {
   cancel
 }
 
-model Contract {
+/**Price policy*/
+model Price_Policy {
   id Int @id @default(autoincrement())
   title String
   content String
   policy String
   wholesalePrice Float
-  bulkPrice Float
-  discount Float
-  agencyId Int @unique
-  agency Agency @relation(fields: [agencyId], references: [id])
-  @@map("contract")
+  agencyId Int? 
+  agency Agency? @relation(fields: [agencyId], references: [id])
+  motorbikeId Int?
+  motorbike Electric_Motorbike? @relation(fields: [motorbikeId], references: [id])
+  @@unique([agencyId, motorbikeId])
+  @@map("price_policy")
 }
+/**Discount policy*/
+model Discount_Policy {
+  id Int @id @default(autoincrement())
+  name String @db.VarChar(300)
+  type DiscountType
+  valueType DiscountValueType
+  value Float
+  min_quantity Int
+  startAt DateTime @db.Date()
+  endAt DateTime @db.Date()
+  status DiscountStatus
+  agencyId Int?
+  agency Agency? @relation(fields: [agencyId], references: [id])
+  motorbikeId Int?
+  motorbike Electric_Motorbike? @relation(fields: [motorbikeId], references: [id])
+  @@unique([agencyId, motorbikeId, type])
+  @@map("discount_policy")
+}
+
+enum DiscountType {
+  VOLUME
+  SPECIAL
+}
+
+enum DiscountValueType {
+  PERCENT
+  FIXED
+}
+
+enum DiscountStatus {
+  ACTIVE
+  INACTIVE
+}
+
+/**Promotion policy*/
+model Promotion {
+  id Int @id @default(autoincrement())
+  name String @db.VarChar(300)
+  description String @db.Text()
+  valueType PromotionValueType
+  value Float
+  startAt DateTime @db.Date()
+  endAt DateTime @db.Date()
+  status DiscountStatus
+  agencyId Int?
+  agency Agency? @relation(fields: [agencyId], references: [id])
+  motorbikeId Int?
+  motorbike Electric_Motorbike? @relation(fields: [motorbikeId], references: [id])
+  @@map("promotions")
+}
+
+enum PromotionValueType {
+  PERCENT
+  FIXED
+}
+
+enum PromotionStatus {
+  ACTIVE
+  INACTIVE
+}
+
+
 /**Agency debt table*/
 model Agency_Debt {
   id Int @id @default(autoincrement())
@@ -294,6 +360,9 @@ model Electric_Motorbike {
   warehouse Inventory[]
   orders Order[]
   transferContract Transfer_Contract[]
+  pricePolicy Price_Policy[]
+  discountPolicy Discount_Policy[]
+  promotion Promotion[]
   @@map("electric_motorbikes")
 }
 

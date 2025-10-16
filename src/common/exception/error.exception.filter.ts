@@ -34,6 +34,7 @@ export class ErrorExceptionFilter implements ExceptionFilter {
           path: request.url,
           stack: exception.stack,
         };
+    this.logger.error(`Path ${request.url} error: ${exception.message}`);
     httpAdapter.reply(
       currentTransferMethod.getResponse(),
       responseBody,
