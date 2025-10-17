@@ -26,6 +26,7 @@ import {
 } from './dto';
 import { ApiResponseDocumentPagination } from 'src/common/decorator/swagger-decorator/api.response.document.pagination';
 import { DiscountQuery } from './decorators';
+import { DiscountType, ValueType } from './types';
 
 @Controller('discount')
 @ApiBearerAuth('access-token')
@@ -54,8 +55,8 @@ export class DiscountController {
   @Get()
   @ApiOperation({ summary: 'Get discount list' })
   @ApiQueriesAndPagination(
-    { name: 'type', example: 'special', required: false },
-    { name: 'valueType', example: 'percent', required: false },
+    { name: 'type', example: DiscountType.VOLUME, required: false },
+    { name: 'valueType', example: ValueType.FIXED, required: false },
   )
   @ApiResponseDocumentPagination(
     HttpStatus.OK,

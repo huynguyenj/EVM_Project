@@ -70,6 +70,7 @@ export class DiscountService {
         valueType: discountQuery.valueType.toUpperCase(),
       });
     }
+    console.log(filters);
     const listData = await this.prisma.discount_Policy.findMany({
       skip: skipData,
       take: discountQuery.limit,
