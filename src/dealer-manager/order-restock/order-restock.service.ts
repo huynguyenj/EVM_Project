@@ -64,6 +64,11 @@ export class OrderRestockService {
     );
     const basePrice = motorbikeData.price;
 
+    const motorbikeColor = await this.motorbikeService.getMotorbikeColor(
+      createOrderDto.motorbikeId,
+      createOrderDto.colorId,
+    );
+
     const createdData = await this.prisma.agency_Order.create({
       data: {
         basePrice: basePrice,
@@ -75,6 +80,7 @@ export class OrderRestockService {
         wholesalePrice: pricePolicy.wholesalePrice,
         agencyId: createOrderDto.agencyId,
         electricMotorbikeId: createOrderDto.motorbikeId,
+        colorId: motorbikeColor.colorId,
         promotionId: createOrderDto.promotionId ?? null,
         discountId: createOrderDto.discountId ?? null,
         pricePolicyId: pricePolicy.id,
@@ -165,6 +171,17 @@ export class OrderRestockService {
       skip: skipData,
       take: orderQuery.limit,
       where: orderQuery.status ? { status: orderQuery.status } : {},
+      select: {
+        basePrice: true,
+        quantity: true,
+        wholesalePrice: true,
+        discountTotal: true,
+        promotionTotal: true,
+        finalPrice: true,
+        subtotal: true,
+        orderAt: true,
+        status: true,
+      },
     });
     return {
       listData,
@@ -189,6 +206,12 @@ export class OrderRestockService {
       },
       include: {
         agencyBill: true,
+        color: {
+          select: {
+            id: true,
+            colorType: true,
+          },
+        },
         electricMotorbike: {
           select: {
             id: true,

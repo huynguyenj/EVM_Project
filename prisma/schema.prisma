@@ -97,6 +97,7 @@ model Agency {
   pricePolicy Price_Policy[]
   discountPolicy Discount_Policy[]
   promotion Promotion[]
+  agencyStock Agency_Stock[]
   @@map("agencies")
 }
 
@@ -114,6 +115,22 @@ model Revenue {
   agencyId Int @unique
   agency Agency @relation(fields: [agencyId], references: [id])
   @@map("revenue")
+}
+/**Agency stock*/
+model Agency_Stock {
+  id Int @id @default(autoincrement())
+  quantity Int
+  price Float
+  createAt DateTime @db.Date @default(now())
+  updateAt DateTime @db.Date @default(now())
+  agencyId Int
+  agency Agency @relation(fields: [agencyId], references: [id])
+  motorbikeId Int
+  motorbike Electric_Motorbike @relation(fields: [motorbikeId], references: [id])
+  colorId Int
+  color Color @relation(fields: [colorId], references: [id])
+  @@unique([motorbikeId, colorId])
+  @@map("agency_stocks")
 }
 
 /**Contract table*/
@@ -140,6 +157,8 @@ model Agency_Order {
   discountPolicy Discount_Policy? @relation(fields: [discountId], references: [id])
   promotionId Int?
   promotion Promotion? @relation(fields: [promotionId], references: [id])
+  colorId Int
+  color Color @relation(fields: [colorId], references: [id])
   agencyBill Agency_Bill?
   @@map("agency_orders")
 }
@@ -385,6 +404,7 @@ model Electric_Motorbike {
   pricePolicy Price_Policy[]
   discountPolicy Discount_Policy[]
   promotion Promotion[]
+  agencyStock Agency_Stock[]
   @@map("electric_motorbikes")
 }
 
@@ -412,6 +432,8 @@ model Color {
   id Int @id @default(autoincrement())
   colorType String @db.VarChar(200) @unique()
   motorbikes Motorbike_Color[] 
+  agencyOrder Agency_Order[]
+  agencyStock Agency_Stock[]
   @@map("colors")
 }
 

@@ -41,5 +41,11 @@ export class CreateOrderDto {
   @IsNumber()
   @IsPositive()
   @IsNotEmpty()
+  colorId: number;
+
+  @ApiProperty({ example: 1 })
+  @IsNumber()
+  @IsPositive()
+  @IsNotEmpty()
   agencyId: number;
 }

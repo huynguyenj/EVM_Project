@@ -4,9 +4,10 @@ import { OrderBillResponseDto } from './order-bill-response';
 import { MotorbikeResponseDto } from 'src/vehicle/electric-motorbike/dto';
 import { DiscountResponseDto } from 'src/policy/discount/dto';
 import { WarehouseResponseDto } from 'src/admin/warehouses/dto';
+import { ColorResponseDto } from 'src/vehicle/color/dto';
 
 class MotorbikeDto extends PickType(MotorbikeResponseDto, [
-  'name',
+  'id',
   'name',
 ] as const) {}
 class DiscountDto extends PickType(DiscountResponseDto, [
@@ -65,6 +66,9 @@ export class OrderDetailResponseDto {
 
   @ApiResponseProperty({ type: MotorbikeDto })
   electricMotorbike: MotorbikeDto;
+
+  @ApiResponseProperty({ type: ColorResponseDto })
+  color: ColorResponseDto;
 
   @ApiResponseProperty({ type: WarehouseResponseDto })
   warehouse: WarehouseResponseDto;
