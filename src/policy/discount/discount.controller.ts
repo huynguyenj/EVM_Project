@@ -52,7 +52,7 @@ export class DiscountController {
     };
   }
 
-  @Get()
+  @Get('list')
   @ApiOperation({ summary: 'Get discount list' })
   @ApiQueriesAndPagination(
     { name: 'type', example: DiscountType.VOLUME, required: false },
@@ -74,7 +74,7 @@ export class DiscountController {
     };
   }
 
-  @Get(':agencyId')
+  @Get('agency/list/:agencyId')
   @ApiOperation({ summary: 'Get agency discount list' })
   @ApiQueriesAndPagination(
     { name: 'type', example: 'special', required: false },
@@ -101,7 +101,7 @@ export class DiscountController {
     };
   }
 
-  @Get(':discountId')
+  @Get('detail/:discountId')
   @ApiResponseDocument(
     HttpStatus.OK,
     DiscountDetailResponseDto,

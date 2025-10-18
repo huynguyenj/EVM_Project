@@ -58,7 +58,7 @@ export class WarehouseInventoryController {
     };
   }
 
-  @Get()
+  @Get('list')
   @ApiOperation({ summary: 'Get inventory list' })
   @ApiQueriesAndPagination()
   @ApiResponseDocumentPagination(
@@ -77,7 +77,7 @@ export class WarehouseInventoryController {
     };
   }
 
-  @Get(':motorbikeId/:warehouseId')
+  @Get('detail/:motorbikeId/:warehouseId')
   @ApiResponseDocument(
     HttpStatus.OK,
     InventoryDetailResponseDto,

@@ -50,7 +50,7 @@ export class PriceController {
     };
   }
 
-  @Get()
+  @Get('list')
   @ApiOperation({ summary: 'Get list price policies ' })
   @ApiQueriesAndPagination()
   @ApiResponseDocumentPagination(
@@ -69,7 +69,7 @@ export class PriceController {
     };
   }
 
-  @Get(':pricePolicyId')
+  @Get('detail/:pricePolicyId')
   @ApiOperation({ summary: 'Get price policy detail' })
   @ApiResponseDocument(
     HttpStatus.OK,

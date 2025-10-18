@@ -22,5 +22,5 @@ export class BatteryResponseDto {
   limit: string;
 
   @ApiResponseProperty({ example: 1, type: Number })
-  motorbikeId: number;
+  electricMotorbikeId: number;
 }

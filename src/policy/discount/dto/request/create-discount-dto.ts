@@ -91,7 +91,7 @@ export class CreateDiscountDto {
   agencyId?: number;
 
   @IsNumber()
-  @IsOptional()
+  @IsNotEmpty()
   @ApiProperty({ example: 1 })
-  motorbikeId?: number;
+  motorbikeId: number;
 }

@@ -51,7 +51,7 @@ export class PromotionController {
     };
   }
 
-  @Get()
+  @Get('/list')
   @ApiOperation({ summary: 'Get promotion list' })
   @ApiQueriesAndPagination({
     name: 'valueType',
@@ -74,7 +74,7 @@ export class PromotionController {
     };
   }
 
-  @Get(':agencyId')
+  @Get('agency/list/:agencyId')
   @ApiOperation({ summary: 'Get agency Promotion list' })
   @ApiQueriesAndPagination({
     name: 'valueType',
@@ -102,7 +102,7 @@ export class PromotionController {
     };
   }
 
-  @Get(':promotionId')
+  @Get('detail/:promotionId')
   @ApiResponseDocument(
     HttpStatus.OK,
     PromotionResponseDto,

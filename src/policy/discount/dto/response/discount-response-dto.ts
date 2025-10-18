@@ -2,6 +2,11 @@ import { ApiResponseProperty } from '@nestjs/swagger';
 import { DiscountType, DiscountStatus, ValueType } from '../../types';
 
 export class DiscountResponseDto {
+  @ApiResponseProperty({
+    example: 1,
+  })
+  id: number;
+
   @ApiResponseProperty({ example: 'Buy 100 elv motorbike' })
   name: string;
 

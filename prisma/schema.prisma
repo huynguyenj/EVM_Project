@@ -57,7 +57,7 @@ model Role_Staff {
 }
 model Role {
   id Int @id @default(autoincrement())
-  roleName String
+  roleName String @unique
   isActive Boolean @default(true)
   isDeleted Boolean @default(false)
   staff Role_Staff[]
@@ -91,7 +91,7 @@ model Agency {
   status AgencyStatus @default(Active)
   staffs Staff[]
   order Order[]
-  transferContract Transfer_Contract[]
+  transferContract Agency_Order[]
   driveTrial Drive_Trial[]
   revenue Revenue?
   pricePolicy Price_Policy[]
@@ -117,42 +117,54 @@ model Revenue {
 }
 
 /**Contract table*/
-model Transfer_Contract {
+model Agency_Order {
   id Int @id @default(autoincrement())
-  title String
-  content String
-  policy String
   quantity Int
-  status TransferContractStatus
-  createAt DateTime @db.Date
-  expiredAt DateTime @db.Date
+  status AgencyOrderStatus @default(DRAFT)
+  orderAt DateTime @db.Date @default(now())
+  basePrice Float
+  wholesalePrice Float
+  discountTotal Float
+  promotionTotal Float
+  finalPrice Float
+  subtotal Float
   agencyId Int
   agency Agency @relation(fields: [agencyId], references: [id])
   warehouseId Int
   warehouse Warehouse @relation(fields: [warehouseId], references: [id])
   electricMotorbikeId Int
   electricMotorbike Electric_Motorbike @relation(fields: [electricMotorbikeId], references: [id])
-  agencyDebt Agency_Debt?
-  @@map("transfer_contract")
+  pricePolicyId Int
+  pricePolicy Price_Policy @relation(fields: [pricePolicyId], references: [id])
+  discountId Int?
+  discountPolicy Discount_Policy? @relation(fields: [discountId], references: [id])
+  promotionId Int?
+  promotion Promotion? @relation(fields: [promotionId], references: [id])
+  agencyBill Agency_Bill?
+  @@map("agency_orders")
 }
 
-enum TransferContractStatus {
-  valid
-  expired
-  cancel
+enum AgencyOrderStatus {
+  DRAFT
+  PENDING
+  APPROVED
+  DELIVERED
+  PAID
+  CANCELED
 }
 
 /**Price policy*/
 model Price_Policy {
   id Int @id @default(autoincrement())
-  title String
-  content String
-  policy String
+  title String @db.VarChar(100)
+  content String @db.VarChar(200)
+  policy String @db.Text()
   wholesalePrice Float
   agencyId Int? 
   agency Agency? @relation(fields: [agencyId], references: [id])
-  motorbikeId Int?
-  motorbike Electric_Motorbike? @relation(fields: [motorbikeId], references: [id])
+  motorbikeId Int
+  motorbike Electric_Motorbike @relation(fields: [motorbikeId], references: [id])
+  agencyOrder Agency_Order[]
   @@unique([agencyId, motorbikeId])
   @@map("price_policy")
 }
@@ -169,8 +181,9 @@ model Discount_Policy {
   status DiscountStatus
   agencyId Int?
   agency Agency? @relation(fields: [agencyId], references: [id])
-  motorbikeId Int?
+  motorbikeId Int
   motorbike Electric_Motorbike? @relation(fields: [motorbikeId], references: [id])
+  agencyOrder Agency_Order[]
   @@unique([agencyId, motorbikeId, type])
   @@map("discount_policy")
 }
@@ -204,6 +217,7 @@ model Promotion {
   agency Agency? @relation(fields: [agencyId], references: [id])
   motorbikeId Int?
   motorbike Electric_Motorbike? @relation(fields: [motorbikeId], references: [id])
+  agencyOrder Agency_Order[]
   @@map("promotions")
 }
 
@@ -217,23 +231,31 @@ enum PromotionStatus {
   INACTIVE
 }
 
-
 /**Agency debt table*/
-model Agency_Debt {
+model Agency_Bill {
   id Int @id @default(autoincrement())
   amount Float
-  duration String
-  startAt DateTime @db.Date
-  endAt DateTime @db.Date
-  isCompleted Boolean
-  transferContractId Int @unique
-  transferContract Transfer_Contract @relation(fields: [transferContractId], references: [id])
+  createAt DateTime @db.Date @default(now())
+  isCompleted Boolean @default(false)
+  type AgencyBillType
+  agencyOrderId Int @unique
+  agencyOrder Agency_Order @relation(fields: [agencyOrderId], references: [id])
+  agencyPayment Agency_Payment?
+  @@map("agency_bill")
 }
 
-model Agency_Paid_Process {
+enum AgencyBillType {
+  FULL
+  DEFERRED
+}
+
+model Agency_Payment {
   id Int @id @default(autoincrement())
   amount Float
   paidAt DateTime @db.Date
+  agencyBillId Int @unique
+  agencyBill Agency_Bill @relation(fields: [agencyBillId], references: [id])
+  @@map("agency_payment")
 }
 /**Warehouse and Inventory*/
 model Warehouse {
@@ -243,7 +265,7 @@ model Warehouse {
   name String @db.VarChar(150)
   isActive Boolean @default(true)
   motorbikes Inventory[]
-  transferContract Transfer_Contract[]
+  agencyOrder Agency_Order[]
   @@map("warehouses")
 }
 model Inventory { 
@@ -359,7 +381,7 @@ model Electric_Motorbike {
   images Motorbike_Image[]
   warehouse Inventory[]
   orders Order[]
-  transferContract Transfer_Contract[]
+  agencyOrder Agency_Order[]
   pricePolicy Price_Policy[]
   discountPolicy Discount_Policy[]
   promotion Promotion[]

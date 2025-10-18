@@ -4,6 +4,6 @@ import { DiscountModule } from './discount/discount.module';
 import { PromotionModule } from './promotion/promotion.module';
 
 @Module({
-  imports: [PriceModule, DiscountModule, PromotionModule]
+  imports: [PriceModule, DiscountModule, PromotionModule],
 })
 export class PolicyModule {}

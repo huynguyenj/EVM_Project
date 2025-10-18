@@ -14,5 +14,5 @@ export class ConfigurationResponseDto {
   maximumCapacity: number;
 
   @ApiResponseProperty({ example: 1, type: Number })
-  motorbikeId: number;
+  electricMotorbikeId: number;
 }

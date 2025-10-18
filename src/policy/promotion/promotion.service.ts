@@ -84,6 +84,20 @@ export class PromotionService {
     return data;
   }
 
+  async getPromotionPrice(promotionId: number) {
+    const data = await this.prisma.promotion.findUnique({
+      where: {
+        id: promotionId,
+      },
+      select: {
+        value: true,
+        valueType: true,
+      },
+    });
+    if (!data) throw new NotFoundException('This promotion is not existed!');
+    return data;
+  }
+
   async getAgencyPromotions(
     agencyId: number,
     promotionQueries: PromotionQueries,

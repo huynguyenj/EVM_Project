@@ -50,7 +50,7 @@ export class WarehousesController {
     };
   }
 
-  @Get()
+  @Get('/list')
   @ApiOperation({ summary: 'Get list ware house' })
   @ApiResponseDocumentPagination(
     HttpStatus.OK,
@@ -72,7 +72,7 @@ export class WarehousesController {
     };
   }
 
-  @Get(':warehouseId')
+  @Get('detail/:warehouseId')
   @ApiOperation({ summary: 'Get warehouse detail' })
   @ApiResponseDocument(
     HttpStatus.OK,

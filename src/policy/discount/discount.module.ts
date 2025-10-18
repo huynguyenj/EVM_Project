@@ -4,6 +4,7 @@ import { DiscountService } from './discount.service';
 
 @Module({
   controllers: [DiscountController],
-  providers: [DiscountService]
+  providers: [DiscountService],
+  exports: [DiscountService],
 })
 export class DiscountModule {}

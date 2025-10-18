@@ -65,7 +65,7 @@ export class StaffController {
     };
   }
 
-  @Get(':agencyId')
+  @Get('list/:agencyId')
   @ApiQueriesAndPagination()
   @ApiResponseDocumentPagination(
     HttpStatus.OK,

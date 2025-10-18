@@ -102,6 +102,24 @@ export class WarehouseInventoryService {
     return updatedData;
   }
 
+  async updateInventoryQuantity(
+    motorbikeId: number,
+    warehouseId: number,
+    restQuantity: number,
+  ) {
+    await this.prisma.inventory.update({
+      where: {
+        electricMotorbikeId_warehouseId: {
+          electricMotorbikeId: motorbikeId,
+          warehouseId: warehouseId,
+        },
+      },
+      data: {
+        quantity: restQuantity,
+      },
+    });
+  }
+
   async deleteInventory(motorbikeId: number, warehouseId: number) {
     await this.prisma.inventory.delete({
       where: {

@@ -4,6 +4,11 @@ import { AgencyResponseDto } from 'src/admin/agency/dto';
 import { MotorbikeResponseDto } from 'src/vehicle/electric-motorbike/dto';
 
 export class DiscountDetailResponseDto {
+  @ApiResponseProperty({
+    example: 1,
+  })
+  id: number;
+
   @ApiResponseProperty({ example: 'Buy 100 elv motorbike' })
   name: string;
 
