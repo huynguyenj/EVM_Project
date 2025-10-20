@@ -10,5 +10,5 @@ export class SafeFeatureResponseDto {
   lock: string;
 
   @ApiResponseProperty({ example: 1 })
-  motorbikeId: number;
+  electricMotorbikeId: number;
 }

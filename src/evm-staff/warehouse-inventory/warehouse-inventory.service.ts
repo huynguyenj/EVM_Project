@@ -43,7 +43,7 @@ export class WarehouseInventoryService {
     const skipData = (inventoryQuery.page - 1) * inventoryQuery.limit;
     const dataList = await this.prisma.inventory.findMany({
       skip: skipData,
-      take: inventoryQuery.page,
+      take: inventoryQuery.limit,
     });
     return {
       data: dataList,
@@ -100,6 +100,24 @@ export class WarehouseInventoryService {
       },
     });
     return updatedData;
+  }
+
+  async updateInventoryQuantity(
+    motorbikeId: number,
+    warehouseId: number,
+    restQuantity: number,
+  ) {
+    await this.prisma.inventory.update({
+      where: {
+        electricMotorbikeId_warehouseId: {
+          electricMotorbikeId: motorbikeId,
+          warehouseId: warehouseId,
+        },
+      },
+      data: {
+        quantity: restQuantity,
+      },
+    });
   }
 
   async deleteInventory(motorbikeId: number, warehouseId: number) {

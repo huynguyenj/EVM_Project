@@ -35,6 +35,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
           timeStamp: new Date().toLocaleDateString(),
           stack: exception.stack,
         };
+    this.logger.error(
+      `HTTP request ${request.url} error: ${exception.message}`,
+    );
     httpAdapter.reply(
       currentTransferMethod.getResponse(),
       responseBody,

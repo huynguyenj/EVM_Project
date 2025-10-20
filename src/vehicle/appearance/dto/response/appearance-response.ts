@@ -22,5 +22,5 @@ export class AppearanceResponseDto {
   storageLimit: number;
 
   @ApiResponseProperty({ example: 1, type: Number })
-  motorbikeId: number;
+  electricMotorbikeId: number;
 }

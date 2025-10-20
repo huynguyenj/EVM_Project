@@ -12,6 +12,9 @@ import { AdminModule } from './admin/admin.module';
 import { DealerManagerModule } from './dealer-manager/dealer-manager.module';
 import { SupabaseModule } from './supabase/supabase.module';
 import { EvmStaffModule } from './evm-staff/evm-staff.module';
+import { PolicyModule } from './policy/policy.module';
+import { SeederModule } from './seeder/seeder.module';
+import { DealerStaffModule } from './dealer-staff/dealer-staff.module';
 import supabaseConfig from './common/config/supabase.config';
 
 @Module({
@@ -24,6 +27,9 @@ import supabaseConfig from './common/config/supabase.config';
         PASSWORD_HASHSALT: Joi.number().required(),
         JWT_ACCESS_TOKEN_EXPIRED: Joi.string().required(),
         JWT_REFRESH_TOKEN_EXPIRED: Joi.string().required(),
+        ADMIN_EMAIL: Joi.string().required(),
+        ADMIN_PASSWORD: Joi.string().required(),
+        ADMIN_USERNAME: Joi.string().required(),
       }),
     }),
     PrismaModule,
@@ -34,6 +40,9 @@ import supabaseConfig from './common/config/supabase.config';
     DealerManagerModule,
     SupabaseModule,
     EvmStaffModule,
+    PolicyModule,
+    SeederModule,
+    DealerStaffModule,
   ],
   providers: [
     {

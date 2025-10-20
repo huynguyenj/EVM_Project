@@ -48,7 +48,7 @@ export class StaffController {
     };
   }
 
-  @Get()
+  @Get('list')
   @ApiOperation({ summary: 'Get staff list' })
   @ApiQueriesAndPagination({
     name: 'role',
@@ -94,7 +94,7 @@ export class StaffController {
     };
   }
 
-  @Get(':staffId')
+  @Get('detail/:staffId')
   @ApiOperation({ summary: 'Get staff information' })
   @HttpCode(200)
   @ApiResponseDocument(

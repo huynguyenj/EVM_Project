@@ -28,7 +28,7 @@ import {
 import { ApiResponseDocumentPagination } from 'src/common/decorator/swagger-decorator/api.response.document.pagination';
 
 @ApiBearerAuth('access-token')
-@ApiTags('Dealer Staff-Staff Management')
+@ApiTags('Dealer Manager Staff - Staff Management')
 @Controller('manager/staff')
 @Roles(Role.DEALER_MANAGER)
 export class StaffController {
@@ -65,7 +65,7 @@ export class StaffController {
     };
   }
 
-  @Get(':agencyId')
+  @Get('list/:agencyId')
   @ApiQueriesAndPagination()
   @ApiResponseDocumentPagination(
     HttpStatus.OK,

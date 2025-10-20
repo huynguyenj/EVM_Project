@@ -26,6 +26,14 @@ export class StaffService {
     if (staffExisted) {
       throw new BadRequestException('This email is already existed!');
     }
+    const isUserNameExisted = await this.prisma.staff.findUnique({
+      where: {
+        username: staffInput.username,
+        isDeleted: false,
+      },
+    });
+    if (isUserNameExisted)
+      throw new BadRequestException('This username already existed!');
     const staffInformationCreated = await this.prisma.staff.create({
       data: {
         email: staffInput.email,

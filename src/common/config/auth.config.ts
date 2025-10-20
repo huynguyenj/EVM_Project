@@ -7,4 +7,7 @@ export default registerAs('auth', () => ({
   hashSalt: parseInt(process.env.PASSWORD_HASHSALT || '12'),
   cookiesTime: parseInt(process.env.COOKIES_TIME || '60*60*24*7'),
   cookiesName: 'refreshToken',
+  adminEmail: process.env.ADMIN_EMAIL,
+  adminUsername: process.env.ADMIN_USERNAME,
+  adminPassword: process.env.ADMIN_PASSWORD,
 }));

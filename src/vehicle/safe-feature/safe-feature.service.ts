@@ -4,8 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateSafeFeatureDto } from './dto';
-import { Prisma } from 'generated/prisma';
+import { CreateSafeFeatureDto, UpdateSafeFeatureDto } from './dto';
 
 @Injectable()
 export class SafeFeatureService {
@@ -50,7 +49,7 @@ export class SafeFeatureService {
 
   async updateSafeFeaturesByVehicleId(
     vehicleId: number,
-    updateSafeFeatureDto: Prisma.Safe_FeatureUpdateInput,
+    updateSafeFeatureDto: UpdateSafeFeatureDto,
   ) {
     return await this.prisma.safe_Feature.update({
       where: { electricMotorbikeId: vehicleId },

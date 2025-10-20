@@ -1,10 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsDate, IsNotEmpty, IsNumber } from 'class-validator';
+import { IsDate, IsNotEmpty, IsNumber, IsPositive } from 'class-validator';
 
 export class CreateInventoryDto {
   @ApiProperty({ example: 100 })
   @IsNumber()
+  @IsPositive()
   @IsNotEmpty()
   quantity: number;
 

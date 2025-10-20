@@ -1,7 +1,10 @@
 import { Module } from '@nestjs/common';
 import { StaffModule } from './staff/staff.module';
+import { OrderRestockModule } from './order-restock/order-restock.module';
+import { AgencyStockModule } from './agency-stock/agency-stock.module';
+import { InstallmentPlanModule } from './installment-plan/installment-plan.module';
 
 @Module({
-  imports: [StaffModule],
+  imports: [StaffModule, OrderRestockModule, AgencyStockModule, InstallmentPlanModule],
 })
 export class DealerManagerModule {}

@@ -32,7 +32,7 @@ model Staff {
   agency Agency? @relation(fields: [agencyId], references: [id])
   feedback Feedback[]
   role Role_Staff[]
-  order Order[]
+  customerContract Customer_Contract[]
   token Token? 
   @@map("staffs")
 }
@@ -57,7 +57,7 @@ model Role_Staff {
 }
 model Role {
   id Int @id @default(autoincrement())
-  roleName String
+  roleName String @unique
   isActive Boolean @default(true)
   isDeleted Boolean @default(false)
   staff Role_Staff[]
@@ -89,12 +89,17 @@ model Agency {
   address String @db.VarChar(200)
   contactInfo String @db.Text
   status AgencyStatus @default(Active)
+  customers Customer[]
   staffs Staff[]
-  order Order[]
-  transferContract Transfer_Contract[]
+  customerContracts Customer_Contract[]
+  transferContract Agency_Order[]
   driveTrial Drive_Trial[]
   revenue Revenue?
-  contract Contract?
+  pricePolicy Price_Policy[]
+  discountPolicy Discount_Policy[]
+  promotion Promotion[]
+  agencyStock Agency_Stock[]
+  installmentPlan Installment_Plan[]
   @@map("agencies")
 }
 
@@ -113,62 +118,196 @@ model Revenue {
   agency Agency @relation(fields: [agencyId], references: [id])
   @@map("revenue")
 }
+/**Agency stock*/
+model Agency_Stock {
+  id Int @id @default(autoincrement())
+  quantity Int
+  price Float
+  createAt DateTime @db.Date @default(now())
+  updateAt DateTime @db.Date @default(now())
+  agencyId Int
+  agency Agency @relation(fields: [agencyId], references: [id])
+  motorbikeId Int
+  motorbike Electric_Motorbike @relation(fields: [motorbikeId], references: [id])
+  colorId Int
+  color Color @relation(fields: [colorId], references: [id])
+  @@unique([motorbikeId, colorId])
+  @@map("agency_stocks")
+}
 
 /**Contract table*/
-model Transfer_Contract {
+model Agency_Order {
   id Int @id @default(autoincrement())
-  title String
-  content String
-  policy String
   quantity Int
-  status TransferContractStatus
-  createAt DateTime @db.Date
-  expiredAt DateTime @db.Date
+  status AgencyOrderStatus @default(DRAFT)
+  orderAt DateTime @db.Date @default(now())
+  basePrice Float
+  wholesalePrice Float
+  discountTotal Float
+  promotionTotal Float
+  finalPrice Float
+  subtotal Float
   agencyId Int
   agency Agency @relation(fields: [agencyId], references: [id])
   warehouseId Int
   warehouse Warehouse @relation(fields: [warehouseId], references: [id])
   electricMotorbikeId Int
   electricMotorbike Electric_Motorbike @relation(fields: [electricMotorbikeId], references: [id])
-  agencyDebt Agency_Debt?
-  @@map("transfer_contract")
+  pricePolicyId Int
+  pricePolicy Price_Policy @relation(fields: [pricePolicyId], references: [id])
+  discountId Int?
+  discountPolicy Discount_Policy? @relation(fields: [discountId], references: [id])
+  promotionId Int?
+  promotion Promotion? @relation(fields: [promotionId], references: [id])
+  colorId Int
+  color Color @relation(fields: [colorId], references: [id])
+  agencyBill Agency_Bill?
+  @@map("agency_orders")
 }
 
-enum TransferContractStatus {
-  valid
-  expired
-  cancel
+enum AgencyOrderStatus {
+  DRAFT
+  PENDING
+  APPROVED
+  DELIVERED
+  PAID
+  CANCELED
 }
 
-model Contract {
+/**Price policy*/
+model Price_Policy {
   id Int @id @default(autoincrement())
-  title String
-  content String
-  policy String
+  title String @db.VarChar(100)
+  content String @db.VarChar(200)
+  policy String @db.Text()
   wholesalePrice Float
-  bulkPrice Float
-  discount Float
-  agencyId Int @unique
-  agency Agency @relation(fields: [agencyId], references: [id])
-  @@map("contract")
+  agencyId Int? 
+  agency Agency? @relation(fields: [agencyId], references: [id])
+  motorbikeId Int
+  motorbike Electric_Motorbike @relation(fields: [motorbikeId], references: [id])
+  agencyOrder Agency_Order[]
+  @@unique([agencyId, motorbikeId])
+  @@map("price_policy")
 }
+/**Discount policy*/
+model Discount_Policy {
+  id Int @id @default(autoincrement())
+  name String @db.VarChar(300)
+  type DiscountType
+  valueType DiscountValueType
+  value Float
+  min_quantity Int
+  startAt DateTime @db.Date()
+  endAt DateTime @db.Date()
+  status DiscountStatus
+  agencyId Int?
+  agency Agency? @relation(fields: [agencyId], references: [id])
+  motorbikeId Int
+  motorbike Electric_Motorbike? @relation(fields: [motorbikeId], references: [id])
+  agencyOrder Agency_Order[]
+  @@unique([agencyId, motorbikeId, type])
+  @@map("discount_policy")
+}
+
+enum DiscountType {
+  VOLUME
+  SPECIAL
+}
+
+enum DiscountValueType {
+  PERCENT
+  FIXED
+}
+
+enum DiscountStatus {
+  ACTIVE
+  INACTIVE
+}
+
+/**Promotion policy*/
+model Promotion {
+  id Int @id @default(autoincrement())
+  name String @db.VarChar(300)
+  description String @db.Text()
+  valueType PromotionValueType
+  value Float
+  startAt DateTime @db.Date()
+  endAt DateTime @db.Date()
+  status DiscountStatus
+  agencyId Int?
+  agency Agency? @relation(fields: [agencyId], references: [id])
+  motorbikeId Int?
+  motorbike Electric_Motorbike? @relation(fields: [motorbikeId], references: [id])
+  agencyOrder Agency_Order[]
+  @@map("promotions")
+}
+
+enum PromotionValueType {
+  PERCENT
+  FIXED
+}
+
+enum PromotionStatus {
+  ACTIVE
+  INACTIVE
+}
+
 /**Agency debt table*/
-model Agency_Debt {
+model Agency_Bill {
   id Int @id @default(autoincrement())
   amount Float
-  duration String
-  startAt DateTime @db.Date
-  endAt DateTime @db.Date
-  isCompleted Boolean
-  transferContractId Int @unique
-  transferContract Transfer_Contract @relation(fields: [transferContractId], references: [id])
+  createAt DateTime @db.Date @default(now())
+  isCompleted Boolean @default(false)
+  type AgencyBillType
+  agencyOrderId Int @unique
+  agencyOrder Agency_Order @relation(fields: [agencyOrderId], references: [id])
+  agencyPayment Agency_Payment?
+  @@map("agency_bill")
 }
 
-model Agency_Paid_Process {
+enum AgencyBillType {
+  FULL
+  DEFERRED
+}
+
+model Agency_Payment {
   id Int @id @default(autoincrement())
   amount Float
   paidAt DateTime @db.Date
+  agencyBillId Int @unique
+  agencyBill Agency_Bill @relation(fields: [agencyBillId], references: [id])
+  @@map("agency_payment")
 }
+
+/** Installment Plan*/
+model Installment_Plan {
+  id Int @id @default(autoincrement())
+  name String @db.VarChar(200)
+  interestRate Int
+  interestRateTotalMonth Int
+  totalPaidMonth Int
+  interestPaidType InterestType
+  prePaidPercent Int
+  processFee Float
+  startAt DateTime @db.Date
+  endAt DateTime @db.Date
+  status InstallmentStatus
+  agencyId Int
+  agency Agency @relation(fields: [agencyId], references: [id])
+  installmentContract Installment_Contract?
+  @@map("installment_plans")
+}
+
+enum InstallmentStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum InterestType {
+  FLAT
+  DECLINING
+}
+
 /**Warehouse and Inventory*/
 model Warehouse {
   id Int @id @default(autoincrement())
@@ -177,7 +316,7 @@ model Warehouse {
   name String @db.VarChar(150)
   isActive Boolean @default(true)
   motorbikes Inventory[]
-  transferContract Transfer_Contract[]
+  agencyOrder Agency_Order[]
   @@map("warehouses")
 }
 model Inventory { 
@@ -195,35 +334,111 @@ model Inventory {
 model Customer {
   id Int @id @default(autoincrement())
   name String @db.VarChar(50)
-  address String
+  address String @db.VarChar(300)
   phone String @db.VarChar(20)
-  email String @unique
-  credentialId Int @unique
+  email String @db.VarChar(250)
+  credentialId String @db.VarChar(250)
   dob DateTime @db.Date
+  agencyId Int
+  agency Agency @relation(fields: [agencyId], references: [id])
   feedback Feedback[]
-  orders Order[]
-  customerDebt Customer_Debt[]
+  customerContract Customer_Contract[]
   voucher Voucher[]
-}
-/**Customer debt table*/
-model Customer_Debt {
-  id Int @id @default(autoincrement())
-  amount Float
-  duration String
-  startAt DateTime @db.Date
-  endAt DateTime @db.Date
-  isCompleted Boolean
-  customerId Int
-  customer Customer @relation(fields: [customerId], references: [id])
-  paidProcess Paid_Process[]
+  @@unique([credentialId, email, agencyId])
+  @@map("customers")
 }
 
-model Paid_Process {
+/**Customer contract table*/
+model Customer_Contract {
   id Int @id @default(autoincrement())
-  amount Float
-  paidAt DateTime @db.Date
-  customerDebtId Int
-  customerDebt Customer_Debt @relation(fields: [id], references: [id])
+  title String @db.VarChar(100)
+  content String @db.Text
+  totalAmount Float
+  depositAmount Float
+  finalAmount Float
+  createDate DateTime @db.Date
+  contractPaidType CustomerContractPaidType
+  contractType CustomerContractType
+  status CustomerContractStatus
+  customerId Int
+  customer Customer @relation(fields: [customerId], references: [id])
+  staffId Int
+  staff Staff @relation(fields: [staffId], references: [id])
+  agencyId Int
+  agency Agency @relation(fields: [agencyId], references: [id])
+  electricMotorbikeId Int
+  electricMotorbike Electric_Motorbike @relation(fields: [electricMotorbikeId], references: [id])
+  colorId Int
+  color Color @relation(fields: [colorId], references: [id])
+  installmentContract Installment_Contract?
+  @@map("customer_contracts")
+}
+
+enum CustomerContractPaidType {
+  FULL
+  DEBT
+}
+
+enum CustomerContractType {
+  PRE_ORDER
+  AT_STORE
+  ORDER
+}
+
+enum CustomerContractStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  DELIVERED
+  COMPLETED
+  CANCELED
+}
+/**Installment Contract*/
+model Installment_Contract {
+  id Int @id @default(autoincrement())
+  startAt DateTime @db.Date
+  prePaidTotal Float
+  totalDebtPaid Float
+  penaltyValue Float
+  penaltyType PenaltyType
+  status InstallmentContractStatus
+  customerContractId Int @unique
+  customerContract Customer_Contract @relation(fields: [customerContractId], references: [id])
+  installmentPlanId Int @unique
+  installmentPlan Installment_Plan @relation(fields: [installmentPlanId], references: [id])
+  installmentPayments Installment_Payment[]
+  @@map("installment_contracts")
+}
+
+enum InstallmentContractStatus {
+  ACTIVE
+  COMPLETED
+  OVERDUE
+}
+
+enum PenaltyType {
+  DAILY
+  FIXED
+}
+
+
+model Installment_Payment {
+  id Int @id @default(autoincrement())
+  dueDate DateTime @db.Date
+  paidDate DateTime? @db.Date
+  amountDue Float
+  amountPaid Float
+  penaltyAmount Float @default(0)
+  status InstallmentPaymentStatus @default(PENDING)
+  installmentContractId Int
+  installmentContract Installment_Contract @relation(fields: [installmentContractId], references: [id])
+  @@map("installment_payments")
+}
+
+enum InstallmentPaymentStatus {
+  PENDING
+  LATE
+  PAID
 }
 
 /**Voucher table*/
@@ -292,8 +507,12 @@ model Electric_Motorbike {
   colors Motorbike_Color[]
   images Motorbike_Image[]
   warehouse Inventory[]
-  orders Order[]
-  transferContract Transfer_Contract[]
+  customerContract Customer_Contract[]
+  agencyOrder Agency_Order[]
+  pricePolicy Price_Policy[]
+  discountPolicy Discount_Policy[]
+  promotion Promotion[]
+  agencyStock Agency_Stock[]
   @@map("electric_motorbikes")
 }
 
@@ -321,6 +540,9 @@ model Color {
   id Int @id @default(autoincrement())
   colorType String @db.VarChar(200) @unique()
   motorbikes Motorbike_Color[] 
+  agencyOrder Agency_Order[]
+  agencyStock Agency_Stock[]
+  customerContract Customer_Contract[]
   @@map("colors")
 }
 
@@ -366,69 +588,4 @@ model Battery {
   @@map("batteries")
 }
 
-/**Order table*/
-model Order {
-  id Int @id @default(autoincrement())
-  type OrderType
-  price Float
-  address Float
-  orderDate DateTime @db.Date
-  customerId Int
-  customer Customer @relation(fields: [customerId], references: [id])
-  staffId Int
-  staff Staff @relation(fields: [staffId], references: [id])
-  agencyId Int
-  agency Agency @relation(fields: [agencyId], references: [id])
-  electricMotorbikeId Int @unique
-  electricMotorbike Electric_Motorbike @relation(fields: [electricMotorbikeId], references: [id])
-  payment Payment?
-  shipment Shipment?
-}
-
-enum OrderType {
-  order
-  pre_order
-}
-
-/**Payment table*/
-model Payment {
-  id Int @id @default(autoincrement())
-  paymentMethod PaymentMethod
-  amount Float
-  status PaymentStatus
-  paidAt DateTime @db.Date
-  orderId Int @unique
-  order Order @relation(fields: [orderId], references: [id])
-}
-
-enum PaymentStatus {
-  fail
-  success
-  processing
-  cancel
-}
-
-enum PaymentMethod {
-  bank
-  pay_full
-  instalment
-}
-/**Shipment table*/
-model Shipment {
-  id Int @id @default(autoincrement())
-  trackingNumber BigInt
-  carrier String
-  shippedAt DateTime @db.Date
-  deliveredAt DateTime @db.Date
-  status ShipmentStatus
-  orderId Int @unique
-  order Order @relation(fields: [orderId], references: [id])
-}
-
-enum ShipmentStatus {
-  pending
-  shipped
-  delivered
-  cancel
-}
 

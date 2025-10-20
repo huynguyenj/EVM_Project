@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateMotorbikeDto } from './dto';
 import { Prisma } from 'generated/prisma';
@@ -105,7 +109,37 @@ export class MotorbikeService {
         images: true,
       },
     });
+    if (!motorbikeData) throw new NotFoundException('Not found motorbike');
     return motorbikeData;
+  }
+
+  async getMotorbikePrice(motorbikeId: number) {
+    const motorbike = await this.prisma.electric_Motorbike.findUnique({
+      where: {
+        id: motorbikeId,
+      },
+      select: {
+        price: true,
+      },
+    });
+    if (!motorbike) throw new NotFoundException('Can not found motorbike!');
+    return motorbike;
+  }
+
+  async getMotorbikeColor(motorbikeId: number, colorId: number) {
+    const data = await this.prisma.motorbike_Color.findUnique({
+      where: {
+        motorbikeId_colorId: {
+          colorId: colorId,
+          motorbikeId: motorbikeId,
+        },
+      },
+    });
+    if (!data)
+      throw new BadRequestException(
+        'This motorbike with the color is not existed!',
+      );
+    return data;
   }
 
   async updateMotorbike(

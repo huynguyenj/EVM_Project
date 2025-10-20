@@ -1,8 +1,9 @@
-import { IsNumber, IsOptional } from 'class-validator';
+import { IsNumber, IsOptional, IsPositive } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateAppearanceDto {
   @IsNumber()
+  @IsPositive()
   @IsOptional()
   @ApiPropertyOptional({
     example: 2000,
@@ -11,6 +12,7 @@ export class UpdateAppearanceDto {
   length?: number;
 
   @IsNumber()
+  @IsPositive()
   @IsOptional()
   @ApiPropertyOptional({
     example: 700,
@@ -19,6 +21,7 @@ export class UpdateAppearanceDto {
   width?: number;
 
   @IsNumber()
+  @IsPositive()
   @IsOptional()
   @ApiPropertyOptional({
     example: 1100,
@@ -27,6 +30,7 @@ export class UpdateAppearanceDto {
   height?: number;
 
   @IsNumber()
+  @IsPositive()
   @IsOptional()
   @ApiPropertyOptional({
     example: 120,
@@ -35,6 +39,7 @@ export class UpdateAppearanceDto {
   weight?: number;
 
   @IsNumber()
+  @IsPositive()
   @IsOptional()
   @ApiPropertyOptional({
     example: 150,
@@ -43,6 +48,7 @@ export class UpdateAppearanceDto {
   undercarriageDistance?: number;
 
   @IsNumber()
+  @IsPositive()
   @IsOptional()
   @ApiPropertyOptional({ example: 30, description: 'Storage limit in liters' })
   storageLimit?: number;

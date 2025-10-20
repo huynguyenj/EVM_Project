@@ -49,7 +49,7 @@ export class AgencyController {
     };
   }
 
-  @Get()
+  @Get('list')
   @ApiOperation({ summary: 'Get agency list' })
   @ApiQueriesAndPagination(
     { name: 'location', example: 'china', required: false },
@@ -70,7 +70,7 @@ export class AgencyController {
     };
   }
 
-  @Get(':agencyId')
+  @Get('detail/:agencyId')
   @ApiOperation({ summary: 'Get agency detail' })
   @ApiResponseDocument(
     HttpStatus.OK,
