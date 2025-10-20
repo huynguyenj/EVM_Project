@@ -65,6 +65,7 @@ export class CreateDiscountDto {
   @IsNotEmpty()
   @Type(() => Date)
   startAt: Date;
+
   @ApiProperty({
     example: '2025-10-12T14:30:00.000Z',
     type: String,

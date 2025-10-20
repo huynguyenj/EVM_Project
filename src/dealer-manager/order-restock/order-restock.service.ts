@@ -24,6 +24,10 @@ export class OrderRestockService {
   ) {}
 
   async createOrderRestock(createOrderDto: CreateOrderDto) {
+    await this.checkPreviousOrder(
+      createOrderDto.motorbikeId,
+      createOrderDto.agencyId,
+    );
     const pricePolicy =
       await this.pricePolicyService.getPricePolicyAgencyAndMotorbike(
         createOrderDto.agencyId,
@@ -101,6 +105,30 @@ export class OrderRestockService {
     return createdData;
   }
 
+  async checkPreviousOrder(motorbikeId: number, agencyId: number) {
+    const recentOrderWithAgencyAndMotorbike =
+      await this.prisma.agency_Order.findFirst({
+        where: {
+          agencyId: agencyId,
+          electricMotorbikeId: motorbikeId,
+        },
+        orderBy: {
+          orderAt: 'desc',
+        },
+      });
+    if (recentOrderWithAgencyAndMotorbike) {
+      const orderBill = await this.prisma.agency_Bill.findUnique({
+        where: {
+          agencyOrderId: recentOrderWithAgencyAndMotorbike.id,
+        },
+      });
+      if (orderBill && !orderBill.isCompleted) {
+        throw new BadRequestException(
+          'Your previous order bill is not completed yet. Please finish to order.',
+        );
+      }
+    }
+  }
   async inventoryUpdate(
     motorbikeId: number,
     warehouseId: number,

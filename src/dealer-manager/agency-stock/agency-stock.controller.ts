@@ -24,10 +24,13 @@ import {
 } from './dto';
 import { ApiResponseDocumentPagination } from 'src/common/decorator/swagger-decorator/api.response.document.pagination';
 import { AgencyStockQuery } from './decorators';
+import { Roles } from 'src/auth/decorators/roles.decorators';
+import { Role } from 'src/auth/types/role.enum';
 
 @Controller('agency-stock')
 @ApiBearerAuth('access-token')
 @ApiTags('Dealer Manager - Stock Management')
+@Roles(Role.DEALER_MANAGER, Role.DEALER_STAFF)
 export class AgencyStockController {
   constructor(private agencyStockService: AgencyStockService) {}
 
