@@ -38,7 +38,7 @@ export class PriceService {
 
   async getListPricePolicies(priceQuery: PriceQueries) {
     const skipData = (priceQuery.page - 1) * priceQuery.limit;
-    const listData = await this.prisma.discount_Policy.findMany({
+    const listData = await this.prisma.price_Policy.findMany({
       skip: skipData,
       take: priceQuery.limit,
     });
