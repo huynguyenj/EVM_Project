@@ -9,7 +9,7 @@ import {
   PromotionQueries,
   UpdatePromotionDto,
 } from './dto';
-import { PromotionValueType } from './types';
+import { PromotionStatus, PromotionValueType } from './types';
 
 @Injectable()
 export class PromotionService {
@@ -33,7 +33,6 @@ export class PromotionService {
         endAt: createPromotionDto.endAt,
         status: createPromotionDto.status,
         motorbikeId: createPromotionDto.motorbikeId ?? null,
-        agencyId: createPromotionDto.agencyId ?? null,
       },
     });
     return createdData;
@@ -50,6 +49,18 @@ export class PromotionService {
         valueType: promotionQueries.valueType.toUpperCase(),
       });
     }
+
+    if (promotionQueries.motorbikeId) {
+      filters.push({ motorbikeId: promotionQueries.motorbikeId });
+    }
+
+    if (
+      promotionQueries.status &&
+      Object.values(PromotionStatus).includes(promotionQueries.status)
+    ) {
+      filters.push({ status: promotionQueries.status });
+    }
+
     const listData = await this.prisma.promotion.findMany({
       skip: skipData,
       take: promotionQueries.limit,
@@ -76,7 +87,6 @@ export class PromotionService {
         id: PromotionId,
       },
       include: {
-        agency: true,
         motorbike: true,
       },
     });
@@ -92,16 +102,15 @@ export class PromotionService {
       select: {
         value: true,
         valueType: true,
+        status: true,
+        endAt: true,
       },
     });
     if (!data) throw new NotFoundException('This promotion is not existed!');
     return data;
   }
 
-  async getAgencyPromotions(
-    agencyId: number,
-    promotionQueries: PromotionQueries,
-  ) {
+  async getPromotionsAgency(promotionQueries: PromotionQueries) {
     const skipData = (promotionQueries.page - 1) * promotionQueries.limit;
     const filters: any[] = [];
     if (
@@ -116,7 +125,8 @@ export class PromotionService {
       skip: skipData,
       take: promotionQueries.limit,
       where: {
-        agencyId: agencyId,
+        status: 'ACTIVE',
+        ...filters,
       },
     });
     return {
@@ -124,15 +134,15 @@ export class PromotionService {
       paginationInfo: {
         page: promotionQueries.page,
         limit: promotionQueries.limit,
-        total: await this.getTotalAgencyPromotion(agencyId),
+        total: await this.getTotalAgencyPromotion(),
       },
     };
   }
 
-  async getTotalAgencyPromotion(agencyId: number) {
+  async getTotalAgencyPromotion() {
     return await this.prisma.promotion.count({
       where: {
-        agencyId: agencyId,
+        status: 'ACTIVE',
       },
     });
   }

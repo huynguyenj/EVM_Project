@@ -72,10 +72,10 @@ export class CreatePromotionDto {
   @IsNotEmpty()
   status: PromotionStatus;
 
-  @IsNumber()
-  @IsOptional()
-  @ApiProperty({ example: 1 })
-  agencyId?: number;
+  // @IsNumber()
+  // @IsOptional()
+  // @ApiProperty({ example: 1 })
+  // agencyId?: number;
 
   @IsNumber()
   @IsOptional()

@@ -35,10 +35,19 @@ export class OrderRestockService {
       );
     let discountTotal: number = 0;
     let promotionTotal: number = 0;
+    const currentDate = new Date();
     if (createOrderDto.discountId) {
       const discountData = await this.discountService.getDiscountPrice(
         createOrderDto.discountId,
       );
+      if (discountData.status === 'INACTIVE')
+        throw new BadRequestException('Discount is inactive!');
+      if (currentDate.getDate() < discountData.endAt.getDate())
+        throw new BadRequestException('Discount is expired!');
+      if (createOrderDto.quantity < discountData.min_quantity)
+        throw new BadRequestException(
+          `This discount is required amount ${discountData.min_quantity} of motorbike to have the usage`,
+        );
       discountTotal = this.calculatePriceWithSpecialDeal(
         pricePolicy.wholesalePrice,
         discountData.valueType,
@@ -49,6 +58,12 @@ export class OrderRestockService {
       const promotion = await this.promotionService.getPromotionPrice(
         createOrderDto.promotionId,
       );
+
+      if (promotion.status === 'INACTIVE')
+        throw new BadRequestException('Promotion is inactive!');
+      if (promotion.endAt.getDate() < currentDate.getDate())
+        throw new BadRequestException('Promotion is expired!');
+
       promotionTotal = this.calculatePriceWithSpecialDeal(
         pricePolicy.wholesalePrice,
         promotion.valueType,

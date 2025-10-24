@@ -25,7 +25,7 @@ import {
 } from './dto';
 import { ApiResponseDocumentPagination } from 'src/common/decorator/swagger-decorator/api.response.document.pagination';
 import { PromotionQuery } from './decorators';
-import { PromotionValueType } from './types';
+import { PromotionStatus, PromotionValueType } from './types';
 
 @Controller('promotion')
 @ApiBearerAuth('access-token')
@@ -53,11 +53,15 @@ export class PromotionController {
 
   @Get('/list')
   @ApiOperation({ summary: 'Get promotion list' })
-  @ApiQueriesAndPagination({
-    name: 'valueType',
-    example: PromotionValueType.FIXED,
-    required: false,
-  })
+  @ApiQueriesAndPagination(
+    {
+      name: 'valueType',
+      example: PromotionValueType.FIXED,
+      required: false,
+    },
+    { name: 'motorbikeId', example: 1, required: false },
+    { name: 'status', example: PromotionStatus.ACTIVE, required: false },
+  )
   @ApiResponseDocumentPagination(
     HttpStatus.OK,
     PromotionResponseDto,
@@ -74,29 +78,30 @@ export class PromotionController {
     };
   }
 
-  @Get('agency/list/:agencyId')
-  @ApiOperation({ summary: 'Get agency Promotion list' })
-  @ApiQueriesAndPagination({
-    name: 'valueType',
-    example: 'percent',
-    required: false,
-  })
+  @Get('agency/list')
+  @Roles(Role.DEALER_MANAGER)
+  @ApiOperation({ summary: 'Get promotion list for agency' })
+  @ApiQueriesAndPagination(
+    {
+      name: 'valueType',
+      example: 'percent',
+      required: false,
+    },
+    { name: 'motorbikeId', example: 1, required: false },
+  )
   @ApiResponseDocumentPagination(
     HttpStatus.OK,
     PromotionResponseDto,
-    'Get agency Promotion list successfully',
+    'Get promotion list for agency successfully',
   )
   async getAgencyPromotionList(
-    @Param('agencyId', ParseIntPipe) agencyId: number,
     @PromotionQuery() PromotionQueries: PromotionQueries,
   ) {
-    const dataList = await this.promotionService.getAgencyPromotions(
-      agencyId,
-      PromotionQueries,
-    );
+    const dataList =
+      await this.promotionService.getPromotionsAgency(PromotionQueries);
     return {
       statusCode: HttpStatus.OK,
-      message: 'Get promotion list successfully!',
+      message: 'Get promotion list for agency successfully!',
       data: dataList.data,
       paginationInfo: dataList.paginationInfo,
     };

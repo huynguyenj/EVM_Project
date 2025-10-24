@@ -61,25 +61,25 @@ model Role {
   isActive Boolean @default(true)
   isDeleted Boolean @default(false)
   staff Role_Staff[]
-  permissions Role_Permission[]
+  // permissions Role_Permission[]
   @@map("role")
 }
-model Role_Permission {
-  roleId Int
-  role Role @relation(fields: [roleId], references: [id])
-  permissionId Int
-  permission Permission @relation(fields: [permissionId], references: [id])
-  @@id([roleId, permissionId])
-  @@map("role_permission")
-}
-model Permission { 
-  id Int @id @default(autoincrement())
-  permissionName String
-  isActive Boolean
-  isDeleted Boolean
-  roles Role_Permission[]
-  @@map("permissions")
-}
+// model Role_Permission {
+//   roleId Int
+//   role Role @relation(fields: [roleId], references: [id])
+//   permissionId Int
+//   permission Permission @relation(fields: [permissionId], references: [id])
+//   @@id([roleId, permissionId])
+//   @@map("role_permission")
+// }
+// model Permission { 
+//   id Int @id @default(autoincrement())
+//   permissionName String
+//   isActive Boolean
+//   isDeleted Boolean
+//   roles Role_Permission[]
+//   @@map("permissions")
+// }
 
 /**Agency table */
 model Agency {
@@ -97,7 +97,6 @@ model Agency {
   revenue Revenue?
   pricePolicy Price_Policy[]
   discountPolicy Discount_Policy[]
-  promotion Promotion[]
   agencyStock Agency_Stock[]
   installmentPlan Installment_Plan[]
   @@map("agencies")
@@ -203,7 +202,7 @@ model Discount_Policy {
   agencyId Int?
   agency Agency? @relation(fields: [agencyId], references: [id])
   motorbikeId Int
-  motorbike Electric_Motorbike? @relation(fields: [motorbikeId], references: [id])
+  motorbike Electric_Motorbike @relation(fields: [motorbikeId], references: [id])
   agencyOrder Agency_Order[]
   @@unique([agencyId, motorbikeId, type])
   @@map("discount_policy")
@@ -234,8 +233,6 @@ model Promotion {
   startAt DateTime @db.Date()
   endAt DateTime @db.Date()
   status DiscountStatus
-  agencyId Int?
-  agency Agency? @relation(fields: [agencyId], references: [id])
   motorbikeId Int?
   motorbike Electric_Motorbike? @relation(fields: [motorbikeId], references: [id])
   agencyOrder Agency_Order[]
@@ -474,19 +471,20 @@ model Drive_Trial {
   email String
   phone String @db.VarChar(20)
   driveDate DateTime @db.Date
-  driveTime DateTime @db.Time()
-  status DriveStatus
+  driveTime String @db.VarChar(10)
+  status DriveStatus @default(PENDING)
   electricMotorbikeId Int @unique
   electricMotorbike Electric_Motorbike @relation(fields: [electricMotorbikeId], references: [id])
   agencyId Int
   agency Agency @relation(fields: [agencyId], references: [id])
+  @@map("drive_trials")
 }
 
 enum DriveStatus {
-  pending
-  accept
-  cancel
-  finish
+  PENDING
+  ACCEPTED
+  CANCELED
+  COMPLETED
 }
 
 /**Electric motorbike table*/

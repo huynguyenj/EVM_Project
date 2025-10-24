@@ -1,0 +1,6 @@
+export enum DriveTrailStatus {
+  PENDING = 'PENDING',
+  ACCEPTED = 'ACCEPTED',
+  COMPLETED = 'COMPLETED',
+  CANCELED = 'CANCELED',
+}
