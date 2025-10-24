@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateDiscountDto, DiscountQueries, UpdateDiscountDto } from './dto';
-import { ValueType, DiscountType } from './types';
+import { ValueType, DiscountType, DiscountStatus } from './types';
 
 @Injectable()
 export class DiscountService {
@@ -44,7 +44,7 @@ export class DiscountService {
         endAt: createDiscountDto.endAt,
         min_quantity: createDiscountDto.min_quantity ?? 0,
         status: createDiscountDto.status,
-        motorbikeId: createDiscountDto.motorbikeId ?? null,
+        motorbikeId: createDiscountDto.motorbikeId,
         agencyId: createDiscountDto.agencyId ?? null,
       },
     });
@@ -54,6 +54,14 @@ export class DiscountService {
   async getListDiscount(discountQuery: DiscountQueries) {
     const skipData = (discountQuery.page - 1) * discountQuery.limit;
     const filters: any[] = [];
+
+    if (discountQuery.motorbikeId) {
+      filters.push({ motorbikeId: discountQuery.motorbikeId });
+    }
+
+    if (discountQuery.agencyId) {
+      filters.push({ agencyId: discountQuery.agencyId });
+    }
     if (
       discountQuery.type &&
       Object.values(DiscountType).includes(discountQuery.type)
@@ -70,6 +78,16 @@ export class DiscountService {
         valueType: discountQuery.valueType.toUpperCase(),
       });
     }
+
+    if (
+      discountQuery.status &&
+      Object.values(DiscountStatus).includes(discountQuery.status)
+    ) {
+      filters.push({
+        status: discountQuery.status.toUpperCase(),
+      });
+    }
+
     const listData = await this.prisma.discount_Policy.findMany({
       skip: skipData,
       take: discountQuery.limit,
@@ -111,6 +129,9 @@ export class DiscountService {
       select: {
         value: true,
         valueType: true,
+        status: true,
+        endAt: true,
+        min_quantity: true,
       },
     });
     if (!data) throw new NotFoundException('This discount is not existed!');
@@ -140,7 +161,9 @@ export class DiscountService {
       skip: skipData,
       take: discountQuery.limit,
       where: {
+        status: 'ACTIVE',
         agencyId: agencyId,
+        ...filters,
       },
     });
     return {
@@ -157,53 +180,73 @@ export class DiscountService {
     return await this.prisma.discount_Policy.count({
       where: {
         agencyId: agencyId,
+        status: 'ACTIVE',
       },
     });
   }
 
-  async getAgencyDiscountsGlobal(
-    agencyId: number,
-    discountQuery: DiscountQueries,
-  ) {
-    const skipData = (discountQuery.page - 1) * discountQuery.limit;
-    const listData = await this.prisma.discount_Policy.findMany({
-      skip: skipData,
-      take: discountQuery.limit,
-      where: {
-        agencyId: agencyId,
-        motorbikeId: undefined,
-      },
-    });
-    return {
-      data: listData,
-      paginationInfo: {
-        page: discountQuery.page,
-        limit: discountQuery.limit,
-        total: await this.getTotalAgencyDiscount(agencyId),
-      },
-    };
-  }
+  // async getAgencyDiscountsGlobal(
+  //   agencyId: number,
+  //   discountQuery: DiscountQueries,
+  // ) {
+  //   const skipData = (discountQuery.page - 1) * discountQuery.limit;
+  //   const listData = await this.prisma.discount_Policy.findMany({
+  //     skip: skipData,
+  //     take: discountQuery.limit,
+  //     where: {
+  //       agencyId: agencyId,
+  //       motorbikeId: undefined,
+  //     },
+  //   });
+  //   return {
+  //     data: listData,
+  //     paginationInfo: {
+  //       page: discountQuery.page,
+  //       limit: discountQuery.limit,
+  //       total: await this.getTotalAgencyDiscount(agencyId),
+  //     },
+  //   };
+  // }
 
-  async getTotalAgencyDiscountGlobal(agencyId: number) {
-    return await this.prisma.discount_Policy.count({
-      where: {
-        agencyId: agencyId,
-        motorbikeId: undefined,
-      },
-    });
-  }
+  // async getTotalAgencyDiscountGlobal(agencyId: number) {
+  //   return await this.prisma.discount_Policy.count({
+  //     where: {
+  //       agencyId: agencyId,
+  //       motorbikeId: undefined,
+  //     },
+  //   });
+  // }
 
   async getMotorbikeDiscountsGlobal(
     motorbikeId: number,
     discountQuery: DiscountQueries,
   ) {
     const skipData = (discountQuery.page - 1) * discountQuery.limit;
+    const filters: any[] = [];
+    if (
+      discountQuery.type &&
+      Object.values(DiscountType).includes(discountQuery.type)
+    ) {
+      filters.push({
+        type: discountQuery.type.toUpperCase(),
+      });
+    }
+    if (
+      discountQuery.valueType &&
+      Object.values(ValueType).includes(discountQuery.valueType)
+    ) {
+      filters.push({
+        valueType: discountQuery.valueType.toUpperCase(),
+      });
+    }
     const listData = await this.prisma.discount_Policy.findMany({
       skip: skipData,
       take: discountQuery.limit,
       where: {
+        status: 'ACTIVE',
         agencyId: undefined,
         motorbikeId: motorbikeId,
+        ...filters,
       },
     });
     return {
@@ -219,6 +262,7 @@ export class DiscountService {
   async getTotalMotorbikeDiscountGlobal(motorbikeId: number) {
     return await this.prisma.discount_Policy.count({
       where: {
+        status: 'ACTIVE',
         agencyId: undefined,
         motorbikeId: motorbikeId,
       },

@@ -26,7 +26,7 @@ import {
 } from './dto';
 import { ApiResponseDocumentPagination } from 'src/common/decorator/swagger-decorator/api.response.document.pagination';
 import { DiscountQuery } from './decorators';
-import { DiscountType, ValueType } from './types';
+import { DiscountStatus, DiscountType, ValueType } from './types';
 
 @Controller('discount')
 @ApiBearerAuth('access-token')
@@ -57,6 +57,9 @@ export class DiscountController {
   @ApiQueriesAndPagination(
     { name: 'type', example: DiscountType.VOLUME, required: false },
     { name: 'valueType', example: ValueType.FIXED, required: false },
+    { name: 'agencyId', example: 1, required: false },
+    { name: 'motorbikeId', example: 1, required: false },
+    { name: 'status', example: DiscountStatus.ACTIVE, required: false },
   )
   @ApiResponseDocumentPagination(
     HttpStatus.OK,
@@ -75,7 +78,8 @@ export class DiscountController {
   }
 
   @Get('agency/list/:agencyId')
-  @ApiOperation({ summary: 'Get agency discount list' })
+  @Roles(Role.DEALER_MANAGER)
+  @ApiOperation({ summary: 'Get discount list for agency' })
   @ApiQueriesAndPagination(
     { name: 'type', example: 'special', required: false },
     { name: 'valueType', example: 'percent', required: false },
@@ -96,6 +100,34 @@ export class DiscountController {
     return {
       statusCode: HttpStatus.OK,
       message: 'Get discount list successfully!',
+      data: dataList.data,
+      paginationInfo: dataList.paginationInfo,
+    };
+  }
+
+  @Get('agency/motorbike/list/:motorbikeId')
+  @Roles(Role.DEALER_MANAGER)
+  @ApiOperation({ summary: 'Get motorbike discount list for agency' })
+  @ApiQueriesAndPagination(
+    { name: 'type', example: 'special', required: false },
+    { name: 'valueType', example: 'percent', required: false },
+  )
+  @ApiResponseDocumentPagination(
+    HttpStatus.OK,
+    DiscountResponseDto,
+    'Get motorbike discount list for agency successfully',
+  )
+  async getMotorbikeDiscountList(
+    @Param('motorbikeId', ParseIntPipe) motorbikeId: number,
+    @DiscountQuery() discountQueries: DiscountQueries,
+  ) {
+    const dataList = await this.discountService.getMotorbikeDiscountsGlobal(
+      motorbikeId,
+      discountQueries,
+    );
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Get motorbike discount list successfully!',
       data: dataList.data,
       paginationInfo: dataList.paginationInfo,
     };

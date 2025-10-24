@@ -40,8 +40,8 @@ export class PromotionResponseDto {
   })
   status: PromotionStatus;
 
-  @ApiResponseProperty({ example: 1 })
-  agencyId?: number;
+  // @ApiResponseProperty({ example: 1 })
+  // agencyId?: number;
 
   @ApiResponseProperty({ example: 1 })
   motorbikeId?: number;
