@@ -32,7 +32,7 @@ export class UpdateDiscountDto {
   })
   @IsEnum(ValueType)
   @IsOptional()
-  value_type?: ValueType;
+  valueType?: ValueType;
 
   @ApiProperty({
     example: 10,

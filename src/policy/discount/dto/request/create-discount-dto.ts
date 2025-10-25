@@ -33,7 +33,7 @@ export class CreateDiscountDto {
   })
   @IsEnum(ValueType)
   @IsNotEmpty()
-  value_type: ValueType;
+  valueType: ValueType;
 
   @ApiProperty({
     example: 10,

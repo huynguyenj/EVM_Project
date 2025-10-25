@@ -130,9 +130,43 @@ model Agency_Stock {
   motorbike Electric_Motorbike @relation(fields: [motorbikeId], references: [id])
   colorId Int
   color Color @relation(fields: [colorId], references: [id])
+  agencyStockPromotion Agency_Stock_Promotion[]
   @@unique([motorbikeId, colorId])
   @@map("agency_stocks")
 }
+
+model Stock_Promotion {
+  id Int @id @default(autoincrement())
+  name String @db.VarChar(300)
+  description String @db.Text()
+  valueType PromotionValueType
+  value Float
+  startAt DateTime @db.Date()
+  endAt DateTime @db.Date()
+  agencyStock Agency_Stock_Promotion[]
+  status DiscountStatus
+  @@map("stock_promotions")
+}
+
+enum AgencyStockPromotionValueType {
+  PERCENT
+  FIXED
+}
+
+enum AgencyStockPromotionStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model Agency_Stock_Promotion {
+  stockPromotionId Int
+  stockPromotion Stock_Promotion @relation(fields: [stockPromotionId], references: [id])
+  agencyStockId Int
+  agencyStock Agency_Stock @relation(fields: [agencyStockId], references: [id])
+  @@unique([stockPromotionId, agencyStockId])
+  @@map("agency_stock_promotion")
+}
+
 
 /**Contract table*/
 model Agency_Order {

@@ -13,7 +13,7 @@ export class DiscountService {
 
   async createDiscount(createDiscountDto: CreateDiscountDto) {
     if (
-      createDiscountDto.value_type === ValueType.PERCENT &&
+      createDiscountDto.valueType === ValueType.PERCENT &&
       (createDiscountDto.value < 0 || createDiscountDto.value > 100)
     )
       throw new BadRequestException(
@@ -38,7 +38,7 @@ export class DiscountService {
       data: {
         name: createDiscountDto.name,
         type: createDiscountDto.type,
-        valueType: createDiscountDto.value_type,
+        valueType: createDiscountDto.valueType,
         value: createDiscountDto.value,
         startAt: createDiscountDto.startAt,
         endAt: createDiscountDto.endAt,
