@@ -151,7 +151,7 @@ export class PromotionController {
   @ApiResponseDocument(HttpStatus.OK, Object, 'Delete promotion successfully!')
   @ApiOperation({ summary: 'Delete promotion' })
   async deletePromotion(
-    @Param('PromotionId', ParseIntPipe) promotionId: number,
+    @Param('promotionId', ParseIntPipe) promotionId: number,
   ) {
     await this.promotionService.deletePromotion(promotionId);
     return {

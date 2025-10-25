@@ -17,7 +17,7 @@ export class PromotionService {
 
   async createPromotion(createPromotionDto: CreatePromotionDto) {
     if (
-      createPromotionDto.value_type === PromotionValueType.PERCENT &&
+      createPromotionDto.valueType === PromotionValueType.PERCENT &&
       (createPromotionDto.value < 0 || createPromotionDto.value > 100)
     )
       throw new BadRequestException(
@@ -27,7 +27,7 @@ export class PromotionService {
       data: {
         name: createPromotionDto.name,
         description: createPromotionDto.description,
-        valueType: createPromotionDto.value_type,
+        valueType: createPromotionDto.valueType,
         value: createPromotionDto.value,
         startAt: createPromotionDto.startAt,
         endAt: createPromotionDto.endAt,

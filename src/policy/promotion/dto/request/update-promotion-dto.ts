@@ -28,7 +28,7 @@ export class UpdatePromotionDto {
   })
   @IsEnum(PromotionValueType)
   @IsOptional()
-  value_type?: PromotionValueType;
+  valueType?: PromotionValueType;
 
   @ApiProperty({
     example: 10,

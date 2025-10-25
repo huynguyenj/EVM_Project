@@ -29,7 +29,7 @@ export class CreatePromotionDto {
   })
   @IsEnum(PromotionValueType)
   @IsNotEmpty()
-  value_type: PromotionValueType;
+  valueType: PromotionValueType;
 
   @ApiProperty({
     example: 10,
