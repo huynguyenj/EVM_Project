@@ -13,7 +13,7 @@ export class OrderRestockManagementService {
       filters.push({ status: orderManageQueries.status });
     }
     if (orderManageQueries.agencyId) {
-      filters.push({ agencyId: orderManageQueries.agencyId });
+      filters.push({ agencyId: Number(orderManageQueries.agencyId) });
     }
     const listData = await this.prisma.agency_Order.findMany({
       skip: skipData,

@@ -56,11 +56,11 @@ export class DiscountService {
     const filters: any[] = [];
 
     if (discountQuery.motorbikeId) {
-      filters.push({ motorbikeId: discountQuery.motorbikeId });
+      filters.push({ motorbikeId: Number(discountQuery.motorbikeId) });
     }
 
     if (discountQuery.agencyId) {
-      filters.push({ agencyId: discountQuery.agencyId });
+      filters.push({ agencyId: Number(discountQuery.agencyId) });
     }
     if (
       discountQuery.type &&

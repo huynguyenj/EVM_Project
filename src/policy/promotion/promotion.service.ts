@@ -51,7 +51,7 @@ export class PromotionService {
     }
 
     if (promotionQueries.motorbikeId) {
-      filters.push({ motorbikeId: promotionQueries.motorbikeId });
+      filters.push({ motorbikeId: Number(promotionQueries.motorbikeId) });
     }
 
     if (
