@@ -95,13 +95,13 @@ export class CustomerContractService {
 
     if (customerContractQueries.customerId) {
       filters.push({
-        customerId: customerContractQueries.customerId,
+        customerId: Number(customerContractQueries.customerId),
       });
     }
 
     if (customerContractQueries.staffId) {
       filters.push({
-        staffId: customerContractQueries.staffId,
+        staffId: Number(customerContractQueries.staffId),
       });
     }
 

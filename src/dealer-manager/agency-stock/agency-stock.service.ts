@@ -48,10 +48,10 @@ export class AgencyStockService {
     const skipData = (agencyStockQueries.page - 1) * agencyStockQueries.limit;
     const filters: any[] = [{ agencyId: agencyId }];
     if (agencyStockQueries.motorbikeId) {
-      filters.push({ motorbikeId: agencyStockQueries.motorbikeId });
+      filters.push({ motorbikeId: Number(agencyStockQueries.motorbikeId) });
     }
     if (agencyStockQueries.colorId) {
-      filters.push({ colorId: agencyStockQueries.colorId });
+      filters.push({ colorId: Number(agencyStockQueries.colorId) });
     }
     const listData = await this.prisma.agency_Stock.findMany({
       skip: skipData,
