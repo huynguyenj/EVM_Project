@@ -21,9 +21,9 @@ import {
 
 @ApiBearerAuth('access-token')
 @Controller('color')
-@Roles(Role.ADMIN, Role.EVM_STAFF)
 export class ColorController {
   constructor(private colorService: ColorService) {}
+  @Roles(Role.ADMIN, Role.EVM_STAFF)
   @Post()
   @ApiOperation({ summary: 'Create color' })
   @ApiResponseDocument(
@@ -43,6 +43,7 @@ export class ColorController {
   }
 
   @Get()
+  @Roles(Role.ADMIN, Role.EVM_STAFF, Role.DEALER_MANAGER, Role.DEALER_STAFF)
   @ApiOperation({ summary: 'Get color' })
   @ApiResponseDocumentArray(
     HttpStatus.OK,
@@ -59,6 +60,7 @@ export class ColorController {
   }
 
   @Patch(':colorId')
+  @Roles(Role.ADMIN, Role.EVM_STAFF)
   @ApiOperation({ summary: 'Update color' })
   @ApiResponseDocument(HttpStatus.OK, ColorResponseDto, 'Update color success!')
   async updateColor(
@@ -77,6 +79,7 @@ export class ColorController {
   }
 
   @Delete(':colorId')
+  @Roles(Role.ADMIN, Role.EVM_STAFF)
   @ApiOperation({ summary: 'Delete color' })
   @ApiResponseDocument(HttpStatus.OK, Object, 'Delete color success')
   async deleteColor(@Param('colorId', ParseIntPipe) colorId: number) {
