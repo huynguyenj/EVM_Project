@@ -13,4 +13,9 @@ export class SignInResponseDto {
     example: ['Admin', 'User'],
   })
   role: string[];
+
+  @ApiResponseProperty({
+    example: 1,
+  })
+  agencyId: number | null;
 }

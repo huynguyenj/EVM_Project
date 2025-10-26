@@ -29,7 +29,7 @@ import { Role } from 'src/auth/types/role.enum';
 
 @Controller('agency-stock')
 @ApiBearerAuth('access-token')
-@ApiTags('Dealer Manager - Stock Management')
+@ApiTags('Dealer Manager & Dealer Staff - Stock Management')
 @Roles(Role.DEALER_MANAGER, Role.DEALER_STAFF)
 export class AgencyStockController {
   constructor(private agencyStockService: AgencyStockService) {}

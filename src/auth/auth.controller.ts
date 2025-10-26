@@ -38,6 +38,7 @@ export class AuthController {
     });
     const response: SignInResponseDto = {
       userId: tokenData.data.id,
+      agencyId: tokenData.data.agencyId,
       accessToken: tokenData.accessToken,
       role: tokenData.data.role.map((role) => role.role.roleName),
     };
