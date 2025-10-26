@@ -1,4 +1,5 @@
 import { ApiResponseProperty, PickType } from '@nestjs/swagger';
+import { StockPromotionResponseDto } from 'src/dealer-manager/stock-promotion/dto';
 import { ColorResponseDto } from 'src/vehicle/color/dto';
 import { MotorbikeDetailResponseDto } from 'src/vehicle/electric-motorbike/dto';
 class MotorbikeStockDto extends PickType(MotorbikeDetailResponseDto, [
@@ -32,6 +33,9 @@ export class AgencyStockDetailResponseDto {
     format: 'date-time',
   })
   updateAt: Date;
+
+  @ApiResponseProperty({ type: [StockPromotionResponseDto] })
+  agencyStockPromotion: [StockPromotionResponseDto];
 
   @ApiResponseProperty({ type: MotorbikeStockDto })
   motorbike: MotorbikeStockDto;

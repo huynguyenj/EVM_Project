@@ -3,8 +3,15 @@ import { StaffModule } from './staff/staff.module';
 import { OrderRestockModule } from './order-restock/order-restock.module';
 import { AgencyStockModule } from './agency-stock/agency-stock.module';
 import { InstallmentPlanModule } from './installment-plan/installment-plan.module';
+import { StockPromotionModule } from './stock-promotion/stock-promotion.module';
 
 @Module({
-  imports: [StaffModule, OrderRestockModule, AgencyStockModule, InstallmentPlanModule],
+  imports: [
+    StaffModule,
+    OrderRestockModule,
+    AgencyStockModule,
+    InstallmentPlanModule,
+    StockPromotionModule,
+  ],
 })
 export class DealerManagerModule {}

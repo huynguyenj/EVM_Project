@@ -98,6 +98,7 @@ model Agency {
   pricePolicy Price_Policy[]
   discountPolicy Discount_Policy[]
   agencyStock Agency_Stock[]
+  agencyStockPromotion Stock_Promotion[]
   installmentPlan Installment_Plan[]
   @@map("agencies")
 }
@@ -143,7 +144,9 @@ model Stock_Promotion {
   value Float
   startAt DateTime @db.Date()
   endAt DateTime @db.Date()
-  agencyStock Agency_Stock_Promotion[]
+  agencyId Int
+  agency Agency @relation(fields: [agencyId], references: [id])
+  agencyStockPromotion Agency_Stock_Promotion[]
   status DiscountStatus
   @@map("stock_promotions")
 }

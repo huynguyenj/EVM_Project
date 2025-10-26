@@ -84,6 +84,11 @@ export class AgencyStockService {
         id: agencyStockId,
       },
       include: {
+        agencyStockPromotion: {
+          include: {
+            stockPromotion: true,
+          },
+        },
         color: true,
         motorbike: {
           select: {
