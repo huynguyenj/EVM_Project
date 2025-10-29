@@ -216,6 +216,7 @@ export class OrderRestockService {
       take: orderQuery.limit,
       where: orderQuery.status ? { status: orderQuery.status } : {},
       select: {
+        id: true,
         basePrice: true,
         quantity: true,
         wholesalePrice: true,
