@@ -51,7 +51,8 @@ export class WarehousesController {
   }
 
   @Get('/list')
-  @ApiOperation({ summary: 'Get list ware house' })
+  @Roles(Role.ADMIN, Role.EVM_STAFF, Role.DEALER_MANAGER)
+  @ApiOperation({ summary: 'Get list warehouse' })
   @ApiResponseDocumentPagination(
     HttpStatus.OK,
     WarehouseResponseDto,
@@ -73,6 +74,7 @@ export class WarehousesController {
   }
 
   @Get('detail/:warehouseId')
+  @Roles(Role.ADMIN, Role.EVM_STAFF, Role.DEALER_MANAGER)
   @ApiOperation({ summary: 'Get warehouse detail' })
   @ApiResponseDocument(
     HttpStatus.OK,

@@ -8,10 +8,10 @@ export class CreateOrderDto {
   @IsNotEmpty()
   quantity: number;
 
-  @ApiProperty({ example: 1 })
-  @IsNumber()
-  @IsPositive()
-  pricePolicyId: number;
+  // @ApiProperty({ example: 1 })
+  // @IsNumber()
+  // @IsPositive()
+  // pricePolicyId: number;
 
   @ApiProperty({ example: 1 })
   @IsNumber()
