@@ -31,6 +31,12 @@ export class StockPromotionService {
   }
 
   async assignPromotionToStock(assignStockPromotion: AssignStockPromotionDto) {
+    for (const stockId of assignStockPromotion.listStockId) {
+      await this.checkAvailableAssignment(
+        assignStockPromotion.stockPromotionId,
+        stockId,
+      );
+    }
     await this.prisma.$transaction(
       assignStockPromotion.listStockId.map((stockId) =>
         this.prisma.agency_Stock_Promotion.create({
@@ -41,6 +47,21 @@ export class StockPromotionService {
         }),
       ),
     );
+    return;
+  }
+
+  async checkAvailableAssignment(stockPromotionId: number, stockId: number) {
+    const isPromotionWithStockExist =
+      await this.prisma.agency_Stock_Promotion.findUnique({
+        where: {
+          stockPromotionId_agencyStockId: {
+            agencyStockId: stockId,
+            stockPromotionId: stockPromotionId,
+          },
+        },
+      });
+    if (isPromotionWithStockExist)
+      throw new BadRequestException('This stock already have promotion!');
     return;
   }
 
