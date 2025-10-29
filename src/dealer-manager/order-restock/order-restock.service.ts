@@ -106,6 +106,7 @@ export class OrderRestockService {
         warehouseId: createOrderDto.warehouseId,
       },
       select: {
+        id: true,
         basePrice: true,
         quantity: true,
         wholesalePrice: true,
