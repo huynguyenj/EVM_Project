@@ -36,6 +36,7 @@ export class OrderRestockService {
     let discountTotal: number = 0;
     let promotionTotal: number = 0;
     const currentDate = new Date();
+
     if (createOrderDto.discountId) {
       const discountData = await this.discountService.getDiscountPrice(
         createOrderDto.discountId,
