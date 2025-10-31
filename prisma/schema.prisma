@@ -94,7 +94,7 @@ model Agency {
   customerContracts Customer_Contract[]
   transferContract Agency_Order[]
   driveTrial Drive_Trial[]
-  revenue Revenue?
+  revenue Revenue[]
   pricePolicy Price_Policy[]
   discountPolicy Discount_Policy[]
   agencyStock Agency_Stock[]
@@ -114,7 +114,7 @@ model Revenue {
   total Float
   createAt DateTime @db.Date
   updateAt DateTime @db.Date
-  agencyId Int @unique
+  agencyId Int
   agency Agency @relation(fields: [agencyId], references: [id])
   @@map("revenue")
 }
