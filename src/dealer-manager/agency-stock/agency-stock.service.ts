@@ -129,6 +129,11 @@ export class AgencyStockService {
   }
 
   async deleteAgencyStock(agencyStockId: number) {
+    await this.prisma.agency_Stock_Promotion.deleteMany({
+      where: {
+        agencyStockId: agencyStockId,
+      },
+    });
     await this.prisma.agency_Stock.delete({
       where: {
         id: agencyStockId,
