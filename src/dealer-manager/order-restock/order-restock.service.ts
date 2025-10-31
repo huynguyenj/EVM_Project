@@ -43,11 +43,11 @@ export class OrderRestockService {
       );
       if (discountData.status === 'INACTIVE')
         throw new BadRequestException('Discount is inactive!');
-      if (currentDate.getDate() > discountData.endAt.getDate())
+      if (currentDate > discountData.endAt)
         throw new BadRequestException('Discount is expired!');
       if (createOrderDto.quantity < discountData.min_quantity)
         throw new BadRequestException(
-          `This discount is required amount ${discountData.min_quantity} of motorbike to have the usage`,
+          `This discount is required at least ${discountData.min_quantity} of motorbike to have the usage`,
         );
       discountTotal = this.calculatePriceWithSpecialDeal(
         pricePolicy.wholesalePrice,
@@ -62,7 +62,7 @@ export class OrderRestockService {
 
       if (promotion.status === 'INACTIVE')
         throw new BadRequestException('Promotion is inactive!');
-      if (currentDate.getDate() > promotion.endAt.getDate())
+      if (currentDate > promotion.endAt)
         throw new BadRequestException('Promotion is expired!');
 
       promotionTotal = this.calculatePriceWithSpecialDeal(

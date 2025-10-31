@@ -4,6 +4,7 @@ import { OrderRestockModule } from './order-restock/order-restock.module';
 import { AgencyStockModule } from './agency-stock/agency-stock.module';
 import { InstallmentPlanModule } from './installment-plan/installment-plan.module';
 import { StockPromotionModule } from './stock-promotion/stock-promotion.module';
+import { RevenueModule } from './revenue/revenue.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { StockPromotionModule } from './stock-promotion/stock-promotion.module';
     AgencyStockModule,
     InstallmentPlanModule,
     StockPromotionModule,
+    RevenueModule,
   ],
 })
 export class DealerManagerModule {}
