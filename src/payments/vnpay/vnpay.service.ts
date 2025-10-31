@@ -5,7 +5,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreatePaymentAgencyBill } from '../dto';
 import QueryString from 'qs';
 import crypto from 'crypto';
-import { VnpParam } from '../types';
+import { VnpParam, VnpParamResponse } from '../types';
 @Injectable()
 export class VnpayService {
   constructor(
@@ -52,8 +52,8 @@ export class VnpayService {
       vnp_Locale: 'vn',
       vnp_CurrCode: 'VND',
       vnp_TxnRef: timeStamp,
-      vnp_OrderInfo: `${billId}`,
-      vnp_OrderType: platform,
+      vnp_OrderInfo: `${billId}&${platform}`,
+      vnp_OrderType: 'other',
       vnp_Amount: amount * 100,
       vnp_ReturnUrl: this.vnPaySetting.vnpayReturnUrl || '',
       vnp_IpAddr: ipAddress,
@@ -82,16 +82,19 @@ export class VnpayService {
     };
   }
 
-  async createAgencyBillPayment(vnp_Params: VnpParam) {
+  async createAgencyBillPayment(vnp_Params: VnpParamResponse) {
     const vnpData = this.checkPaymentReturn(vnp_Params);
     if (!vnpData)
       return `${this.vnPaySetting.vnpayClientReturn + '/payment?status=invalid'}`;
-    const { vnp_Amount, vnp_BankCode, vnp_OrderInfo, vnp_OrderType } = vnpData;
+    const { vnp_Amount, vnp_ResponseCode, vnp_OrderInfo } = vnpData;
+    const orderInfoListInfo = vnp_OrderInfo.split('&'); //vnp_OrderInfo = 1&web
+    const billId = orderInfoListInfo[0];
+    const platform = orderInfoListInfo[1];
     const returnClientUrl =
-      vnp_OrderType === 'web'
+      platform === 'web'
         ? this.vnPaySetting.vnpayClientReturn
         : this.vnPaySetting.vnpayClientMobileReturn;
-    if (vnp_BankCode === '00') {
+    if (vnp_ResponseCode === '00') {
       // await this.prisma.agency_Payment.create({
       //   data: {
       //     amount: Number(vnp_Amount) / 100,
@@ -113,7 +116,7 @@ export class VnpayService {
     }
   }
 
-  private checkPaymentReturn(vnp_Params: VnpParam) {
+  private checkPaymentReturn(vnp_Params: VnpParamResponse) {
     const secureHash = vnp_Params['vnp_SecureHash'];
     delete vnp_Params['vnp_SecureHash'];
     delete vnp_Params['vnp_SecureHashType'];
