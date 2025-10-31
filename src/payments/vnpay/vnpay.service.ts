@@ -83,29 +83,27 @@ export class VnpayService {
     const vnpData = this.checkPaymentReturn(vnp_Params);
     if (!vnpData)
       return `${this.vnPaySetting.vnpayClientReturn + '/payment?status=invalid'}`;
-    const { vnp_Amount, vnp_ResponseCode, vnp_OrderInfo } = vnpData;
+    const { vnp_ResponseCode, vnp_OrderInfo } = vnpData;
     const orderInfoListInfo = vnp_OrderInfo.split('-'); //vnp_OrderInfo = 1&web
+    //Bill id
     const billId = Number(orderInfoListInfo[0]);
+    //Platform
     const platform = orderInfoListInfo[1];
+    //Return client url
     const returnClientUrl =
       platform === 'web'
         ? this.vnPaySetting.vnpayClientReturn
         : this.vnPaySetting.vnpayClientMobileReturn;
+
     if (vnp_ResponseCode === '00') {
-      const isPaymentExisted = await this.prisma.agency_Payment.findUnique({
+      const isBillPaid = await this.prisma.agency_Bill.findUnique({
         where: {
-          agencyBillId: billId,
+          id: billId,
         },
       });
-      if (isPaymentExisted)
+      if (isBillPaid && isBillPaid.isCompleted == true)
         throw new BadRequestException('This bill already pay');
-      await this.prisma.agency_Payment.create({
-        data: {
-          amount: Number(vnp_Amount) / 100,
-          paidAt: new Date(),
-          agencyBillId: Number(billId),
-        },
-      });
+
       await this.prisma.agency_Bill.update({
         where: {
           id: Number(vnp_OrderInfo),
