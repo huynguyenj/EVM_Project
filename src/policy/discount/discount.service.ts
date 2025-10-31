@@ -163,6 +163,9 @@ export class DiscountService {
       where: {
         status: 'ACTIVE',
         agencyId: agencyId,
+        endAt: {
+          gte: new Date(),
+        },
         ...filters,
       },
     });
@@ -184,38 +187,6 @@ export class DiscountService {
       },
     });
   }
-
-  // async getAgencyDiscountsGlobal(
-  //   agencyId: number,
-  //   discountQuery: DiscountQueries,
-  // ) {
-  //   const skipData = (discountQuery.page - 1) * discountQuery.limit;
-  //   const listData = await this.prisma.discount_Policy.findMany({
-  //     skip: skipData,
-  //     take: discountQuery.limit,
-  //     where: {
-  //       agencyId: agencyId,
-  //       motorbikeId: undefined,
-  //     },
-  //   });
-  //   return {
-  //     data: listData,
-  //     paginationInfo: {
-  //       page: discountQuery.page,
-  //       limit: discountQuery.limit,
-  //       total: await this.getTotalAgencyDiscount(agencyId),
-  //     },
-  //   };
-  // }
-
-  // async getTotalAgencyDiscountGlobal(agencyId: number) {
-  //   return await this.prisma.discount_Policy.count({
-  //     where: {
-  //       agencyId: agencyId,
-  //       motorbikeId: undefined,
-  //     },
-  //   });
-  // }
 
   async getMotorbikeDiscountsGlobal(
     motorbikeId: number,
