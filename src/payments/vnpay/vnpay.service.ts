@@ -1,4 +1,9 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { type ConfigType } from '@nestjs/config';
 import vnpayConfig from 'src/common/config/vnpay.config';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -59,15 +64,7 @@ export class VnpayService {
       vnp_IpAddr: ipAddress,
       vnp_CreateDate: createDate,
     };
-    const sortedParams = Object.keys(vnp_params)
-      .sort()
-      .reduce(
-        (acc, key) => {
-          acc[key] = encodeURIComponent(vnp_params[key]).replace(/%20/g, '+');
-          return acc;
-        },
-        {} as Record<string, any>,
-      );
+    const sortedParams = this.sortObject(vnp_params);
 
     const signData = QueryString.stringify(sortedParams, { encode: false });
     const hmac = crypto.createHmac('sha512', this.vnPaySetting.vnpaySecretKey);
@@ -88,28 +85,35 @@ export class VnpayService {
       return `${this.vnPaySetting.vnpayClientReturn + '/payment?status=invalid'}`;
     const { vnp_Amount, vnp_ResponseCode, vnp_OrderInfo } = vnpData;
     const orderInfoListInfo = vnp_OrderInfo.split('-'); //vnp_OrderInfo = 1&web
-    const billId = orderInfoListInfo[0];
+    const billId = Number(orderInfoListInfo[0]);
     const platform = orderInfoListInfo[1];
     const returnClientUrl =
       platform === 'web'
         ? this.vnPaySetting.vnpayClientReturn
         : this.vnPaySetting.vnpayClientMobileReturn;
     if (vnp_ResponseCode === '00') {
-      // await this.prisma.agency_Payment.create({
-      //   data: {
-      //     amount: Number(vnp_Amount) / 100,
-      //     paidAt: new Date(),
-      //     agencyBillId: Number(vnp_OrderInfo),
-      //   },
-      // });
-      // await this.prisma.agency_Bill.update({
-      //   where: {
-      //     id: Number(vnp_OrderInfo),
-      //   },
-      //   data: {
-      //     isCompleted: true,
-      //   },
-      // });
+      const isPaymentExisted = await this.prisma.agency_Payment.findUnique({
+        where: {
+          agencyBillId: billId,
+        },
+      });
+      if (isPaymentExisted)
+        throw new BadRequestException('This bill already pay');
+      await this.prisma.agency_Payment.create({
+        data: {
+          amount: Number(vnp_Amount) / 100,
+          paidAt: new Date(),
+          agencyBillId: Number(billId),
+        },
+      });
+      await this.prisma.agency_Bill.update({
+        where: {
+          id: Number(vnp_OrderInfo),
+        },
+        data: {
+          isCompleted: true,
+        },
+      });
       return `${returnClientUrl + '/payment?status=success'}`;
     } else {
       return `${returnClientUrl + '/payment?status=fail'}`;
@@ -120,15 +124,7 @@ export class VnpayService {
     const secureHash = vnp_Params['vnp_SecureHash'];
     delete vnp_Params['vnp_SecureHash'];
     delete vnp_Params['vnp_SecureHashType'];
-    const sortedParams = Object.keys(vnp_Params)
-      .sort()
-      .reduce(
-        (acc, key) => {
-          acc[key] = (vnp_Params as any)[key];
-          return acc;
-        },
-        {} as Record<string, string>,
-      );
+    const sortedParams = this.sortObject(vnp_Params);
     const signData = QueryString.stringify(sortedParams, { encode: false });
     const hmac = crypto.createHmac('sha512', this.vnPaySetting.vnpaySecretKey);
     const signed = hmac.update(signData).digest('hex');
@@ -138,5 +134,18 @@ export class VnpayService {
     } else {
       return null;
     }
+  }
+
+  private sortObject(object: any) {
+    const sortedParams = Object.keys(object)
+      .sort()
+      .reduce(
+        (acc, key) => {
+          acc[key] = encodeURIComponent(object[key]).replace(/%20/g, '+');
+          return acc;
+        },
+        {} as Record<string, any>,
+      );
+    return sortedParams;
   }
 }
