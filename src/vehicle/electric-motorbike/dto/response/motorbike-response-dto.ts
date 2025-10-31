@@ -1,4 +1,6 @@
 import { ApiResponseProperty } from '@nestjs/swagger';
+import { ImageMotorbikeResponse } from 'src/vehicle/images/dto';
+
 export class MotorbikeResponseDto {
   @ApiResponseProperty({ example: 1 })
   id: number;
@@ -19,4 +21,10 @@ export class MotorbikeResponseDto {
 
   @ApiResponseProperty({ example: '2025' })
   version: string;
+
+  @ApiResponseProperty({ example: false })
+  isDeleted: boolean;
+
+  @ApiResponseProperty({ type: [ImageMotorbikeResponse] })
+  images: ImageMotorbikeResponse[];
 }

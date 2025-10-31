@@ -35,6 +35,14 @@ export class MotorbikeService {
     const motorbikeList = await this.prisma.electric_Motorbike.findMany({
       skip: skipData,
       take: motorbikeParams.limit,
+      include: {
+        images: {
+          select: {
+            id: true,
+            imageUrl: true,
+          },
+        },
+      },
       where: filters.length > 0 ? { AND: filters } : {},
     });
     return {
@@ -63,6 +71,14 @@ export class MotorbikeService {
     const motorbikeList = await this.prisma.electric_Motorbike.findMany({
       skip: skipData,
       take: motorbikeParams.limit,
+      include: {
+        images: {
+          select: {
+            id: true,
+            imageUrl: true,
+          },
+        },
+      },
       where: filters.length > 0 ? { AND: filters } : {},
     });
     return {

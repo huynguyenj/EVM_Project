@@ -79,7 +79,11 @@ export class MotorbikeController {
     { name: 'model', type: String, required: false, example: 'Model X' },
     { name: 'makeFrom', type: String, required: false, example: 'Viet Nam' },
   )
-  @SetMetadata('public', true)
+  @ApiResponseDocumentPagination(
+    HttpStatus.OK,
+    MotorbikeResponseDto,
+    'Get list motorbike successfully!',
+  )
   async getAllMotorbikeForAdmin(
     @Motorbike() motorbikeParams: MotorbikeRequestQuery,
   ) {
