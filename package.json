@@ -11,7 +11,7 @@
     "start": "nest start",
     "start:dev": "cross-env BUILD_MODE=dev nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "cross-env BUILD_MODE=production dist/main",
+    "start:prod": "cross-env BUILD_MODE=production node dist/main",
     "deploy": "npm install && npx prisma generate && npm run build",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
