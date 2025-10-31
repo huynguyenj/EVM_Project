@@ -126,6 +126,9 @@ export class PromotionService {
       take: promotionQueries.limit,
       where: {
         status: 'ACTIVE',
+        endAt: {
+          gte: new Date(),
+        },
         ...filters,
       },
     });
