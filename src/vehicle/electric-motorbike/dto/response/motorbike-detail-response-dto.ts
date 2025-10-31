@@ -29,6 +29,9 @@ export class MotorbikeDetailResponseDto {
   @ApiResponseProperty({ example: '2025' })
   version: string;
 
+  @ApiResponseProperty({ example: false })
+  isDeleted: boolean;
+
   @ApiResponseProperty({ type: AppearanceResponseDto })
   appearance: AppearanceResponseDto;
 
