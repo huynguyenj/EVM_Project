@@ -5,7 +5,7 @@ import {
   HttpStatus,
   Post,
   Query,
-  Redirect,
+  Res,
   SetMetadata,
 } from '@nestjs/common';
 import { VnpayService } from './vnpay.service';
@@ -17,6 +17,7 @@ import {
 } from '../dto';
 import { IpAddress } from './decorators';
 import { ApiResponseDocument } from 'src/common/decorator';
+import { type Response } from 'express';
 
 @Controller('vnpay')
 @ApiTags('Payments')
@@ -49,10 +50,9 @@ export class VnpayController {
   }
 
   @Get('check')
-  @Redirect()
   @SetMetadata('public', true)
-  async checkPayment(@Query() query: VnpParamQuery) {
+  async checkPayment(@Query() query: VnpParamQuery, @Res() res: Response) {
     const returnUrl = await this.vnPayService.createAgencyBillPayment(query);
-    return returnUrl;
+    return res.redirect(returnUrl);
   }
 }
