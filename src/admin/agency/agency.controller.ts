@@ -8,6 +8,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  SetMetadata,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/auth/decorators/roles.decorators';
@@ -28,12 +29,12 @@ import { ApiResponseDocumentPagination } from 'src/common/decorator/swagger-deco
 
 @ApiBearerAuth('access-token')
 @ApiTags('Admin - Agency Management')
-@Roles(Role.ADMIN)
 @Controller('agency')
 export class AgencyController {
   constructor(private agencyService: AgencyService) {}
 
   @Post()
+  @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Create agency' })
   @ApiResponseDocument(
     HttpStatus.CREATED,
@@ -50,6 +51,7 @@ export class AgencyController {
   }
 
   @Get('list')
+  @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Get agency list' })
   @ApiQueriesAndPagination(
     { name: 'location', example: 'china', required: false },
@@ -70,7 +72,30 @@ export class AgencyController {
     };
   }
 
+  @Get('list/customer')
+  @SetMetadata('public', true)
+  @ApiOperation({ summary: 'Get agency list for customer' })
+  @ApiQueriesAndPagination(
+    { name: 'location', example: 'china', required: false },
+    { name: 'address', example: 'Bejing', required: false },
+  )
+  @ApiResponseDocumentPagination(
+    HttpStatus.OK,
+    AgencyResponseDto,
+    'Get list agencies successfully!',
+  )
+  async getListAgencyForCustomer(@AgencyQuery() agencyQueries: AgencyQueries) {
+    const dataList = await this.agencyService.getListAgency(agencyQueries);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Get list agencies successfully',
+      data: dataList.dataList,
+      paginationInfo: dataList.paginationInfo,
+    };
+  }
+
   @Get('detail/:agencyId')
+  @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Get agency detail' })
   @ApiResponseDocument(
     HttpStatus.OK,
@@ -87,6 +112,7 @@ export class AgencyController {
   }
 
   @Patch(':agencyId')
+  @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Update agency' })
   @ApiResponseDocument(
     HttpStatus.OK,
@@ -109,6 +135,7 @@ export class AgencyController {
   }
 
   @Delete(':agencyId')
+  @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Delete agency' })
   @ApiResponseDocument(HttpStatus.OK, Object, 'Delete agency successfully!')
   async deleteAgency(@Param('agencyId', ParseIntPipe) agencyId: number) {
