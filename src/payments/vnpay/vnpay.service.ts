@@ -52,7 +52,7 @@ export class VnpayService {
       vnp_Locale: 'vn',
       vnp_CurrCode: 'VND',
       vnp_TxnRef: timeStamp,
-      vnp_OrderInfo: `${billId}&${platform}`,
+      vnp_OrderInfo: `${billId}-${platform}`,
       vnp_OrderType: 'other',
       vnp_Amount: amount * 100,
       vnp_ReturnUrl: this.vnPaySetting.vnpayReturnUrl || '',
@@ -87,7 +87,7 @@ export class VnpayService {
     if (!vnpData)
       return `${this.vnPaySetting.vnpayClientReturn + '/payment?status=invalid'}`;
     const { vnp_Amount, vnp_ResponseCode, vnp_OrderInfo } = vnpData;
-    const orderInfoListInfo = vnp_OrderInfo.split('&'); //vnp_OrderInfo = 1&web
+    const orderInfoListInfo = vnp_OrderInfo.split('-'); //vnp_OrderInfo = 1&web
     const billId = orderInfoListInfo[0];
     const platform = orderInfoListInfo[1];
     const returnClientUrl =
