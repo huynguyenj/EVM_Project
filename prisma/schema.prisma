@@ -291,11 +291,12 @@ model Agency_Bill {
   id Int @id @default(autoincrement())
   amount Float
   createAt DateTime @db.Date @default(now())
+  paidAt DateTime? @db.Date
   isCompleted Boolean @default(false)
   type AgencyBillType
   agencyOrderId Int @unique
   agencyOrder Agency_Order @relation(fields: [agencyOrderId], references: [id])
-  agencyPayment Agency_Payment?
+  // agencyPayment Agency_Payment?
   @@map("agency_bill")
 }
 
@@ -304,14 +305,14 @@ enum AgencyBillType {
   DEFERRED
 }
 
-model Agency_Payment {
-  id Int @id @default(autoincrement())
-  amount Float
-  paidAt DateTime @db.Date
-  agencyBillId Int @unique
-  agencyBill Agency_Bill @relation(fields: [agencyBillId], references: [id])
-  @@map("agency_payment")
-}
+// model Agency_Payment {
+//   id Int @id @default(autoincrement())
+//   amount Float
+//   paidAt DateTime @db.Date
+//   agencyBillId Int @unique
+//   agencyBill Agency_Bill @relation(fields: [agencyBillId], references: [id])
+//   @@map("agency_payment")
+// }
 
 /** Installment Plan*/
 model Installment_Plan {
