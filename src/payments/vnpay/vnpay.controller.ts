@@ -18,6 +18,7 @@ import {
 import { IpAddress } from './decorators';
 import { ApiResponseDocument } from 'src/common/decorator';
 import { type Response } from 'express';
+import { VnpQueryQueries } from './decorators/vnp-query-decorator';
 
 @Controller('vnpay')
 @ApiTags('Payments')
@@ -51,7 +52,10 @@ export class VnpayController {
 
   @Get('check')
   @SetMetadata('public', true)
-  async checkPayment(@Query() query: VnpParamQuery, @Res() res: Response) {
+  async checkPayment(
+    @VnpQueryQueries() query: VnpParamQuery,
+    @Res() res: Response,
+  ) {
     const returnUrl = await this.vnPayService.createAgencyBillPayment(query);
     return res.redirect(returnUrl);
   }
