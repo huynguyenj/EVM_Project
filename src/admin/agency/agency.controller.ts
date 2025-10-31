@@ -51,7 +51,7 @@ export class AgencyController {
   }
 
   @Get('list')
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.EVM_STAFF)
   @ApiOperation({ summary: 'Get agency list' })
   @ApiQueriesAndPagination(
     { name: 'location', example: 'china', required: false },
