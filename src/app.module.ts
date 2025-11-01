@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
-import { PermissionModule } from './permission/permission.module';
 import * as Joi from 'joi';
 import authConfig from './common/config/auth.config';
 import { APP_GUARD } from '@nestjs/core';
@@ -35,7 +34,6 @@ import supabaseConfig from './common/config/supabase.config';
     }),
     PrismaModule,
     AuthModule,
-    PermissionModule,
     VehicleModule,
     AdminModule,
     DealerManagerModule,
