@@ -1,7 +1,7 @@
 import {
-  BadRequestException,
   Inject,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { type ConfigType } from '@nestjs/config';
@@ -13,6 +13,7 @@ import crypto from 'crypto';
 import { VnpParam, VnpParamResponse } from '../types';
 @Injectable()
 export class VnpayService {
+  private logger: Logger;
   constructor(
     private prisma: PrismaService,
     @Inject(vnpayConfig.KEY)
@@ -85,10 +86,13 @@ export class VnpayService {
       return `${this.vnPaySetting.vnpayClientReturn + '/payment?status=invalid'}`;
     const { vnp_ResponseCode, vnp_OrderInfo } = vnpData;
     const orderInfoListInfo = vnp_OrderInfo.split('-'); //vnp_OrderInfo = 1&web
+    this.logger.warn(`VNP order info: ${vnp_OrderInfo}`);
     //Bill id
     const billId = Number(orderInfoListInfo[0]);
+    this.logger.warn(`BillId: ${billId}`);
     //Platform
     const platform = orderInfoListInfo[1];
+    this.logger.warn(`Platform: ${platform}`);
     //Return client url
     const returnClientUrl =
       platform === 'web'
@@ -102,7 +106,7 @@ export class VnpayService {
         },
       });
       if (isBillPaid && isBillPaid.isCompleted == true)
-        throw new BadRequestException('This bill already pay');
+        return `${returnClientUrl + '/payment?status=fail'}`;
 
       await this.prisma.agency_Bill.update({
         where: {
