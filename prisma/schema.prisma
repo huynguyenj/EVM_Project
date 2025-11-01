@@ -511,7 +511,7 @@ model Drive_Trial {
   driveDate DateTime @db.Date
   driveTime String @db.VarChar(10)
   status DriveStatus @default(PENDING)
-  electricMotorbikeId Int @unique
+  electricMotorbikeId Int
   electricMotorbike Electric_Motorbike @relation(fields: [electricMotorbikeId], references: [id])
   agencyId Int
   agency Agency @relation(fields: [agencyId], references: [id])
@@ -535,7 +535,7 @@ model Electric_Motorbike {
   makeFrom String @db.VarChar(100)
   version String  @db.VarChar(100)
   isDeleted Boolean @default(false)
-  driveTrial Drive_Trial?
+  driveTrial Drive_Trial[]
   configuration Configuration?
   appearance Appearance?
   safeFeature Safe_Feature?
