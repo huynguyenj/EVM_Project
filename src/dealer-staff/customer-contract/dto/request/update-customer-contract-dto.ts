@@ -8,7 +8,7 @@ import {
   IsPositive,
   IsString,
 } from 'class-validator';
-import { ContractPaidType, ContractStatus, ContractType } from '../../types';
+import { ContractPaidType, ContractStatus } from '../../types';
 
 export class UpdateCustomerContractDto {
   @ApiProperty({ example: 'Contract for motorbike with customer John' })
@@ -25,12 +25,7 @@ export class UpdateCustomerContractDto {
   @IsNumber()
   @IsPositive()
   @IsOptional()
-  totalAmount?: number;
-
-  @ApiProperty({ example: 10000 })
-  @IsNumber()
-  @IsOptional()
-  depositAmount?: number;
+  finalPrice?: number;
 
   @ApiProperty({
     example: '2025-10-12T14:30:00.000Z',
@@ -40,32 +35,25 @@ export class UpdateCustomerContractDto {
   @IsDate()
   @IsOptional()
   @Type(() => Date)
-  createDate?: Date;
+  signDate?: Date;
+
+  @ApiProperty({
+    example: '2025-10-12T14:30:00.000Z',
+    type: String,
+    format: 'date-time',
+  })
+  @IsDate()
+  @IsOptional()
+  @Type(() => Date)
+  deliveryDate?: Date;
 
   @ApiProperty({ example: ContractPaidType.FULL })
   @IsEnum(ContractPaidType)
   @IsOptional()
   contractPaidType?: ContractPaidType;
 
-  @ApiProperty({ example: ContractType.AT_STORE })
-  @IsEnum(ContractType)
-  @IsOptional()
-  contractType?: ContractType;
-
   @ApiProperty({ example: ContractStatus.PENDING })
   @IsEnum(ContractStatus)
   @IsOptional()
   status?: ContractStatus;
-
-  @ApiProperty({ example: 1 })
-  @IsNumber()
-  @IsPositive()
-  @IsOptional()
-  electricMotorbikeId?: number;
-
-  @ApiProperty({ example: 1 })
-  @IsNumber()
-  @IsPositive()
-  @IsOptional()
-  colorId?: number;
 }

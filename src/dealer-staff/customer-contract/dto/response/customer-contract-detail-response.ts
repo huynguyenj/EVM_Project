@@ -16,6 +16,15 @@ class ElectricMotorbikeCustomerContractDto extends PickType(
   ['id', 'name', 'makeFrom', 'model', 'version'] as const,
 ) {}
 
+export class DocumentCustomerContract {
+  @ApiResponseProperty({ example: 1 })
+  id: string;
+  @ApiResponseProperty({ example: 'Credential document' })
+  documentType: string;
+  @ApiResponseProperty({ example: 'http://example.com/document.png' })
+  imageUrl: string;
+}
+
 export class CustomerContractDetailResponseDto extends CustomerResponseContractDto {
   @ApiResponseProperty({ type: StaffCustomerContractDto })
   staff: StaffCustomerContractDto;
@@ -28,4 +37,7 @@ export class CustomerContractDetailResponseDto extends CustomerResponseContractD
 
   @ApiResponseProperty({ type: CustomerResponseDto })
   customer: CustomerResponseDto;
+
+  @ApiResponseProperty({ type: [DocumentCustomerContract] })
+  contractDocuments: DocumentCustomerContract[];
 }

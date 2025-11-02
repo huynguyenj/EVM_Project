@@ -1,8 +1,13 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { type ConfigType } from '@nestjs/config';
 import vnpayConfig from 'src/common/config/vnpay.config';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreatePaymentAgencyBill } from '../dto';
+import { CreatePaymentAgencyBill, CreatePaymentCustomer } from '../dto';
 import QueryString from 'qs';
 import crypto from 'crypto';
 import { VnpParam, VnpParamResponse } from '../types';
@@ -25,11 +30,43 @@ export class VnpayService {
       },
     });
     if (!data) throw new NotFoundException('This bill is not existed');
+    if (data.isCompleted)
+      throw new BadRequestException('This bill is already paid');
     const vnpUrl = this.createPaymentUrl(
       platform,
       ipAddress,
       data.amount,
       data.id,
+      this.vnPaySetting.vnpayReturnUrl,
+    );
+    return vnpUrl;
+  }
+
+  async getInstallmentInformation(
+    platform: string,
+    ipAddress: string,
+    createPaymentCustomer: CreatePaymentCustomer,
+  ) {
+    const data = await this.prisma.installment_Schedule.findUnique({
+      where: {
+        id: createPaymentCustomer.installmentScheduleId,
+      },
+    });
+    let amount = 0;
+    if (!data) throw new NotFoundException('This installment is not existed');
+    if (data.status === 'PAID')
+      throw new BadRequestException('This installment is already paid');
+    if (data.dueDate != null && data.dueDate < new Date()) {
+      amount = data.amountDue + data.penaltyAmount;
+    } else {
+      amount = data.amountDue;
+    }
+    const vnpUrl = this.createPaymentUrl(
+      platform,
+      ipAddress,
+      amount,
+      data.id,
+      this.vnPaySetting.vnpayReturnUrlCustomer,
     );
     return vnpUrl;
   }
@@ -39,6 +76,7 @@ export class VnpayService {
     ipAddress: string,
     amount: number,
     billId: number,
+    returnUrl?: string,
   ) {
     const createDate = new Date()
       .toISOString()
@@ -55,7 +93,7 @@ export class VnpayService {
       vnp_OrderInfo: `${billId}-${platform}`,
       vnp_OrderType: 'other',
       vnp_Amount: amount * 100,
-      vnp_ReturnUrl: this.vnPaySetting.vnpayReturnUrl || '',
+      vnp_ReturnUrl: returnUrl || '',
       vnp_IpAddr: ipAddress,
       vnp_CreateDate: createDate,
     };
@@ -91,20 +129,45 @@ export class VnpayService {
         : this.vnPaySetting.vnpayClientMobileReturn;
 
     if (vnp_ResponseCode === '00') {
-      const isBillPaid = await this.prisma.agency_Bill.findUnique({
-        where: {
-          id: billId,
-        },
-      });
-      if (isBillPaid && isBillPaid.isCompleted == true)
-        return `${returnClientUrl + '/payment?status=fail'}`;
-
       await this.prisma.agency_Bill.update({
         where: {
           id: billId,
         },
         data: {
           isCompleted: true,
+        },
+      });
+      return `${returnClientUrl + '/payment?status=success'}`;
+    } else {
+      return `${returnClientUrl + '/payment?status=fail'}`;
+    }
+  }
+
+  async updateInstallmentPayment(vnp_Params: VnpParamResponse) {
+    const vnpData = this.checkPaymentReturn(vnp_Params);
+    if (!vnpData)
+      return `${this.vnPaySetting.vnpayClientReturn + '/payment?status=invalid'}`;
+    const { vnp_ResponseCode, vnp_OrderInfo, vnp_Amount } = vnpData;
+    const orderInfoListInfo = vnp_OrderInfo.split('-'); //vnp_OrderInfo = 1&web
+    //Installment id
+    const installmentScheduleId = Number(orderInfoListInfo[0]);
+    //Platform
+    const platform = orderInfoListInfo[1];
+    //Return client url
+    const returnClientUrl =
+      platform === 'web'
+        ? this.vnPaySetting.vnpayClientReturn
+        : this.vnPaySetting.vnpayClientMobileReturn;
+
+    if (vnp_ResponseCode === '00') {
+      await this.prisma.installment_Schedule.update({
+        where: {
+          id: installmentScheduleId,
+        },
+        data: {
+          status: 'PAID',
+          amountPaid: vnp_Amount / 100,
+          paidDate: new Date(),
         },
       });
       return `${returnClientUrl + '/payment?status=success'}`;

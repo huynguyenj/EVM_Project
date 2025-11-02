@@ -3,12 +3,15 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { SupabaseFileService } from 'src/supabase/file/supabase.file.service';
 import { ColorService } from '../color/color.service';
 import { MotorbikeService } from '../electric-motorbike/motorbike.service';
+import { CreateCustomerContractDocumentsDto } from './dto';
 
 @Injectable()
 export class ImagesService {
   constructor(
     @Inject('COMMON_DIR') private commonDirPath: string,
     @Inject('COLOR_DIR') private colorDirPath: string,
+    @Inject('CUSTOMER_CONTRACT_DOCUMENT_DIR')
+    private contractDocumentDirPath: string,
     private supabaseFileService: SupabaseFileService,
     private prisma: PrismaService,
     private colorService: ColorService,
@@ -116,6 +119,50 @@ export class ImagesService {
   async deleteMotorbikeImage(imageId: number, imageUrl: string) {
     await this.supabaseFileService.deleteFile(imageUrl);
     return await this.prisma.motorbike_Image.delete({
+      where: {
+        id: imageId,
+      },
+    });
+  }
+
+  async uploadContractFile(
+    files: Array<Express.Multer.File>,
+    contractId: number,
+    createContractDocument: CreateCustomerContractDocumentsDto,
+  ) {
+    const contract = await this.prisma.customer_Contract.findUnique({
+      where: {
+        id: contractId,
+      },
+    });
+    const imageUrlList = await Promise.all(
+      files.map((file) => {
+        const fileExt = file.originalname;
+        const path = `${this.contractDocumentDirPath}/${contract?.id}/${createContractDocument.documentType}/${fileExt}`;
+        return this.supabaseFileService.uploadFile(file, path);
+      }),
+    );
+    await Promise.all(
+      imageUrlList.map((imageUrl) =>
+        this.prisma.contract_Document.create({
+          data: {
+            documentType: createContractDocument.documentType,
+            imageUrl: imageUrl,
+            customerContractId: contractId,
+          },
+        }),
+      ),
+    );
+    return imageUrlList.map((image) => {
+      return {
+        imageUrl: image,
+      };
+    });
+  }
+
+  async deleteDocumentContract(imageId: number, imageUrl: string) {
+    await this.supabaseFileService.deleteFile(imageUrl);
+    return await this.prisma.contract_Document.delete({
       where: {
         id: imageId,
       },

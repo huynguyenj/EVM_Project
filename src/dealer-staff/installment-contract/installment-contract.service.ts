@@ -33,13 +33,13 @@ export class InstallmentContractService {
         createInstallmentContractDto.installmentPlanId,
       );
     const prePaidTotal = this.calculatePrePaidTotal(
-      customerContract.finalAmount,
+      customerContract.finalPrice,
       installmentPlan.prePaidPercent,
       installmentPlan.processFee,
     );
 
     const totalPaidDebt = this.calculateTotalDebt(
-      customerContract.finalAmount,
+      customerContract.finalPrice,
       prePaidTotal,
     );
     const createdData = await this.prisma.installment_Contract.create({
@@ -57,7 +57,7 @@ export class InstallmentContractService {
     return createdData;
   }
 
-  calculatePrePaidTotal(
+  private calculatePrePaidTotal(
     finalAmount: number,
     prePaidPercent: number,
     processFee: number,
@@ -93,7 +93,7 @@ export class InstallmentContractService {
       contractId: interestContract.id,
     });
     const isInterestPaymentsExisted =
-      await this.prisma.installment_Payment.findMany({
+      await this.prisma.installment_Schedule.findMany({
         where: {
           installmentContractId: installmentContractId,
         },
@@ -102,7 +102,7 @@ export class InstallmentContractService {
       throw new BadRequestException(
         'This installment contract already have payment process!',
       );
-    const createdData = await this.prisma.installment_Payment.createMany({
+    const createdData = await this.prisma.installment_Schedule.createMany({
       data: interestPaymentData,
     });
     return createdData;
@@ -138,7 +138,7 @@ export class InstallmentContractService {
   }
 
   async getInstallmentPaymentDetail(installmentPaymentId: number) {
-    const data = await this.prisma.installment_Payment.findUnique({
+    const data = await this.prisma.installment_Schedule.findUnique({
       where: {
         id: installmentPaymentId,
       },
@@ -164,7 +164,7 @@ export class InstallmentContractService {
     installmentPaymentId: number,
     updateInstallmentPaymentDto: UpdateInstallmentPaymentDto,
   ) {
-    const updatedData = await this.prisma.installment_Payment.update({
+    const updatedData = await this.prisma.installment_Schedule.update({
       where: {
         id: installmentPaymentId,
       },
@@ -173,7 +173,7 @@ export class InstallmentContractService {
     return updatedData;
   }
   async deleteInstallmentContract(installmentContractId: number) {
-    await this.prisma.installment_Payment.deleteMany({
+    await this.prisma.installment_Schedule.deleteMany({
       where: {
         installmentContractId: installmentContractId,
       },
@@ -187,7 +187,7 @@ export class InstallmentContractService {
   }
 
   async deleteInstallmentPayment(installmentPaymentId: number) {
-    await this.prisma.installment_Payment.delete({
+    await this.prisma.installment_Schedule.delete({
       where: {
         id: installmentPaymentId,
       },

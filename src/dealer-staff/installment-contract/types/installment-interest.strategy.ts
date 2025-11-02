@@ -1,7 +1,7 @@
 type InstallmentPaymentType = {
+  period: Date;
   amountDue: number;
   amountPaid: number;
-  dueDate: Date;
   installmentContractId: number;
   paidDate: Date | null;
 };

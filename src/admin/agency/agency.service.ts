@@ -1,6 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AgencyQueries, CreateAgencyDto, UpdateAgencyDto } from './dto';
+import { Role } from 'src/auth/types/role.enum';
 
 @Injectable()
 export class AgencyService {
@@ -51,6 +56,23 @@ export class AgencyService {
         total: await this.getTotalAgency(),
       },
     };
+  }
+
+  async checkDealerManagerInAgency(agencyId: number) {
+    const staffList = await this.prisma.$queryRaw<{ roleName: string }[]>`
+      select r."roleName"
+      from staffs s
+      left join role_staff on role_staff."staffId" = s.id
+      left join role r on r.id = role_staff."roleId"
+      where "agencyId" = ${agencyId};
+    `;
+    const roleNames = staffList.map((r) => r.roleName);
+    const isDealerManagerExist = roleNames.includes(Role.DEALER_MANAGER);
+    if (isDealerManagerExist)
+      throw new BadRequestException(
+        'This agency has a dealer manager, cannot assign staff to this agency',
+      );
+    return;
   }
 
   async getAgencyDetail(agencyId: number) {

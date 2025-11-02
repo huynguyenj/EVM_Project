@@ -33,6 +33,7 @@ model Staff {
   feedback Feedback[]
   role Role_Staff[]
   customerContract Customer_Contract[]
+  quotation Quotation[]
   token Token? 
   @@map("staffs")
 }
@@ -100,6 +101,7 @@ model Agency {
   agencyStock Agency_Stock[]
   agencyStockPromotion Stock_Promotion[]
   installmentPlan Installment_Plan[]
+  quotation Quotation[]
   @@map("agencies")
 }
 
@@ -318,6 +320,7 @@ enum AgencyBillType {
 model Installment_Plan {
   id Int @id @default(autoincrement())
   name String @db.VarChar(200)
+  tensor String @db.VarChar(100)
   interestRate Int
   interestRateTotalMonth Int
   totalPaidMonth Int
@@ -378,6 +381,7 @@ model Customer {
   agency Agency @relation(fields: [agencyId], references: [id])
   feedback Feedback[]
   customerContract Customer_Contract[]
+  quotation Quotation[]
   voucher Voucher[]
   @@unique([credentialId, email, agencyId])
   @@map("customers")
@@ -386,15 +390,14 @@ model Customer {
 /**Customer contract table*/
 model Customer_Contract {
   id Int @id @default(autoincrement())
+  contractCode String @db.Text
   title String @db.VarChar(100)
   content String @db.Text
-  totalAmount Float
-  depositAmount Float
-  finalAmount Float
-  createDate DateTime @db.Date
+  signDate DateTime @db.Date
+  deliveryDate DateTime? @db.Date
   contractPaidType CustomerContractPaidType
-  contractType CustomerContractType
   status CustomerContractStatus
+  finalPrice Float
   customerId Int
   customer Customer @relation(fields: [customerId], references: [id])
   staffId Int
@@ -406,6 +409,9 @@ model Customer_Contract {
   colorId Int
   color Color @relation(fields: [colorId], references: [id])
   installmentContract Installment_Contract?
+  quotationId Int @unique
+  quotation Quotation @relation(fields: [quotationId], references: [id])
+  contractDocuments Contract_Document[]
   @@map("customer_contracts")
 }
 
@@ -414,11 +420,7 @@ enum CustomerContractPaidType {
   DEBT
 }
 
-enum CustomerContractType {
-  PRE_ORDER
-  AT_STORE
-  ORDER
-}
+
 
 enum CustomerContractStatus {
   PENDING
@@ -428,6 +430,76 @@ enum CustomerContractStatus {
   COMPLETED
   CANCELED
 }
+
+model Contract_Document {
+  id Int @id @default(autoincrement())
+  documentType String @db.VarChar(200)
+  imageUrl String
+  customerContractId Int
+  customerContract Customer_Contract @relation(fields: [customerContractId], references: [id])
+  @@map("contract_documents")
+}
+
+
+/*Quotation*/
+model Quotation {
+  id Int @id @default(autoincrement())
+  quoteCode String @db.Text
+  createDate DateTime @db.Date @default(now())
+  type QuotationType
+  status QuotationStatus
+  basePrice Float
+  promotionPrice Float?
+  finalPrice Float
+  validUntil DateTime @db.Date
+  customerId Int
+  customer Customer @relation(fields: [customerId], references: [id])
+  dealerStaffId Int
+  staff Staff @relation(fields: [dealerStaffId], references: [id])
+  motorbikeId Int
+  motorbike Electric_Motorbike @relation(fields: [motorbikeId], references: [id])
+  colorId Int
+  color Color @relation(fields: [colorId], references: [id])
+  deposit Deposit?
+  customerContract Customer_Contract?
+  agencyId Int
+  agency Agency @relation(fields: [agencyId], references: [id])
+  @@map("quotations")
+}
+
+enum QuotationType {
+   AT_STORE
+   ORDER
+   PRE_ORDER
+}
+
+enum QuotationStatus {
+  DRAFT
+  ACCEPTED
+  REJECTED
+  EXPIRED
+  REVERSED
+}
+
+/**Deposit */
+model Deposit {
+  id Int @id @default(autoincrement())
+  depositPercent Int
+  depositAmount Float
+  holdDays DateTime @db.Date
+  status DepositStatus @default(PENDING)
+  quotationId Int @unique
+  quotation Quotation @relation(fields: [quotationId], references: [id])
+  @@map("deposits")
+}
+
+enum DepositStatus {
+  PENDING
+  HOLDING
+  APPLIED
+  EXPIRED
+}
+
 /**Installment Contract*/
 model Installment_Contract {
   id Int @id @default(autoincrement())
@@ -441,7 +513,7 @@ model Installment_Contract {
   customerContract Customer_Contract @relation(fields: [customerContractId], references: [id])
   installmentPlanId Int @unique
   installmentPlan Installment_Plan @relation(fields: [installmentPlanId], references: [id])
-  installmentPayments Installment_Payment[]
+  installmentPayments Installment_Schedule[]
   @@map("installment_contracts")
 }
 
@@ -457,9 +529,10 @@ enum PenaltyType {
 }
 
 
-model Installment_Payment {
+model Installment_Schedule {
   id Int @id @default(autoincrement())
-  dueDate DateTime @db.Date
+  period DateTime @db.Date
+  dueDate DateTime? @db.Date
   paidDate DateTime? @db.Date
   amountDue Float
   amountPaid Float
@@ -467,7 +540,7 @@ model Installment_Payment {
   status InstallmentPaymentStatus @default(PENDING)
   installmentContractId Int
   installmentContract Installment_Contract @relation(fields: [installmentContractId], references: [id])
-  @@map("installment_payments")
+  @@map("installment_schedule")
 }
 
 enum InstallmentPaymentStatus {
@@ -549,6 +622,7 @@ model Electric_Motorbike {
   discountPolicy Discount_Policy[]
   promotion Promotion[]
   agencyStock Agency_Stock[]
+  quotation Quotation[]
   @@map("electric_motorbikes")
 }
 
@@ -579,6 +653,7 @@ model Color {
   agencyOrder Agency_Order[]
   agencyStock Agency_Stock[]
   customerContract Customer_Contract[]
+  quotation Quotation[]
   @@map("colors")
 }
 

@@ -16,6 +16,11 @@ export class UpdateInstallmentPlanDto {
   @IsOptional()
   name?: string;
 
+  @ApiProperty({ example: 'Techcombank' })
+  @IsString()
+  @IsOptional()
+  tensor?: string;
+
   @ApiProperty({ example: 8 })
   @IsNumber()
   @IsOptional()

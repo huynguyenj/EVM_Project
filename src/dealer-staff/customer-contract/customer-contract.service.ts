@@ -13,6 +13,7 @@ import { ContractStatus, ContractType } from './types';
 import { MotorbikeService } from 'src/vehicle/electric-motorbike/motorbike.service';
 import { CustomerService } from '../customer/customer.service';
 import { ColorService } from 'src/vehicle/color/color.service';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class CustomerContractService {
@@ -58,12 +59,11 @@ export class CustomerContractService {
       createCustomerContract.electricMotorbikeId,
       createCustomerContract.colorId,
     );
-    const finalAmount =
-      createCustomerContract.totalAmount - createCustomerContract.depositAmount;
+    const contractCode = uuidv4();
     const createdData = await this.prisma.customer_Contract.create({
       data: {
         ...createCustomerContract,
-        finalAmount: finalAmount < 0 ? 0 : finalAmount,
+        contractCode: contractCode,
       },
     });
     return createdData;
@@ -150,6 +150,7 @@ export class CustomerContractService {
             makeFrom: true,
           },
         },
+        contractDocuments: true,
         color: true,
         customer: true,
       },
@@ -164,7 +165,7 @@ export class CustomerContractService {
         id: customerContractId,
       },
       select: {
-        finalAmount: true,
+        finalPrice: true,
       },
     });
     if (!data)
@@ -186,9 +187,7 @@ export class CustomerContractService {
       where: {
         id: contractId,
       },
-      data: {
-        finalAmount: updatedData.totalAmount - updatedData.depositAmount,
-      },
+      data: updateCustomerContractDto,
     });
     return updatedData;
   }

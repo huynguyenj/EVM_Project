@@ -11,8 +11,9 @@ import {
 import { VnpayService } from './vnpay.service';
 import { ApiQuery, ApiTags } from '@nestjs/swagger';
 import {
-  AgencyBillPaymentUrl,
   CreatePaymentAgencyBill,
+  CreatePaymentCustomer,
+  PaymentUrl,
   VnpParamQuery,
 } from '../dto';
 import { IpAddress } from './decorators';
@@ -29,7 +30,7 @@ export class VnpayController {
   @SetMetadata('public', true)
   @ApiResponseDocument(
     HttpStatus.CREATED,
-    AgencyBillPaymentUrl,
+    PaymentUrl,
     'Get payment url success',
   )
   @ApiQuery({ name: 'platform', required: true, example: 'web' })
@@ -50,6 +51,31 @@ export class VnpayController {
     };
   }
 
+  @Post('customer-installment-payment')
+  @SetMetadata('public', true)
+  @ApiResponseDocument(
+    HttpStatus.CREATED,
+    PaymentUrl,
+    'Get payment url success',
+  )
+  @ApiQuery({ name: 'platform', required: true, example: 'web' })
+  async createCustomerInstallmentPaymentUrl(
+    @Query('platform') platform: string,
+    @IpAddress() ipAddress: string,
+    @Body() createCustomerInstallmentPayment: CreatePaymentCustomer,
+  ) {
+    const paymentData = await this.vnPayService.getInstallmentInformation(
+      platform,
+      ipAddress,
+      createCustomerInstallmentPayment,
+    );
+    return {
+      statusCode: HttpStatus.CREATED,
+      message: 'Get payment url success',
+      data: paymentData,
+    };
+  }
+
   @Get('check')
   @SetMetadata('public', true)
   async checkPayment(
@@ -57,6 +83,16 @@ export class VnpayController {
     @Res() res: Response,
   ) {
     const returnUrl = await this.vnPayService.createAgencyBillPayment(query);
+    return res.redirect(returnUrl);
+  }
+
+  @Get('check-customer')
+  @SetMetadata('public', true)
+  async checkCustomerPayment(
+    @VnpQueryQueries() query: VnpParamQuery,
+    @Res() res: Response,
+  ) {
+    const returnUrl = await this.vnPayService.updateInstallmentPayment(query);
     return res.redirect(returnUrl);
   }
 }

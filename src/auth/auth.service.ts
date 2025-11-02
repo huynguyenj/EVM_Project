@@ -23,7 +23,10 @@ export class AuthService {
 
   async signIn(signInDto: SignIn) {
     const staffInfo = await this.validateEmail(signInDto.email);
-    if (!staffInfo) throw new NotFoundException('This account is not existed!');
+    if (staffInfo.isDeleted === true)
+      throw new UnauthorizedException('This account is deleted!');
+    if (staffInfo.isActive === false)
+      throw new UnauthorizedException('This account is deactivated!');
     const isPasswordMatch = await bcrypt.compare(
       signInDto.password,
       staffInfo.password,
@@ -152,6 +155,7 @@ export class AuthService {
         },
       },
     });
+    if (!staffInfo) throw new NotFoundException('This account is not existed!');
     return staffInfo;
   }
 

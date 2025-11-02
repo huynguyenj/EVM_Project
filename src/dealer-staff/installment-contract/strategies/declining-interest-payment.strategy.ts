@@ -22,7 +22,7 @@ export class DecliningInterestStrategy implements InstallmentInterestStrategy {
       return {
         amountDue: total,
         amountPaid: 0,
-        dueDate: this.addMonths(startDate, i + 1),
+        period: this.addMonths(startDate, i + 1),
         installmentContractId: contractId,
         paidDate: null,
       };
@@ -32,6 +32,7 @@ export class DecliningInterestStrategy implements InstallmentInterestStrategy {
   private addMonths(date: Date, months: number) {
     const newDate = new Date(date);
     newDate.setMonth(newDate.getMonth() + months);
+    newDate.setDate(1);
     return newDate;
   }
 }

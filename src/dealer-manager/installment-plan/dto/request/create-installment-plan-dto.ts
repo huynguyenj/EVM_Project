@@ -16,6 +16,11 @@ export class CreateInstallmentPlanDto {
   @IsNotEmpty()
   name: string;
 
+  @ApiProperty({ example: 'Techcombank' })
+  @IsString()
+  @IsNotEmpty()
+  tensor: string;
+
   @ApiProperty({ example: 8 })
   @IsNumber()
   @IsNotEmpty()

@@ -16,7 +16,12 @@ import { DeleteImageDto } from './dto/request/delete-image-dto';
 import { Roles } from 'src/auth/decorators/roles.decorators';
 import { Role } from 'src/auth/types/role.enum';
 import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
-import { ImageResponse, MotorbikeColorFileDto, MotorbikeImages } from './dto';
+import {
+  CreateCustomerContractDocumentsDto,
+  ImageResponse,
+  MotorbikeColorFileDto,
+  MotorbikeImages,
+} from './dto';
 import {
   ApiFileUpload,
   ApiResponseDocument,
@@ -108,6 +113,46 @@ export class ImagesController {
     return {
       statusCode: HttpStatus.OK,
       message: 'Delete motorbike image success',
+      data: {},
+    };
+  }
+
+  @Post('customer-contract-document/:contractId')
+  @ApiOperation({ summary: 'Upload multiple files document contract image' })
+  @ApiResponseDocumentArray(
+    HttpStatus.CREATED,
+    ImageResponse,
+    'Upload files success!',
+  )
+  @ApiFileUpload(CreateCustomerContractDocumentsDto)
+  @UseInterceptors(FilesInterceptor('documentImages'))
+  async uploadContractDocumentImages(
+    @Param('contractId', ParseIntPipe) contractId: number,
+    @UploadedFiles() files: Array<Express.Multer.File>,
+    @Body() createContractDocument: CreateCustomerContractDocumentsDto,
+  ) {
+    const imageUrlLists = await this.imageServices.uploadContractFile(
+      files,
+      contractId,
+      createContractDocument,
+    );
+    return {
+      statusCode: HttpStatus.CREATED,
+      data: imageUrlLists,
+      message: 'Upload files success',
+    };
+  }
+
+  @Delete('document-contract/:imageId')
+  @ApiOperation({ summary: 'Delete file image document contract' })
+  async deleteDocumentContractImage(
+    @Param('imageId', ParseIntPipe) imageId: number,
+    @Body() imageDto: DeleteImageDto,
+  ) {
+    await this.imageServices.deleteDocumentContract(imageId, imageDto.imageUrl);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Delete document image success',
       data: {},
     };
   }

@@ -6,11 +6,13 @@ import { CreateAccountDto } from './dto';
 import * as bcrypt from 'bcryptjs';
 import { Prisma } from 'generated/prisma';
 import { StaffQuery } from './types';
+import { AgencyService } from '../agency/agency.service';
 
 @Injectable()
 export class StaffService {
   constructor(
     private prisma: PrismaService,
+    private agencyService: AgencyService,
     @Inject(authConfig.KEY)
     private authSettings: ConfigType<typeof authConfig>,
   ) {}
@@ -156,6 +158,7 @@ export class StaffService {
   }
 
   async updateAgencyForStaff(staffId: number, agencyId: number) {
+    await this.agencyService.checkDealerManagerInAgency(agencyId);
     const staffInfo = await this.prisma.staff.findUnique({
       where: {
         id: staffId,

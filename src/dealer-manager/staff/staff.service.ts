@@ -85,6 +85,7 @@ export class StaffService {
       take: staffQuery.limit,
       where: {
         agencyId: agencyId,
+        isDeleted: false,
       },
       include: {
         role: {
@@ -119,6 +120,7 @@ export class StaffService {
     return await this.prisma.staff.count({
       where: {
         agencyId: agencyId,
+        isDeleted: false,
       },
     });
   }
@@ -166,7 +168,7 @@ export class StaffService {
           },
         },
       },
-      data: { isDeleted: true },
+      data: { isDeleted: true, isActive: false },
     });
   }
 }
