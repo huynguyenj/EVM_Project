@@ -7,4 +7,5 @@ export default registerAs('vnpay', () => ({
   vnpayReturnUrl: process.env.VNP_RETURN_URL,
   vnpayClientReturn: process.env.WEB_CLIENT_LOCAL_HOST,
   vnpayClientMobileReturn: process.env.MOBILE_CILENT_LOCAL_HOST,
+  vnpayReturnUrlCustomer: process.env.VNP_RETURN_URL_CUSTOMER,
 }));
