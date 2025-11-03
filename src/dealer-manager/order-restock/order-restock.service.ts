@@ -256,7 +256,7 @@ export class OrderRestockService {
         id: orderId,
       },
       data: {
-        status: OrderStatus.ACCEPTED,
+        status: OrderStatus.PENDING,
       },
     });
     return updatedData;

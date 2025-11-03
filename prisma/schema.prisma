@@ -205,7 +205,6 @@ model Agency_Order {
 
 enum AgencyOrderStatus {
   DRAFT
-  ACCEPTED
   PENDING
   APPROVED
   DELIVERED
