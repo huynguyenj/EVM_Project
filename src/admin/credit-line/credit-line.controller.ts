@@ -27,8 +27,8 @@ import { ApiResponseDocumentPagination } from 'src/common/decorator/swagger-deco
 import { CreditLineQuery } from './decorators';
 
 @Controller('credit-line')
-@ApiTags('Admin - Credit line agency management')
-@Roles(Role.ADMIN)
+@ApiTags('Admin & EVM staff - Credit line agency management')
+@Roles(Role.ADMIN, Role.EVM_STAFF)
 @ApiBearerAuth('access-token')
 export class CreditLineController {
   constructor(private creditService: CreditLineService) {}
