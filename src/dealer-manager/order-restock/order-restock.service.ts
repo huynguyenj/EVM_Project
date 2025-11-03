@@ -39,9 +39,16 @@ export class OrderRestockService {
 
     //Insert order item to order_items table
     for (const orderItem of createOrderDto.orderItems) {
+      const motorbikeData = await this.motorbikeService.getMotorbikePrice(
+        orderItem.motorbikeId,
+      );
+      const motorbikeColor = await this.motorbikeService.getMotorbikeColor(
+        orderItem.motorbikeId,
+        orderItem.colorId,
+      );
       let discountTotal: number = 0;
       let promotionTotal: number = 0;
-      let wholesalePrice: number = 0;
+      let wholesalePrice: number = motorbikeData.price;
       const currentDate = new Date();
 
       //Price policy
@@ -92,21 +99,16 @@ export class OrderRestockService {
       }
       // Calculate final price
       const finalPrice =
-        wholesalePrice - (discountTotal + promotionTotal) * orderItem.quantity;
-      const motorbikeData = await this.motorbikeService.getMotorbikePrice(
-        orderItem.motorbikeId,
-      );
-      const motorbikeColor = await this.motorbikeService.getMotorbikeColor(
-        orderItem.motorbikeId,
-        orderItem.colorId,
-      );
+        (wholesalePrice - (discountTotal + promotionTotal)) *
+        orderItem.quantity;
+
       await this.prisma.order_Items.create({
         data: {
           basePrice: motorbikeData.price,
           quantity: orderItem.quantity,
           discountTotal: discountTotal,
           promotionTotal: promotionTotal,
-          finalPrice: finalPrice,
+          finalPrice: finalPrice < 0 ? 0 : finalPrice,
           wholesalePrice: wholesalePrice,
           electricMotorbikeId: orderItem.motorbikeId,
           colorId: motorbikeColor.colorId,
@@ -156,7 +158,7 @@ export class OrderRestockService {
   ) {
     switch (type) {
       case 'FIXED':
-        return wholesalePrice - valueType;
+        return valueType;
       case 'PERCENT':
         return wholesalePrice * (valueType / 100);
       default:
