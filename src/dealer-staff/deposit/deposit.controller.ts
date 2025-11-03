@@ -11,7 +11,7 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { DepositService } from './deposit.service';
 import { ApiResponseDocument } from 'src/common/decorator';
-import { CreateDepositDto, DepositResponseDto } from './dto';
+import { CreateDepositDto, DepositResponseDto, UpdateDepositDto } from './dto';
 
 @Controller('deposit')
 @ApiTags('Dealer Staff - Deposit')
@@ -56,7 +56,7 @@ export class DepositController {
   @ApiOperation({ summary: 'Update Deposit Status' })
   async updateDepositStatus(
     @Param('depositId') depositId: number,
-    @Body() updateDepositDto: CreateDepositDto,
+    @Body() updateDepositDto: UpdateDepositDto,
   ) {
     const updatedDeposit = await this.depositService.updateDeposit(
       depositId,
