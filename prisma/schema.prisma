@@ -121,6 +121,7 @@ model Credit_Line {
   isBlocked Boolean @default(false)
   agencyId Int @unique
   agency Agency @relation(fields: [agencyId], references: [id]) 
+  @@map("credit_lines")
 }
 
 /**Revenue table*/
@@ -197,7 +198,6 @@ model Agency_Order {
   creditChecked Boolean
   agencyId Int
   agency Agency @relation(fields: [agencyId], references: [id])
-  agencyBill Agency_Bill?
   orderItems Order_Items[]
   apBatches Ap_Batches[]
   @@map("agency_orders")
@@ -350,24 +350,6 @@ enum PromotionStatus {
   INACTIVE
 }
 
-/**Agency debt table*/
-model Agency_Bill {
-  id Int @id @default(autoincrement())
-  amount Float
-  createAt DateTime @db.Date @default(now())
-  paidAt DateTime? @db.Date
-  isCompleted Boolean @default(false)
-  type AgencyBillType
-  agencyOrderId Int @unique
-  agencyOrder Agency_Order @relation(fields: [agencyOrderId], references: [id])
-  // agencyPayment Agency_Payment?
-  @@map("agency_bill")
-}
-
-enum AgencyBillType {
-  FULL
-  DEFERRED
-}
 
 // model Agency_Payment {
 //   id Int @id @default(autoincrement())
