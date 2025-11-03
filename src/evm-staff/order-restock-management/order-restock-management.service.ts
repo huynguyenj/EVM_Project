@@ -39,7 +39,25 @@ export class OrderRestockManagementService {
         id: orderId,
       },
       include: {
-        agencyBill: true,
+        orderItems: true,
+      },
+    });
+    if (!data) throw new NotFoundException('Not found order!');
+    return;
+  }
+
+  async getOrderItemDetail(orderItemId: number) {
+    const data = await this.prisma.order_Items.findUnique({
+      where: {
+        id: orderItemId,
+      },
+      include: {
+        color: {
+          select: {
+            id: true,
+            colorType: true,
+          },
+        },
         electricMotorbike: {
           select: {
             id: true,

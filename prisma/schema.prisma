@@ -102,12 +102,25 @@ model Agency {
   agencyStockPromotion Stock_Promotion[]
   installmentPlan Installment_Plan[]
   quotation Quotation[]
+  apBatches Ap_Batches[]
+  creditLine Credit_Line?
   @@map("agencies")
 }
 
 enum AgencyStatus {
   Active
   Inactive
+}
+
+/** Credit line */
+model Credit_Line {
+  id Int @id @default(autoincrement())
+  creditLimit Float
+  warningThreshold Int
+  overDueThreshHoldDays Int
+  isBlocked Boolean @default(false)
+  agencyId Int @unique
+  agency Agency @relation(fields: [agencyId], references: [id]) 
 }
 
 /**Revenue table*/
@@ -176,40 +189,89 @@ model Agency_Stock_Promotion {
 /**Contract table*/
 model Agency_Order {
   id Int @id @default(autoincrement())
-  quantity Int
-  status AgencyOrderStatus @default(DRAFT)
+  subtotal Float
+  itemQuantity Int
   orderAt DateTime @db.Date @default(now())
+  orderType AgencyOrderType
+  status AgencyOrderStatus @default(DRAFT)
+  creditChecked Boolean
+  agencyId Int
+  agency Agency @relation(fields: [agencyId], references: [id])
+  agencyBill Agency_Bill?
+  orderItems Order_Items[]
+  apBatches Ap_Batches[]
+  @@map("agency_orders")
+}
+
+enum AgencyOrderStatus {
+  DRAFT
+  ACCEPTED
+  PENDING
+  APPROVED
+  DELIVERED
+  CANCELED
+}
+
+enum AgencyOrderType {
+  FULL
+  DEFERRED
+}
+
+model Order_Items {
+  id Int @id @default(autoincrement())
+  quantity Int
   basePrice Float
   wholesalePrice Float
   discountTotal Float
   promotionTotal Float
   finalPrice Float
-  subtotal Float
-  agencyId Int
-  agency Agency @relation(fields: [agencyId], references: [id])
-  warehouseId Int
-  warehouse Warehouse @relation(fields: [warehouseId], references: [id])
+  orderId Int
+  order Agency_Order @relation(fields: [orderId], references: [id])
   electricMotorbikeId Int
   electricMotorbike Electric_Motorbike @relation(fields: [electricMotorbikeId], references: [id])
-  pricePolicyId Int
-  pricePolicy Price_Policy @relation(fields: [pricePolicyId], references: [id])
+  pricePolicyId Int?
+  pricePolicy Price_Policy? @relation(fields: [pricePolicyId], references: [id])
   discountId Int?
   discountPolicy Discount_Policy? @relation(fields: [discountId], references: [id])
   promotionId Int?
   promotion Promotion? @relation(fields: [promotionId], references: [id])
   colorId Int
   color Color @relation(fields: [colorId], references: [id])
-  agencyBill Agency_Bill?
-  @@map("agency_orders")
+  warehouseId Int
+  warehouse Warehouse @relation(fields: [warehouseId], references: [id])
+  @@map("order_items")
 }
 
-enum AgencyOrderStatus {
-  DRAFT
-  PENDING
-  APPROVED
-  DELIVERED
-  PAID
-  CANCELED
+/**Ap batches*/
+model Ap_Batches {
+  id Int @id @default(autoincrement())
+  invoiceNumber Float
+  amount Float
+  dueDate DateTime @db.Date
+  status Ap_BatchesStatus @default(OPEN)
+  createAt DateTime @db.Date @default(now())
+  agencyId Int
+  agency Agency @relation(fields: [agencyId], references: [id])
+  agencyOrderId Int
+  agencyOrder Agency_Order @relation(fields: [agencyOrderId], references: [id])
+  apPayment Ap_Payments[]
+  @@map("ap_batches")
+}
+
+enum Ap_BatchesStatus {
+  OPEN
+  PARTIAL
+  CLOSED
+  OVERDUE
+}
+
+model Ap_Payments {
+  id Int @id @default(autoincrement())
+  paidDate DateTime @db.Date
+  amount Float
+  apBatchesId Int
+  apBatches Ap_Batches @relation(fields: [apBatchesId], references: [id])
+  @@map("ap_payments")
 }
 
 /**Price policy*/
@@ -223,7 +285,7 @@ model Price_Policy {
   agency Agency? @relation(fields: [agencyId], references: [id])
   motorbikeId Int
   motorbike Electric_Motorbike @relation(fields: [motorbikeId], references: [id])
-  agencyOrder Agency_Order[]
+  orderItems Order_Items[]
   @@unique([agencyId, motorbikeId])
   @@map("price_policy")
 }
@@ -242,7 +304,7 @@ model Discount_Policy {
   agency Agency? @relation(fields: [agencyId], references: [id])
   motorbikeId Int
   motorbike Electric_Motorbike @relation(fields: [motorbikeId], references: [id])
-  agencyOrder Agency_Order[]
+  orderItems Order_Items[]
   @@unique([agencyId, motorbikeId, type])
   @@map("discount_policy")
 }
@@ -274,7 +336,7 @@ model Promotion {
   status DiscountStatus
   motorbikeId Int?
   motorbike Electric_Motorbike? @relation(fields: [motorbikeId], references: [id])
-  agencyOrder Agency_Order[]
+  agencyOrder Order_Items[]
   @@map("promotions")
 }
 
@@ -354,7 +416,7 @@ model Warehouse {
   name String @db.VarChar(150)
   isActive Boolean @default(true)
   motorbikes Inventory[]
-  agencyOrder Agency_Order[]
+  orderItems Order_Items[]
   @@map("warehouses")
 }
 model Inventory { 
@@ -617,7 +679,7 @@ model Electric_Motorbike {
   images Motorbike_Image[]
   warehouse Inventory[]
   customerContract Customer_Contract[]
-  agencyOrder Agency_Order[]
+  orderItems Order_Items[]
   pricePolicy Price_Policy[]
   discountPolicy Discount_Policy[]
   promotion Promotion[]
@@ -650,7 +712,7 @@ model Color {
   id Int @id @default(autoincrement())
   colorType String @db.VarChar(200) @unique()
   motorbikes Motorbike_Color[] 
-  agencyOrder Agency_Order[]
+  orderItems Order_Items[]
   agencyStock Agency_Stock[]
   customerContract Customer_Contract[]
   quotation Quotation[]

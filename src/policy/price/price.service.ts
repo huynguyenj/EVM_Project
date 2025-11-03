@@ -64,10 +64,6 @@ export class PriceService {
         },
       },
     });
-    if (!data)
-      throw new NotFoundException(
-        'Not found price policy for this agency with the motorbike! Please contact to EVM Staff or Admin to create price policy for this vehicle',
-      );
     return data;
   }
 

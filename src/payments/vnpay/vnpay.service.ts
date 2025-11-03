@@ -24,18 +24,16 @@ export class VnpayService {
     ipAddress: string,
     createPaymentBill: CreatePaymentAgencyBill,
   ) {
-    const data = await this.prisma.agency_Bill.findUnique({
-      where: {
-        id: createPaymentBill.agencyBillId,
-      },
+    const data = await this.prisma.ap_Batches.findUnique({
+      where: { id: createPaymentBill.batchId },
     });
-    if (!data) throw new NotFoundException('This bill is not existed');
-    if (data.isCompleted)
-      throw new BadRequestException('This bill is already paid');
+    if (!data) throw new NotFoundException('This batch is not existed');
+    if (data.amount === 0)
+      throw new BadRequestException('This batch is already paid');
     const vnpUrl = this.createPaymentUrl(
       platform,
       ipAddress,
-      data.amount,
+      createPaymentBill.amount,
       data.id,
       this.vnPaySetting.vnpayReturnUrl,
     );
@@ -112,14 +110,14 @@ export class VnpayService {
     };
   }
 
-  async createAgencyBillPayment(vnp_Params: VnpParamResponse) {
+  async createAgencyBatchPayment(vnp_Params: VnpParamResponse) {
     const vnpData = this.checkPaymentReturn(vnp_Params);
     if (!vnpData)
       return `${this.vnPaySetting.vnpayClientReturn + '/payment?status=invalid'}`;
-    const { vnp_ResponseCode, vnp_OrderInfo } = vnpData;
+    const { vnp_ResponseCode, vnp_OrderInfo, vnp_Amount } = vnpData;
     const orderInfoListInfo = vnp_OrderInfo.split('-'); //vnp_OrderInfo = 1&web
     //Bill id
-    const billId = Number(orderInfoListInfo[0]);
+    const batchId = Number(orderInfoListInfo[0]);
     //Platform
     const platform = orderInfoListInfo[1];
     //Return client url
@@ -129,12 +127,25 @@ export class VnpayService {
         : this.vnPaySetting.vnpayClientMobileReturn;
 
     if (vnp_ResponseCode === '00') {
-      await this.prisma.agency_Bill.update({
+      const apBatches = await this.prisma.ap_Batches.findUnique({
+        where: { id: batchId },
+        include: {
+          apPayment: true,
+        },
+      });
+      if (!apBatches) throw new BadRequestException('Not found batch');
+      // const totalPaymentBatch = apBatches.apPayment.reduce((total, item) => {
+      //   return total + item.amount;
+      // }, 0);
+      // if (totalPaymentBatch)
+      const restAmount = apBatches.amount - vnp_Amount;
+      await this.prisma.ap_Batches.update({
         where: {
-          id: billId,
+          id: batchId,
         },
         data: {
-          isCompleted: true,
+          amount: restAmount,
+          status: restAmount === 0 ? 'CLOSED' : 'PARTIAL',
         },
       });
       return `${returnClientUrl + '/payment?status=success'}`;
