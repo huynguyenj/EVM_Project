@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Inject,
   Injectable,
   NotFoundException,
@@ -178,5 +179,13 @@ export class AuthService {
       },
     });
     return staffInfo;
+  }
+
+  async getProfile(staffId: number) {
+    const data = await this.prisma.staff.findUnique({
+      where: { id: staffId },
+    });
+    if (!data) throw new BadRequestException('Not found profile');
+    return data;
   }
 }

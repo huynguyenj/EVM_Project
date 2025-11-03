@@ -6,11 +6,12 @@ import {
 import { DiscountService } from 'src/policy/discount/discount.service';
 import { PriceService } from 'src/policy/price/price.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateBillOrder, CreateOrderDto, OrderQueries } from './dto';
+import { CreateAgencyOrderDto, OrderQueries } from './dto';
 import { PromotionService } from 'src/policy/promotion/promotion.service';
 import { WarehouseInventoryService } from 'src/evm-staff/warehouse-inventory/warehouse-inventory.service';
 import { MotorbikeService } from 'src/vehicle/electric-motorbike/motorbike.service';
 import { OrderStatus } from './types';
+import { CreditLineService } from 'src/admin/credit-line/credit-line.service';
 
 @Injectable()
 export class OrderRestockService {
@@ -20,154 +21,135 @@ export class OrderRestockService {
     private promotionService: PromotionService,
     private inventoryService: WarehouseInventoryService,
     private motorbikeService: MotorbikeService,
+    private creditLineService: CreditLineService,
     private prisma: PrismaService,
   ) {}
 
-  async createOrderRestock(createOrderDto: CreateOrderDto) {
-    await this.checkPreviousOrder(
-      createOrderDto.motorbikeId,
-      createOrderDto.agencyId,
-    );
-    const pricePolicy =
-      await this.pricePolicyService.getPricePolicyAgencyAndMotorbike(
-        createOrderDto.agencyId,
-        createOrderDto.motorbikeId,
-      );
-    let discountTotal: number = 0;
-    let promotionTotal: number = 0;
-    const currentDate = new Date();
-
-    if (createOrderDto.discountId) {
-      const discountData = await this.discountService.getDiscountPrice(
-        createOrderDto.discountId,
-      );
-      if (discountData.status === 'INACTIVE')
-        throw new BadRequestException('Discount is inactive!');
-      if (currentDate > discountData.endAt)
-        throw new BadRequestException('Discount is expired!');
-      if (createOrderDto.quantity < discountData.min_quantity)
-        throw new BadRequestException(
-          `This discount is required at least ${discountData.min_quantity} of motorbike to have the usage`,
-        );
-      discountTotal = this.calculatePriceWithSpecialDeal(
-        pricePolicy.wholesalePrice,
-        discountData.valueType,
-        discountData.value,
-      );
-    }
-    if (createOrderDto.promotionId) {
-      const promotion = await this.promotionService.getPromotionPrice(
-        createOrderDto.promotionId,
-      );
-
-      if (promotion.status === 'INACTIVE')
-        throw new BadRequestException('Promotion is inactive!');
-      if (currentDate > promotion.endAt)
-        throw new BadRequestException('Promotion is expired!');
-
-      promotionTotal = this.calculatePriceWithSpecialDeal(
-        pricePolicy.wholesalePrice,
-        promotion.valueType,
-        promotion.value,
-      );
-    }
-    await this.inventoryUpdate(
-      createOrderDto.motorbikeId,
-      createOrderDto.warehouseId,
-      createOrderDto.quantity,
-    );
-    const finalPrice =
-      pricePolicy.wholesalePrice - (discountTotal + promotionTotal);
-    const subtotal = finalPrice * createOrderDto.quantity;
-    const motorbikeData = await this.motorbikeService.getMotorbikePrice(
-      createOrderDto.motorbikeId,
-    );
-    const basePrice = motorbikeData.price;
-
-    const motorbikeColor = await this.motorbikeService.getMotorbikeColor(
-      createOrderDto.motorbikeId,
-      createOrderDto.colorId,
-    );
-
-    const createdData = await this.prisma.agency_Order.create({
+  async createOrderRestock(createOrderDto: CreateAgencyOrderDto) {
+    await this.checkCredit(createOrderDto.agencyId);
+    const createOrder = await this.prisma.agency_Order.create({
       data: {
-        basePrice: basePrice,
-        quantity: createOrderDto.quantity,
-        discountTotal: discountTotal,
-        promotionTotal: promotionTotal,
-        finalPrice: finalPrice,
-        subtotal: subtotal,
-        wholesalePrice: pricePolicy.wholesalePrice,
+        creditChecked: false,
+        itemQuantity: createOrderDto.orderItems.length,
+        orderType: createOrderDto.orderType,
         agencyId: createOrderDto.agencyId,
-        electricMotorbikeId: createOrderDto.motorbikeId,
-        colorId: motorbikeColor.colorId,
-        promotionId: createOrderDto.promotionId ?? null,
-        discountId: createOrderDto.discountId ?? null,
-        pricePolicyId: pricePolicy.id,
-        warehouseId: createOrderDto.warehouseId,
-      },
-      select: {
-        id: true,
-        basePrice: true,
-        quantity: true,
-        wholesalePrice: true,
-        discountTotal: true,
-        promotionTotal: true,
-        finalPrice: true,
-        subtotal: true,
-        orderAt: true,
-        status: true,
+        subtotal: 0,
       },
     });
-    return createdData;
-  }
 
-  async checkPreviousOrder(motorbikeId: number, agencyId: number) {
-    const recentOrderWithAgencyAndMotorbike =
-      await this.prisma.agency_Order.findFirst({
-        where: {
-          agencyId: agencyId,
-          electricMotorbikeId: motorbikeId,
-        },
-        orderBy: {
-          orderAt: 'desc',
-        },
-      });
-    if (recentOrderWithAgencyAndMotorbike) {
-      const orderBill = await this.prisma.agency_Bill.findUnique({
-        where: {
-          agencyOrderId: recentOrderWithAgencyAndMotorbike.id,
-        },
-      });
-      if (orderBill && !orderBill.isCompleted) {
-        throw new BadRequestException(
-          'Your previous order bill is not completed yet. Please finish to order.',
+    //Insert order item to order_items table
+    for (const orderItem of createOrderDto.orderItems) {
+      let discountTotal: number = 0;
+      let promotionTotal: number = 0;
+      let wholesalePrice: number = 0;
+      const currentDate = new Date();
+
+      //Price policy
+      const pricePolicy =
+        await this.pricePolicyService.getPricePolicyAgencyAndMotorbike(
+          createOrderDto.agencyId,
+          orderItem.motorbikeId,
+        );
+
+      if (pricePolicy) wholesalePrice = pricePolicy.wholesalePrice;
+
+      //Discount policy
+      if (orderItem.discountId) {
+        const discountData = await this.discountService.getDiscountPrice(
+          orderItem.discountId,
+        );
+        if (discountData.status === 'INACTIVE')
+          throw new BadRequestException('Discount is inactive!');
+        if (currentDate > discountData.endAt)
+          throw new BadRequestException('Discount is expired!');
+        if (orderItem.quantity < discountData.min_quantity)
+          throw new BadRequestException(
+            `This discount is required at least ${discountData.min_quantity} of motorbike to have the usage`,
+          );
+        // Calculate price of order item when apply discount
+        discountTotal = this.calculatePriceWithSpecialDeal(
+          wholesalePrice,
+          discountData.valueType,
+          discountData.value,
         );
       }
-    }
-  }
-  async inventoryUpdate(
-    motorbikeId: number,
-    warehouseId: number,
-    requestQuantity: number,
-  ) {
-    const inventory = await this.inventoryService.getInventoryDetail(
-      motorbikeId,
-      warehouseId,
-    );
-    if (requestQuantity > inventory.quantity)
-      throw new BadRequestException(
-        `Your request quantity ${requestQuantity} is over the warehouse quantity ${inventory.quantity}`,
+
+      //Promotion policy
+      if (orderItem.promotionId) {
+        const promotion = await this.promotionService.getPromotionPrice(
+          orderItem.promotionId,
+        );
+        if (promotion.status === 'INACTIVE')
+          throw new BadRequestException('Promotion is inactive!');
+        if (currentDate > promotion.endAt)
+          throw new BadRequestException('Promotion is expired!');
+        // Calculate price of order item when apply promotion
+        promotionTotal = this.calculatePriceWithSpecialDeal(
+          wholesalePrice,
+          promotion.valueType,
+          promotion.value,
+        );
+      }
+      // Calculate final price
+      const finalPrice =
+        wholesalePrice - (discountTotal + promotionTotal) * orderItem.quantity;
+      const motorbikeData = await this.motorbikeService.getMotorbikePrice(
+        orderItem.motorbikeId,
       );
-    const restQuantity = inventory.quantity - requestQuantity;
-    await this.inventoryService.updateInventoryQuantity(
-      motorbikeId,
-      warehouseId,
-      restQuantity,
-    );
+      const motorbikeColor = await this.motorbikeService.getMotorbikeColor(
+        orderItem.motorbikeId,
+        orderItem.colorId,
+      );
+      await this.prisma.order_Items.create({
+        data: {
+          basePrice: motorbikeData.price,
+          quantity: orderItem.quantity,
+          discountTotal: discountTotal,
+          promotionTotal: promotionTotal,
+          finalPrice: finalPrice,
+          wholesalePrice: wholesalePrice,
+          electricMotorbikeId: orderItem.motorbikeId,
+          colorId: motorbikeColor.colorId,
+          promotionId: orderItem.promotionId ?? null,
+          discountId: orderItem.discountId ?? null,
+          pricePolicyId: pricePolicy ? pricePolicy.id : null,
+          warehouseId: orderItem.warehouseId,
+          orderId: createOrder.id,
+        },
+      });
+    }
+
+    //Get all order items of order and update order
+    const orderItems = await this.prisma.order_Items.findMany({
+      where: { orderId: createOrder.id },
+    });
+
+    const subtotal = orderItems.reduce((total, item) => {
+      return total + item.finalPrice;
+    }, 0);
+    const updatedOrder = await this.prisma.agency_Order.update({
+      where: {
+        id: createOrder.id,
+      },
+      data: {
+        subtotal: subtotal,
+        itemQuantity: orderItems.length,
+      },
+      include: {
+        orderItems: true,
+      },
+    });
+    return updatedOrder;
   }
 
-  calculatePriceWithSpecialDeal(
+  async checkCredit(agencyId: number) {
+    const creditLine =
+      await this.creditLineService.getCreditLineByAgencyId(agencyId);
+    if (creditLine.isBlocked)
+      throw new BadRequestException('Your credit line has been blocked.');
+  }
+
+  private calculatePriceWithSpecialDeal(
     wholesalePrice: number,
     type: string,
     valueType: number,
@@ -182,34 +164,6 @@ export class OrderRestockService {
     }
   }
 
-  async createOrderBill(orderId: number, createBillDto: CreateBillOrder) {
-    const order = await this.prisma.agency_Order.findUnique({
-      where: {
-        id: orderId,
-      },
-    });
-    if (!order)
-      throw new NotFoundException('Can not found the order. Please try again!');
-    if (order.status === OrderStatus.CANCELED)
-      throw new BadRequestException(
-        'Your order has canceled so you can not create bill.',
-      );
-    const isBillExisted = await this.prisma.agency_Bill.findUnique({
-      where: {
-        agencyOrderId: orderId,
-      },
-    });
-    if (isBillExisted)
-      throw new BadRequestException('This order already has bill!');
-    const createdData = await this.prisma.agency_Bill.create({
-      data: {
-        agencyOrderId: orderId,
-        amount: order.subtotal,
-        type: createBillDto.type,
-      },
-    });
-    return createdData;
-  }
   async getListOrdersAgency(agencyId: number, orderQuery: OrderQueries) {
     const skipData = (orderQuery.page - 1) * orderQuery.limit;
     const listData = await this.prisma.agency_Order.findMany({
@@ -218,15 +172,13 @@ export class OrderRestockService {
       where: orderQuery.status ? { status: orderQuery.status } : {},
       select: {
         id: true,
-        basePrice: true,
-        quantity: true,
-        wholesalePrice: true,
-        discountTotal: true,
-        promotionTotal: true,
-        finalPrice: true,
+        orderType: true,
+        creditChecked: true,
+        itemQuantity: true,
         subtotal: true,
         orderAt: true,
         status: true,
+        orderItems: true,
       },
     });
     return {
@@ -245,13 +197,12 @@ export class OrderRestockService {
     });
   }
 
-  async getOrderDetail(orderId: number) {
-    const data = await this.prisma.agency_Order.findUnique({
+  async getOrderItemDetail(orderId: number) {
+    const data = await this.prisma.order_Items.findUnique({
       where: {
         id: orderId,
       },
       include: {
-        agencyBill: true,
         color: {
           select: {
             id: true,
@@ -288,7 +239,7 @@ export class OrderRestockService {
     return data;
   }
 
-  async updateOrderStatusToPending(orderId: number) {
+  async updateOrderStatusToAccepted(orderId: number) {
     const isUpdatedToPending = await this.prisma.agency_Order.findUnique({
       where: {
         id: orderId,
@@ -303,36 +254,53 @@ export class OrderRestockService {
         id: orderId,
       },
       data: {
-        status: OrderStatus.PENDING,
+        status: OrderStatus.ACCEPTED,
       },
     });
     return updatedData;
   }
 
   async deleteOrder(orderId: number) {
-    const orderRestock = await this.getOrderDetail(orderId);
-    if (orderRestock && orderRestock.status !== OrderStatus.DRAFT)
+    const orderRestock = await this.prisma.agency_Order.findUnique({
+      where: { id: orderId },
+      include: {
+        orderItems: true,
+      },
+    });
+    if (!orderRestock) throw new NotFoundException('Not found the order');
+    if (orderRestock.status !== OrderStatus.DRAFT)
       throw new BadRequestException(
         'This order already in process so you can not delete anymore. Contact to EVM staff to canceled.',
       );
-    await this.prisma.agency_Order.delete({
+    await this.prisma.order_Items.deleteMany({
       where: {
-        id: orderId,
+        orderId: orderId,
       },
     });
-
-    const inventory = await this.inventoryService.getInventoryDetail(
-      orderRestock.electricMotorbikeId,
-      orderRestock.warehouseId,
-    );
-
-    const inventoryUpdateQuantity = inventory.quantity + orderRestock.quantity;
-    await this.inventoryUpdate(
-      orderRestock.electricMotorbikeId,
-      orderRestock.warehouseId,
-      inventoryUpdateQuantity,
-    );
-
+    await this.prisma.agency_Order.delete({
+      where: { id: orderId },
+    });
     return;
   }
+
+  // async inventoryUpdate(
+  //   motorbikeId: number,
+  //   warehouseId: number,
+  //   requestQuantity: number,
+  // ) {
+  //   const inventory = await this.inventoryService.getInventoryDetail(
+  //     motorbikeId,
+  //     warehouseId,
+  //   );
+  //   if (requestQuantity > inventory.quantity)
+  //     throw new BadRequestException(
+  //       `Your request quantity ${requestQuantity} is over the warehouse quantity ${inventory.quantity}`,
+  //     );
+  //   const restQuantity = inventory.quantity - requestQuantity;
+  //   await this.inventoryService.updateInventoryQuantity(
+  //     motorbikeId,
+  //     warehouseId,
+  //     restQuantity,
+  //   );
+  // }
 }

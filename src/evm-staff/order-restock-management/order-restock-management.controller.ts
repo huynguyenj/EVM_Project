@@ -14,6 +14,7 @@ import { Role } from 'src/auth/types/role.enum';
 import { OrderRestockManagementService } from './order-restock-management.service';
 import { ApiResponseDocumentPagination } from 'src/common/decorator/swagger-decorator/api.response.document.pagination';
 import {
+  OrderItemManageDetailResponse,
   OrderManageDetailResponseDto,
   OrderManageQueries,
   OrderManageResponseDto,
@@ -68,6 +69,22 @@ export class OrderRestockManagementController {
     return {
       statusCode: HttpStatus.OK,
       message: 'Get order detail successfully!',
+      data: data,
+    };
+  }
+
+  @Get('detail/order-item/:orderItemId')
+  @ApiOperation({ summary: 'Get order item detail' })
+  @ApiResponseDocument(
+    HttpStatus.OK,
+    OrderItemManageDetailResponse,
+    'Get order detail successfully!',
+  )
+  async getOrderItemDetail(@Param('orderId', ParseIntPipe) orderId: number) {
+    const data = await this.orderManageService.getOrderRestockDetail(orderId);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Get order item detail successfully!',
       data: data,
     };
   }

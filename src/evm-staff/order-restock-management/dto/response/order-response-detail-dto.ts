@@ -1,3 +1,3 @@
-import { OrderDetailResponseDto } from 'src/dealer-manager/order-restock/dto';
+import { OrderResponseDto } from 'src/dealer-manager/order-restock/dto';
 
-export class OrderManageDetailResponseDto extends OrderDetailResponseDto {}
+export class OrderManageDetailResponseDto extends OrderResponseDto {}

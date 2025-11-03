@@ -13,14 +13,7 @@ import { Roles } from 'src/auth/decorators/roles.decorators';
 import { Role } from 'src/auth/types/role.enum';
 import { OrderRestockService } from './order-restock.service';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import {
-  CreateBillOrder,
-  CreateOrderDto,
-  OrderBillResponseDto,
-  OrderDetailResponseDto,
-  OrderQueries,
-  OrderResponseDto,
-} from './dto';
+import { CreateAgencyOrderDto, OrderQueries, OrderResponseDto } from './dto';
 import {
   ApiQueriesAndPagination,
   ApiResponseDocument,
@@ -43,7 +36,7 @@ export class OrderRestockController {
     OrderResponseDto,
     'Create order restock successfully!',
   )
-  async createOrderRestock(@Body() createOrderDto: CreateOrderDto) {
+  async createOrderRestock(@Body() createOrderDto: CreateAgencyOrderDto) {
     const data =
       await this.orderRestockService.createOrderRestock(createOrderDto);
     return {
@@ -52,15 +45,17 @@ export class OrderRestockController {
       data: data,
     };
   }
-  @Get('detail/:orderId')
+  @Get('detail/order-item/:orderItemId')
   @ApiOperation({ summary: 'Get order restock detail' })
   @ApiResponseDocument(
     HttpStatus.OK,
-    OrderDetailResponseDto,
+    OrderResponseDto,
     'Get order restock detail successfully',
   )
-  async getOrderRestockDetail(@Param('orderId', ParseIntPipe) orderId: number) {
-    const data = await this.orderRestockService.getOrderDetail(orderId);
+  async getOrderRestockDetail(
+    @Param('orderItemId', ParseIntPipe) orderItemId: number,
+  ) {
+    const data = await this.orderRestockService.getOrderItemDetail(orderItemId);
     return {
       statusCode: HttpStatus.OK,
       message: 'Get order restock detail successfully!',
@@ -107,7 +102,7 @@ export class OrderRestockController {
     @Param('orderId', ParseIntPipe) orderId: number,
   ) {
     const updatedData =
-      await this.orderRestockService.updateOrderStatusToPending(orderId);
+      await this.orderRestockService.updateOrderStatusToAccepted(orderId);
     return {
       statusCode: HttpStatus.OK,
       message: 'Accept order restock information successfully!',
@@ -130,28 +125,6 @@ export class OrderRestockController {
       statusCode: HttpStatus.OK,
       message: 'Delete order restock information successfully!',
       data: {},
-    };
-  }
-
-  @Post('bill/:orderId')
-  @ApiOperation({ summary: 'Create bill for order restock' })
-  @ApiResponseDocument(
-    HttpStatus.CREATED,
-    OrderBillResponseDto,
-    'Create order restock bill successfully!',
-  )
-  async createOrderRestockBill(
-    @Param('orderId', ParseIntPipe) orderId: number,
-    @Body() createBillDto: CreateBillOrder,
-  ) {
-    const createdData = await this.orderRestockService.createOrderBill(
-      orderId,
-      createBillDto,
-    );
-    return {
-      statusCode: HttpStatus.CREATED,
-      message: 'Create bill for order restock successfully!',
-      data: createdData,
     };
   }
 }

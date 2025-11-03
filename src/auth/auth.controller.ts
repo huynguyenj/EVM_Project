@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Inject,
+  Param,
   Post,
   Req,
   Res,
@@ -18,6 +19,7 @@ import authConfig from 'src/common/config/auth.config';
 import type { ConfigType } from '@nestjs/config';
 import { ApiBearerAuth, ApiCookieAuth, ApiOperation } from '@nestjs/swagger';
 import { ApiResponseDocument } from 'src/common/decorator/swagger-decorator/api.response.document.decorator';
+import { StaffResponseDto } from 'src/dealer-manager/staff/dto';
 
 @Controller('auth')
 export class AuthController {
@@ -83,5 +85,18 @@ export class AuthController {
       message: 'Logout successfully!',
       data: {},
     });
+  }
+
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Get profile' })
+  @ApiResponseDocument(HttpStatus.OK, StaffResponseDto, 'Get profile success')
+  @Get('profile/:staffId')
+  async getProfileStaff(@Param('staffId') staffId: number) {
+    const data = await this.authService.getProfile(staffId);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Get profile success',
+      data: data,
+    };
   }
 }

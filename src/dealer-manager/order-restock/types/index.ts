@@ -1,2 +1,2 @@
 export * from './order.status.enum';
-export * from './order.bill.enum';
+export * from './order.enum';
