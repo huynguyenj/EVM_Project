@@ -4,3 +4,4 @@ export * from './swagger-decorator/api.response.document.decorator';
 export * from './swagger-decorator/api.response.document.array.decorator';
 export * from './swagger-decorator/api.query.pagination';
 export * from './swagger-decorator/api.file';
+export * from './swagger-decorator/api.query.multi';
