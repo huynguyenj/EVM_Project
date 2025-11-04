@@ -285,6 +285,16 @@ export class OrderRestockService {
     return;
   }
 
+  async getOrderDetail(orderId: number) {
+    const data = await this.prisma.agency_Order.findUnique({
+      where: {
+        id: orderId,
+      },
+    });
+    if (!data) throw new NotFoundException('Not found order!');
+    return data;
+  }
+
   // async inventoryUpdate(
   //   motorbikeId: number,
   //   warehouseId: number,

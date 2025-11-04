@@ -19,5 +19,6 @@ import { CreditLineModule } from 'src/admin/credit-line/credit-line.module';
     WarehouseInventoryModule,
     MotorbikeModule,
   ],
+  exports: [OrderRestockService],
 })
 export class OrderRestockModule {}
