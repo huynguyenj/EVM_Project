@@ -80,8 +80,10 @@ export class OrderRestockManagementController {
     OrderItemManageDetailResponse,
     'Get order detail successfully!',
   )
-  async getOrderItemDetail(@Param('orderId', ParseIntPipe) orderId: number) {
-    const data = await this.orderManageService.getOrderRestockDetail(orderId);
+  async getOrderItemDetail(
+    @Param('orderItemId', ParseIntPipe) orderItemId: number,
+  ) {
+    const data = await this.orderManageService.getOrderItemDetail(orderItemId);
     return {
       statusCode: HttpStatus.OK,
       message: 'Get order item detail successfully!',
