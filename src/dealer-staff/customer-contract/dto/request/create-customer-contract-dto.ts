@@ -8,7 +8,7 @@ import {
   IsPositive,
   IsString,
 } from 'class-validator';
-import { ContractPaidType, ContractStatus } from '../../types';
+import { ContractPaidType } from '../../types';
 
 export class CreateCustomerContractDto {
   @ApiProperty({ example: 'Contract for motorbike with customer John' })
@@ -42,40 +42,33 @@ export class CreateCustomerContractDto {
   @IsNotEmpty()
   contractPaidType: ContractPaidType;
 
-  @ApiProperty({ example: ContractStatus.PENDING })
-  @IsEnum(ContractStatus)
-  @IsNotEmpty()
-  status: ContractStatus;
-
   @ApiProperty({ example: 1 })
   @IsNumber()
-  @IsPositive()
   @IsNotEmpty()
   customerId: number;
 
   @ApiProperty({ example: 1 })
   @IsNumber()
-  @IsPositive()
   @IsNotEmpty()
   staffId: number;
 
   @ApiProperty({ example: 1 })
   @IsNumber()
-  @IsPositive()
   @IsNotEmpty()
   agencyId: number;
 
   @ApiProperty({ example: 1 })
   @IsNumber()
-  @IsPositive()
   @IsNotEmpty()
   electricMotorbikeId: number;
 
   @ApiProperty({ example: 1 })
   @IsNumber()
-  @IsPositive()
   @IsNotEmpty()
   colorId: number;
+
   @ApiProperty({ example: 1 })
+  @IsNumber()
+  @IsNotEmpty()
   quotationId: number;
 }
