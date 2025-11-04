@@ -1,10 +1,19 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { OrderManageQueries, UpdateOrderStock } from './dto';
+import { OrderRestockService } from 'src/dealer-manager/order-restock/order-restock.service';
+import { OrderStatus } from 'src/dealer-manager/order-restock/types';
 
 @Injectable()
 export class OrderRestockManagementService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private orderRestockService: OrderRestockService,
+    private prisma: PrismaService,
+  ) {}
 
   async getListOrder(orderManageQueries: OrderManageQueries) {
     const skipData = (orderManageQueries.page - 1) * orderManageQueries.limit;
@@ -43,7 +52,7 @@ export class OrderRestockManagementService {
       },
     });
     if (!data) throw new NotFoundException('Not found order!');
-    return;
+    return data;
   }
 
   async getOrderItemDetail(orderItemId: number) {
@@ -89,6 +98,15 @@ export class OrderRestockManagementService {
   }
 
   async updateStatusOrder(orderId: number, updateOrderDto: UpdateOrderStock) {
+    const order = await this.orderRestockService.getOrderDetail(orderId);
+    if (
+      (updateOrderDto.status === OrderStatus.DELIVERED ||
+        updateOrderDto.status === OrderStatus.APPROVED) &&
+      !order.creditChecked
+    )
+      throw new BadRequestException(
+        'Please check credit of this order, make sure it is allowed.',
+      );
     const updatedData = await this.prisma.agency_Order.update({
       where: {
         id: orderId,
