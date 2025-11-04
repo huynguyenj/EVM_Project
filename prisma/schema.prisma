@@ -439,7 +439,7 @@ model Customer_Contract {
   signDate DateTime @db.Date
   deliveryDate DateTime? @db.Date
   contractPaidType CustomerContractPaidType
-  status CustomerContractStatus
+  status CustomerContractStatus @default(PENDING)
   finalPrice Float
   customerId Int
   customer Customer @relation(fields: [customerId], references: [id])
