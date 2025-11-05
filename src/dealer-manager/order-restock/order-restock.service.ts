@@ -27,6 +27,7 @@ export class OrderRestockService {
 
   async createOrderRestock(createOrderDto: CreateAgencyOrderDto) {
     await this.checkCredit(createOrderDto.agencyId);
+    //Create order with no subtotal and item quantity
     const createOrder = await this.prisma.agency_Order.create({
       data: {
         creditChecked: false,
@@ -51,7 +52,7 @@ export class OrderRestockService {
       let wholesalePrice: number = motorbikeData.price;
       const currentDate = new Date();
 
-      //Price policy
+      //Get price policy information
       const pricePolicy =
         await this.pricePolicyService.getPricePolicyAgencyAndMotorbike(
           createOrderDto.agencyId,
@@ -60,7 +61,7 @@ export class OrderRestockService {
 
       if (pricePolicy) wholesalePrice = pricePolicy.wholesalePrice;
 
-      //Discount policy
+      //Discount policy check and calculate
       if (orderItem.discountId) {
         const discountData = await this.discountService.getDiscountPrice(
           orderItem.discountId,
@@ -81,7 +82,7 @@ export class OrderRestockService {
         );
       }
 
-      //Promotion policy
+      //Promotion policy check and calculate
       if (orderItem.promotionId) {
         const promotion = await this.promotionService.getPromotionPrice(
           orderItem.promotionId,
@@ -125,10 +126,11 @@ export class OrderRestockService {
     const orderItems = await this.prisma.order_Items.findMany({
       where: { orderId: createOrder.id },
     });
-
+    //Calculate all item price
     const subtotal = orderItems.reduce((total, item) => {
       return total + item.finalPrice;
     }, 0);
+    //Update subtotal, item quantity in order
     const updatedOrder = await this.prisma.agency_Order.update({
       where: {
         id: createOrder.id,
@@ -141,14 +143,42 @@ export class OrderRestockService {
         orderItems: true,
       },
     });
+    //Check order deferred subtotal with credit limit
+    if (updatedOrder.orderType === 'DEFERRED') {
+      await this.checkOverCreditLimit(
+        updatedOrder.agencyId,
+        updatedOrder.subtotal,
+        updatedOrder.id,
+      );
+    }
     return updatedOrder;
   }
 
+  //Check credit line is blocked or not
   async checkCredit(agencyId: number) {
     const creditLine =
       await this.creditLineService.getCreditLineByAgencyId(agencyId);
     if (creditLine.isBlocked)
       throw new BadRequestException('Your credit line has been blocked.');
+  }
+
+  // Check over credit limit
+  async checkOverCreditLimit(
+    agencyId: number,
+    subtotal: number,
+    orderId: number,
+  ) {
+    const creditLine =
+      await this.creditLineService.getCreditLineByAgencyId(agencyId);
+    if (!creditLine) throw new BadRequestException('Not found credit line');
+    if (creditLine.creditLimit <= subtotal) {
+      await this.deleteOrder(orderId);
+      throw new BadRequestException(
+        'Your order is over credit limit please try with smaller amount',
+      );
+    }
+    await this.creditLineService.minusCreditLimit(agencyId, subtotal);
+    return;
   }
 
   private calculatePriceWithSpecialDeal(

@@ -39,7 +39,7 @@ export class VnpayController {
     @IpAddress() ipAddress: string,
     @Body() createAgencyBillPaymentUrl: CreatePaymentAgencyBill,
   ) {
-    const paymentData = await this.vnPayService.getBillInformation(
+    const paymentData = await this.vnPayService.getApBatchPaymentInformation(
       platform,
       ipAddress,
       createAgencyBillPaymentUrl,

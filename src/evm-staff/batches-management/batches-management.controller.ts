@@ -55,7 +55,7 @@ export class BatchesManagementController {
   @ApiOperation({ summary: 'Get list batches' })
   @ApiQueriesAndPagination({
     name: 'status',
-    example: BatchesStatus,
+    example: BatchesStatus.OPEN,
     required: false,
   })
   @ApiResponseDocumentPagination(

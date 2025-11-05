@@ -1,5 +1,6 @@
 import { ApiResponseProperty } from '@nestjs/swagger';
 import { ApBatchesResponseDto } from './batches-response-dto';
+import { OrderResponseDto } from 'src/dealer-manager/order-restock/dto';
 
 class BatchesPaymentsDto {
   @ApiResponseProperty({ example: '2025-10-12T14:30:00.000Z' })
@@ -11,4 +12,6 @@ class BatchesPaymentsDto {
 export class BatchesDetailResponse extends ApBatchesResponseDto {
   @ApiResponseProperty({ type: [BatchesPaymentsDto] })
   apPayment: BatchesPaymentsDto[];
+  @ApiResponseProperty({ type: OrderResponseDto })
+  agencyOrder: OrderResponseDto;
 }
