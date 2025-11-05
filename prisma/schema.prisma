@@ -375,7 +375,7 @@ model Installment_Plan {
   status InstallmentStatus
   agencyId Int
   agency Agency @relation(fields: [agencyId], references: [id])
-  installmentContract Installment_Contract?
+  installmentContract Installment_Contract[]
   @@map("installment_plans")
 }
 
@@ -554,7 +554,7 @@ model Installment_Contract {
   status InstallmentContractStatus
   customerContractId Int @unique
   customerContract Customer_Contract @relation(fields: [customerContractId], references: [id])
-  installmentPlanId Int @unique
+  installmentPlanId Int
   installmentPlan Installment_Plan @relation(fields: [installmentPlanId], references: [id])
   installmentPayments Installment_Schedule[]
   @@map("installment_contracts")
