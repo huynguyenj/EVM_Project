@@ -113,6 +113,22 @@ export class OrderRestockManagementController {
     };
   }
 
+  @Patch('checked/:orderId')
+  @ApiOperation({ summary: 'Check credit order' })
+  @ApiResponseDocument(
+    HttpStatus.OK,
+    OrderManageResponseDto,
+    'Check credit successfully!',
+  )
+  async checkOrderForEvmStaff(@Param('orderId', ParseIntPipe) orderId: number) {
+    const updatedData = await this.orderManageService.updateCheckOrder(orderId);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Check credit successfully!',
+      data: updatedData,
+    };
+  }
+
   @Delete(':orderId')
   @ApiOperation({ summary: 'Delete order' })
   @ApiResponseDocument(HttpStatus.OK, Object, 'Delete order successfully!')

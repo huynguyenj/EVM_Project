@@ -97,6 +97,10 @@ export class OrderRestockManagementService {
     return data;
   }
 
+  async updateCheckOrder(orderId: number) {
+    return await this.orderRestockService.updateCheckedOrder(orderId);
+  }
+
   async updateStatusOrder(orderId: number, updateOrderDto: UpdateOrderStock) {
     const order = await this.orderRestockService.getOrderDetail(orderId);
     if (

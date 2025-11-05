@@ -171,4 +171,24 @@ export class PromotionService {
     });
     return;
   }
+
+  async checkExpiredPromotion() {
+    const today = new Date();
+    const listPromotion = await this.prisma.promotion.findMany({
+      where: {
+        endAt: {
+          lt: today,
+        },
+      },
+    });
+    await this.prisma.$transaction(
+      listPromotion.map((promotion) =>
+        this.prisma.promotion.update({
+          where: { id: promotion.id },
+          data: { status: 'INACTIVE' },
+        }),
+      ),
+    );
+    return;
+  }
 }

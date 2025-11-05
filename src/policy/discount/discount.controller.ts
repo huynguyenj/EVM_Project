@@ -151,6 +151,22 @@ export class DiscountController {
     };
   }
 
+  @Patch('expiration-validation')
+  @ApiResponseDocument(
+    HttpStatus.OK,
+    DiscountResponseDto,
+    'Update discount expiration successfully!',
+  )
+  @ApiOperation({ summary: 'Update discount expiration' })
+  async updateDiscountExpiration() {
+    await this.discountService.checkExpiredDiscount();
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Update discount expiration successfully!',
+      data: {},
+    };
+  }
+
   @Patch(':discountId')
   @ApiResponseDocument(
     HttpStatus.OK,

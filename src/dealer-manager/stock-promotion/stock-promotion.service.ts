@@ -113,6 +113,40 @@ export class StockPromotionService {
     });
   }
 
+  async getListStockPromotionForStaff(
+    agencyId: number,
+    stockPromotionQueries: StockPromotionQueries,
+  ) {
+    const skipData =
+      (stockPromotionQueries.page - 1) * stockPromotionQueries.limit;
+    const filters: object[] = [];
+    if (
+      stockPromotionQueries.valueType &&
+      Object.values(StockPromotionValueType).includes(
+        stockPromotionQueries.valueType,
+      )
+    ) {
+      filters.push({
+        valueType: stockPromotionQueries.valueType.toUpperCase(),
+      });
+    }
+    const listData = await this.prisma.stock_Promotion.findMany({
+      skip: skipData,
+      take: stockPromotionQueries.limit,
+      where: {
+        AND: [{ status: 'ACTIVE' }, ...filters],
+      },
+    });
+    return {
+      data: listData,
+      paginationInfo: {
+        page: stockPromotionQueries.page,
+        limit: stockPromotionQueries.limit,
+        total: await this.getTotalStockPromotion(agencyId),
+      },
+    };
+  }
+
   async getStockPromotionDetail(stockPromotionId: number) {
     const data = await this.prisma.stock_Promotion.findUnique({
       where: {
@@ -174,6 +208,27 @@ export class StockPromotionService {
         id: stockPromotionId,
       },
     });
+    return;
+  }
+
+  async checkStockPromotionExpired(agencyId: number) {
+    const today = new Date();
+    const listPromotion = await this.prisma.stock_Promotion.findMany({
+      where: {
+        agencyId: agencyId,
+        endAt: {
+          lt: today,
+        },
+      },
+    });
+    await this.prisma.$transaction(
+      listPromotion.map((promotion) =>
+        this.prisma.stock_Promotion.update({
+          where: { id: promotion.id },
+          data: { status: 'INACTIVE' },
+        }),
+      ),
+    );
     return;
   }
 }
