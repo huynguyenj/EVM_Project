@@ -1,5 +1,7 @@
 import {
   BadRequestException,
+  forwardRef,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -23,6 +25,7 @@ export class CustomerContractService {
     private motorbikeService: MotorbikeService,
     private customerService: CustomerService,
     private colorService: ColorService,
+    @Inject(forwardRef(() => InstallmentContractService))
     private installmentContractService: InstallmentContractService,
   ) {}
 
