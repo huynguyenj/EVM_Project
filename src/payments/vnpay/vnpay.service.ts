@@ -50,10 +50,11 @@ export class VnpayService {
         id: createPaymentCustomer.installmentScheduleId,
       },
     });
-    let amount = 0;
     if (!data) throw new NotFoundException('This installment is not existed');
     if (data.status === 'PAID')
       throw new BadRequestException('This installment is already paid');
+    //Calculate amount
+    let amount = 0;
     if (data.dueDate != null && data.dueDate < new Date()) {
       amount = data.amountDue + data.penaltyAmount;
     } else {
@@ -110,22 +111,22 @@ export class VnpayService {
     };
   }
 
-  async createAgencyBatchPayment(vnp_Params: VnpParamResponse) {
+  async updateAgencyBatchPayment(vnp_Params: VnpParamResponse) {
     const vnpData = this.checkPaymentReturn(vnp_Params);
     if (!vnpData)
       return `${this.vnPaySetting.vnpayClientReturn + '/payment?status=invalid'}`;
     const { vnp_ResponseCode, vnp_OrderInfo, vnp_Amount } = vnpData;
     const orderInfoListInfo = vnp_OrderInfo.split('-'); //vnp_OrderInfo = 1&web
-    //Bill id
+    //Batch id
     const batchId = Number(orderInfoListInfo[0]);
-    //Platform
+    //Platform type
     const platform = orderInfoListInfo[1];
     //Return client url
     const returnClientUrl =
       platform === 'web'
         ? this.vnPaySetting.vnpayClientReturn
         : this.vnPaySetting.vnpayClientMobileReturn;
-
+    //Check payment response
     if (vnp_ResponseCode === '00') {
       const apBatches = await this.prisma.ap_Batches.findUnique({
         where: { id: batchId },
