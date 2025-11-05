@@ -115,6 +115,7 @@ export class StockPromotionController {
     StockPromotionResponseDto,
     'Get stock promotion list successfully',
   )
+  @Roles(Role.DEALER_STAFF)
   async getStockPromotionListForStaff(
     @Param('agencyId', ParseIntPipe) agencyId: number,
     @StockPromotionQuery() stockPromotionQueries: StockPromotionQueries,
