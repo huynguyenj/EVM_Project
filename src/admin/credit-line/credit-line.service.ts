@@ -42,9 +42,14 @@ export class CreditLineService {
 
   async getAllCreditLine(creditLineQuery: CreditLineQueries) {
     const skip = (creditLineQuery.page - 1) * creditLineQuery.limit;
+    const filters: object[] = [];
+    if (creditLineQuery.agencyId) {
+      filters.push({ agencyId: Number(creditLineQuery.agencyId) });
+    }
     const data = await this.prisma.credit_Line.findMany({
       skip,
       take: creditLineQuery.limit,
+      where: filters.length > 0 ? { AND: filters } : {},
     });
 
     return {

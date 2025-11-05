@@ -82,7 +82,7 @@ export class VnpayController {
     @VnpQueryQueries() query: VnpParamQuery,
     @Res() res: Response,
   ) {
-    const returnUrl = await this.vnPayService.createAgencyBatchPayment(query);
+    const returnUrl = await this.vnPayService.updateAgencyBatchPayment(query);
     return res.redirect(returnUrl);
   }
 
