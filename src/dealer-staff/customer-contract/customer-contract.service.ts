@@ -14,6 +14,7 @@ import { MotorbikeService } from 'src/vehicle/electric-motorbike/motorbike.servi
 import { CustomerService } from '../customer/customer.service';
 import { ColorService } from 'src/vehicle/color/color.service';
 import { v4 as uuidv4 } from 'uuid';
+import { InstallmentContractService } from '../installment-contract/installment-contract.service';
 
 @Injectable()
 export class CustomerContractService {
@@ -22,6 +23,7 @@ export class CustomerContractService {
     private motorbikeService: MotorbikeService,
     private customerService: CustomerService,
     private colorService: ColorService,
+    private installmentContractService: InstallmentContractService,
   ) {}
 
   async createCustomerContract(
@@ -193,6 +195,15 @@ export class CustomerContractService {
   }
 
   async deleteCustomerContract(contractId: number) {
+    const installmentContract =
+      await this.installmentContractService.getInstallmentContractByCustomerContractForDelete(
+        contractId,
+      );
+    if (installmentContract) {
+      await this.installmentContractService.deleteInstallmentContract(
+        installmentContract.id,
+      );
+    }
     await this.prisma.customer_Contract.delete({
       where: {
         id: contractId,

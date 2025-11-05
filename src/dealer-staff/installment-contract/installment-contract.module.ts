@@ -8,5 +8,6 @@ import { InstallmentPlanModule } from 'src/dealer-manager/installment-plan/insta
   controllers: [InstallmentContractController],
   providers: [InstallmentContractService],
   imports: [CustomerContractModule, InstallmentPlanModule],
+  exports: [InstallmentContractService],
 })
 export class InstallmentContractModule {}

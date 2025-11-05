@@ -122,6 +122,17 @@ export class InstallmentContractService {
     return data;
   }
 
+  async getInstallmentContractByCustomerContractForDelete(
+    customerContractId: number,
+  ) {
+    const data = await this.prisma.installment_Contract.findUnique({
+      where: {
+        customerContractId: customerContractId,
+      },
+    });
+    return data;
+  }
+
   async getInstallmentContractDetail(installmentContractId: number) {
     const data = await this.prisma.installment_Contract.findUnique({
       where: {
