@@ -119,9 +119,12 @@ export class BatchesManagementService {
   }
 
   async deleteBatches(batchesId: number) {
-    await this.prisma.ap_Payments.deleteMany({
-      where: { apBatchesId: batchesId },
-    });
+    const batch = await this.getBatchDetail(batchesId);
+    if (batch.apPayment.length > 0) {
+      await this.prisma.ap_Payments.deleteMany({
+        where: { apBatchesId: batchesId },
+      });
+    }
     await this.prisma.ap_Batches.delete({
       where: { id: batchesId },
     });

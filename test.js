@@ -1,5 +1,0 @@
-const currentDate = new Date()
-currentDate.setFullYear(2025)
-currentDate.setMonth(0)
-currentDate.setDate(1)
-console.log(currentDate.getDate())
