@@ -30,7 +30,7 @@ import { BatchesQuery } from './decorators';
 @Controller('batches-management')
 @ApiTags('Dealer staff & Admin - Ap Batches Management')
 @ApiBearerAuth('access-token')
-@Roles(Role.DEALER_STAFF, Role.ADMIN)
+@Roles(Role.EVM_STAFF, Role.ADMIN)
 export class BatchesManagementController {
   constructor(private batchesService: BatchesManagementService) {}
 
