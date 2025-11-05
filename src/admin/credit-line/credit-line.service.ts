@@ -133,16 +133,28 @@ export class CreditLineService {
     return;
   }
 
-  // Check credit
-  async checkOverCreditLimit(agencyId: number) {
-    const creditLine = await this.prisma.credit_Line.findUnique({
+  // Update credit limit
+  async minusCreditLimit(agencyId: number, amount: number) {
+    const creditData = await this.getCreditLineByAgencyId(agencyId);
+    const restAmount = creditData.creditLimit - amount;
+    await this.prisma.credit_Line.update({
       where: { agencyId: agencyId },
+      data: { creditLimit: restAmount },
     });
-    if (!creditLine) throw new BadRequestException('Not found credit line');
-    if (creditLine.creditLimit <= 0)
-      throw new BadRequestException('Your credit limit is not enough to order');
+    return;
   }
 
+  async addCreditLimit(agencyId: number, amount: number) {
+    const creditData = await this.getCreditLineByAgencyId(agencyId);
+    const restAmount = creditData.creditLimit + amount;
+    await this.prisma.credit_Line.update({
+      where: { agencyId: agencyId },
+      data: { creditLimit: restAmount },
+    });
+    return;
+  }
+
+  //Checking credit line
   async checkWarningThreshold(agencyId: number, currentUsage: number) {
     const creditLine = await this.prisma.credit_Line.findUnique({
       where: { agencyId: agencyId },

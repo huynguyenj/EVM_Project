@@ -2,10 +2,14 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { BatchesQueries, CreateBatchesDto, UpdateBatchesDto } from './dto';
 import { BatchesStatus } from './types';
+import { CreditLineService } from 'src/admin/credit-line/credit-line.service';
 
 @Injectable()
 export class BatchesManagementService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private creditLineService: CreditLineService,
+  ) {}
 
   async createApBatches(createApBatches: CreateBatchesDto) {
     const createdData = await this.prisma.ap_Batches.create({
@@ -25,7 +29,7 @@ export class BatchesManagementService {
         status: batchesQueries.status.toUpperCase(),
       });
     }
-    const listData = await this.prisma.price_Policy.findMany({
+    const listData = await this.prisma.ap_Batches.findMany({
       skip: skipData,
       take: batchesQueries.limit,
       where: filters.length > 0 ? { AND: filters } : {},
@@ -58,7 +62,7 @@ export class BatchesManagementService {
         status: batchesQueries.status.toUpperCase(),
       });
     }
-    const listData = await this.prisma.price_Policy.findMany({
+    const listData = await this.prisma.ap_Batches.findMany({
       skip: skipData,
       take: batchesQueries.limit,
       where: filters.length > 0 ? { AND: filters } : {},
@@ -82,6 +86,25 @@ export class BatchesManagementService {
   async getBatchDetail(batchId: number) {
     const data = await this.prisma.ap_Batches.findUnique({
       where: { id: batchId },
+      include: {
+        agencyOrder: {
+          include: {
+            orderItems: true,
+          },
+        },
+        apPayment: true,
+      },
+    });
+    if (!data) throw new NotFoundException('Not found this batch');
+    return data;
+  }
+
+  async getBatchWithOrder(batchId: number) {
+    const data = await this.prisma.ap_Batches.findUnique({
+      where: { id: batchId },
+      include: {
+        agencyOrder: true,
+      },
     });
     if (!data) throw new NotFoundException('Not found this batch');
     return data;
@@ -101,6 +124,36 @@ export class BatchesManagementService {
     });
     await this.prisma.ap_Batches.delete({
       where: { id: batchesId },
+    });
+    return;
+  }
+
+  async updateCompleteBatch(batchId: number, agencyId: number, amount: number) {
+    const updatedData = await this.prisma.ap_Batches.update({
+      where: { id: batchId },
+      data: { status: 'CLOSED', amount: amount },
+      include: {
+        agencyOrder: {
+          select: { agencyId: true, subtotal: true },
+        },
+      },
+    });
+    await this.creditLineService.addCreditLimit(
+      agencyId,
+      updatedData.agencyOrder.subtotal,
+    );
+    return;
+  }
+
+  async updatePartialBatch(batchId: number, amount: number) {
+    await this.prisma.ap_Batches.update({
+      where: { id: batchId },
+      data: { status: 'PARTIAL', amount: amount },
+      include: {
+        agencyOrder: {
+          select: { agencyId: true, subtotal: true },
+        },
+      },
     });
     return;
   }

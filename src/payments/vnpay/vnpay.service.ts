@@ -11,15 +11,18 @@ import { CreatePaymentAgencyBill, CreatePaymentCustomer } from '../dto';
 import QueryString from 'qs';
 import crypto from 'crypto';
 import { VnpParam, VnpParamResponse } from '../types';
+import { BatchesManagementService } from 'src/evm-staff/batches-management/batches-management.service';
+import { sortObject } from './utils/vnpayHelper';
 @Injectable()
 export class VnpayService {
   constructor(
     private prisma: PrismaService,
     @Inject(vnpayConfig.KEY)
     private vnPaySetting: ConfigType<typeof vnpayConfig>,
+    private batchesService: BatchesManagementService,
   ) {}
 
-  async getBillInformation(
+  async getApBatchPaymentInformation(
     platform: string,
     ipAddress: string,
     createPaymentBill: CreatePaymentAgencyBill,
@@ -70,47 +73,6 @@ export class VnpayService {
     return vnpUrl;
   }
 
-  private createPaymentUrl(
-    platform: string,
-    ipAddress: string,
-    amount: number,
-    billId: number,
-    returnUrl?: string,
-  ) {
-    const createDate = new Date()
-      .toISOString()
-      .replace(/[-:T.Z]/g, '')
-      .slice(0, 14); //20220101103111: date required by vnpay
-    const timeStamp = Date.now();
-    const vnp_params: VnpParam = {
-      vnp_Version: '2.1.0',
-      vnp_Command: 'pay',
-      vnp_TmnCode: this.vnPaySetting.vnpayTmnCode,
-      vnp_Locale: 'vn',
-      vnp_CurrCode: 'VND',
-      vnp_TxnRef: timeStamp,
-      vnp_OrderInfo: `${billId}-${platform}`,
-      vnp_OrderType: 'other',
-      vnp_Amount: amount * 100,
-      vnp_ReturnUrl: returnUrl || '',
-      vnp_IpAddr: ipAddress,
-      vnp_CreateDate: createDate,
-    };
-    const sortedParams = this.sortObject(vnp_params);
-
-    const signData = QueryString.stringify(sortedParams, { encode: false });
-    const hmac = crypto.createHmac('sha512', this.vnPaySetting.vnpaySecretKey);
-    const signed = hmac.update(signData).digest('hex');
-
-    vnp_params['vnp_SecureHash'] = signed;
-    vnp_params['vnp_SecureHashType'] = 'SHA512';
-
-    const vnpUrl = `${this.vnPaySetting.vnpayUrl}?${QueryString.stringify(vnp_params, { encode: false })}`;
-    return {
-      paymentUrl: vnpUrl,
-    };
-  }
-
   async updateAgencyBatchPayment(vnp_Params: VnpParamResponse) {
     const vnpData = this.checkPaymentReturn(vnp_Params);
     if (!vnpData)
@@ -128,27 +90,17 @@ export class VnpayService {
         : this.vnPaySetting.vnpayClientMobileReturn;
     //Check payment response
     if (vnp_ResponseCode === '00') {
-      const apBatches = await this.prisma.ap_Batches.findUnique({
-        where: { id: batchId },
-        include: {
-          apPayment: true,
-        },
-      });
-      if (!apBatches) throw new BadRequestException('Not found batch');
-      // const totalPaymentBatch = apBatches.apPayment.reduce((total, item) => {
-      //   return total + item.amount;
-      // }, 0);
-      // if (totalPaymentBatch)
+      const apBatches = await this.batchesService.getBatchWithOrder(batchId);
       const restAmount = apBatches.amount - vnp_Amount;
-      await this.prisma.ap_Batches.update({
-        where: {
-          id: batchId,
-        },
-        data: {
-          amount: restAmount,
-          status: restAmount === 0 ? 'CLOSED' : 'PARTIAL',
-        },
-      });
+      if (restAmount === 0) {
+        await this.batchesService.updateCompleteBatch(
+          batchId,
+          apBatches.agencyId,
+          restAmount,
+        );
+      } else {
+        await this.batchesService.updatePartialBatch(batchId, restAmount);
+      }
       return `${returnClientUrl + '/payment?status=success'}`;
     } else {
       return `${returnClientUrl + '/payment?status=fail'}`;
@@ -188,11 +140,53 @@ export class VnpayService {
     }
   }
 
+  //Payment resolver
+  private createPaymentUrl(
+    platform: string,
+    ipAddress: string,
+    amount: number,
+    billId: number,
+    returnUrl?: string,
+  ) {
+    const createDate = new Date()
+      .toISOString()
+      .replace(/[-:T.Z]/g, '')
+      .slice(0, 14); //20220101103111: date required by vnpay
+    const timeStamp = Date.now();
+    const vnp_params: VnpParam = {
+      vnp_Version: '2.1.0',
+      vnp_Command: 'pay',
+      vnp_TmnCode: this.vnPaySetting.vnpayTmnCode,
+      vnp_Locale: 'vn',
+      vnp_CurrCode: 'VND',
+      vnp_TxnRef: timeStamp,
+      vnp_OrderInfo: `${billId}-${platform}`,
+      vnp_OrderType: 'other',
+      vnp_Amount: amount * 100,
+      vnp_ReturnUrl: returnUrl || '',
+      vnp_IpAddr: ipAddress,
+      vnp_CreateDate: createDate,
+    };
+    const sortedParams = sortObject(vnp_params);
+
+    const signData = QueryString.stringify(sortedParams, { encode: false });
+    const hmac = crypto.createHmac('sha512', this.vnPaySetting.vnpaySecretKey);
+    const signed = hmac.update(signData).digest('hex');
+
+    vnp_params['vnp_SecureHash'] = signed;
+    vnp_params['vnp_SecureHashType'] = 'SHA512';
+
+    const vnpUrl = `${this.vnPaySetting.vnpayUrl}?${QueryString.stringify(vnp_params, { encode: false })}`;
+    return {
+      paymentUrl: vnpUrl,
+    };
+  }
+
   private checkPaymentReturn(vnp_Params: VnpParamResponse) {
     const secureHash = vnp_Params['vnp_SecureHash'];
     delete vnp_Params['vnp_SecureHash'];
     delete vnp_Params['vnp_SecureHashType'];
-    const sortedParams = this.sortObject(vnp_Params);
+    const sortedParams = sortObject(vnp_Params);
     const signData = QueryString.stringify(sortedParams, { encode: false });
     const hmac = crypto.createHmac('sha512', this.vnPaySetting.vnpaySecretKey);
     const signed = hmac.update(signData).digest('hex');
@@ -202,18 +196,5 @@ export class VnpayService {
     } else {
       return null;
     }
-  }
-
-  private sortObject(object: any) {
-    const sortedParams = Object.keys(object)
-      .sort()
-      .reduce(
-        (acc, key) => {
-          acc[key] = encodeURIComponent(object[key]).replace(/%20/g, '+');
-          return acc;
-        },
-        {} as Record<string, any>,
-      );
-    return sortedParams;
   }
 }
