@@ -1,5 +1,7 @@
 import {
   BadRequestException,
+  forwardRef,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -17,6 +19,7 @@ import { InterestPaymentStrategyFactory } from './strategies';
 export class InstallmentContractService {
   constructor(
     private prisma: PrismaService,
+    @Inject(forwardRef(() => CustomerContractService))
     private customerContractService: CustomerContractService,
     private installmentPlanService: InstallmentPlanService,
   ) {}
@@ -119,6 +122,17 @@ export class InstallmentContractService {
       throw new NotFoundException(
         'Can not found installment contract with this customer contract',
       );
+    return data;
+  }
+
+  async getInstallmentContractByCustomerContractForDelete(
+    customerContractId: number,
+  ) {
+    const data = await this.prisma.installment_Contract.findUnique({
+      where: {
+        customerContractId: customerContractId,
+      },
+    });
     return data;
   }
 
