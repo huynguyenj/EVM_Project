@@ -103,6 +103,35 @@ export class StockPromotionController {
     };
   }
 
+  @Get('/list/staff/:agencyId')
+  @ApiOperation({ summary: 'Get stock promotion list for staff' })
+  @ApiQueriesAndPagination({
+    name: 'valueType',
+    example: StockPromotionValueType.FIXED,
+    required: false,
+  })
+  @ApiResponseDocumentPagination(
+    HttpStatus.OK,
+    StockPromotionResponseDto,
+    'Get stock promotion list successfully',
+  )
+  async getStockPromotionListForStaff(
+    @Param('agencyId', ParseIntPipe) agencyId: number,
+    @StockPromotionQuery() stockPromotionQueries: StockPromotionQueries,
+  ) {
+    const dataList =
+      await this.stockPromotionService.getListStockPromotionForStaff(
+        agencyId,
+        stockPromotionQueries,
+      );
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Get stock promotion list for staff successfully!',
+      data: dataList.data,
+      paginationInfo: dataList.paginationInfo,
+    };
+  }
+
   @Get('detail/:stockPromotionId')
   @ApiResponseDocument(
     HttpStatus.OK,
@@ -143,6 +172,24 @@ export class StockPromotionController {
       statusCode: HttpStatus.OK,
       message: 'Update stock promotion successfully!',
       data: updateData,
+    };
+  }
+
+  @Patch('expiration/:agencyId')
+  @ApiResponseDocument(
+    HttpStatus.OK,
+    Object,
+    'Update stock promotion status successfully!',
+  )
+  @ApiOperation({ summary: 'Update stock promotion status' })
+  async updateStockPromotionExpired(
+    @Param('agencyId', ParseIntPipe) agencyId: number,
+  ) {
+    await this.stockPromotionService.checkStockPromotionExpired(agencyId);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Update stock promotion status successfully!',
+      data: {},
     };
   }
 

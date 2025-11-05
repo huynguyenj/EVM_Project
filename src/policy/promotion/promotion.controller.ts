@@ -125,6 +125,22 @@ export class PromotionController {
     };
   }
 
+  @Patch('expiration-validation')
+  @ApiResponseDocument(
+    HttpStatus.OK,
+    Object,
+    'Update promotion expiration successfully!',
+  )
+  @ApiOperation({ summary: 'Update promotion expiration' })
+  async updatePromotionExpiration() {
+    await this.promotionService.checkExpiredPromotion();
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Update promotion expiration successfully!',
+      data: {},
+    };
+  }
+
   @Patch(':promotionId')
   @ApiResponseDocument(
     HttpStatus.OK,

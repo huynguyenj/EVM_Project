@@ -261,4 +261,24 @@ export class DiscountService {
     });
     return;
   }
+
+  async checkExpiredDiscount() {
+    const today = new Date();
+    const listDiscounts = await this.prisma.discount_Policy.findMany({
+      where: {
+        endAt: {
+          lt: today,
+        },
+      },
+    });
+    await this.prisma.$transaction(
+      listDiscounts.map((discount) =>
+        this.prisma.discount_Policy.update({
+          where: { id: discount.id },
+          data: { status: 'INACTIVE' },
+        }),
+      ),
+    );
+    return;
+  }
 }

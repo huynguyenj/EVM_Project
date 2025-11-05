@@ -295,6 +295,16 @@ export class OrderRestockService {
     return data;
   }
 
+  async updateCheckedOrder(orderId: number) {
+    const updatedData = await this.prisma.agency_Order.update({
+      where: { id: orderId },
+      data: {
+        creditChecked: true,
+      },
+    });
+    return updatedData;
+  }
+
   // async inventoryUpdate(
   //   motorbikeId: number,
   //   warehouseId: number,
