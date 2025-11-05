@@ -62,7 +62,8 @@ export class InstallmentContractService {
     prePaidPercent: number,
     processFee: number,
   ) {
-    return finalAmount * (prePaidPercent / 100) - processFee;
+    const finalPrice = finalAmount * (prePaidPercent / 100) - processFee;
+    return finalPrice > 0 ? finalPrice : 0;
   }
   calculateTotalDebt(finalAmount: number, prePaidTotal: number) {
     return finalAmount - prePaidTotal;
