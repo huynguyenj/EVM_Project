@@ -126,7 +126,10 @@ export class DashboardService {
   }
 
   async getTotalWarehousesReport() {
-    return await this.prisma.warehouse.count();
+    const totalWarehouses = await this.prisma.warehouse.count();
+    return {
+      totalWarehouses,
+    };
   }
 
   async getTop10MotorbikeOrderReport() {
