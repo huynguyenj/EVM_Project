@@ -46,6 +46,7 @@ export class AuthController {
     };
     res.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
+      message: 'Sign in successfully',
       data: response,
     });
   }
