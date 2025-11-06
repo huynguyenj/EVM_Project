@@ -15,7 +15,7 @@ export class DashboardService {
   ) {
     const filters: object[] = [];
     if (revenueAgencyQuery.agencyId) {
-      filters.push({ agencyId: revenueAgencyQuery.agencyId });
+      filters.push({ agencyId: Number(revenueAgencyQuery.agencyId) });
     }
     const totalContract = await this.prisma.customer_Contract.findMany({
       where: {
@@ -98,7 +98,7 @@ export class DashboardService {
   async getApBatchesReport(apBatchesQueries: ApBatchesQueries) {
     const filters: object[] = [];
     if (apBatchesQueries.agencyId) {
-      filters.push({ agencyId: apBatchesQueries.agencyId });
+      filters.push({ agencyId: Number(apBatchesQueries.agencyId) });
     }
     const apBatchesData = await this.prisma.ap_Batches.findMany({
       where: filters.length > 0 ? { AND: filters } : {},
