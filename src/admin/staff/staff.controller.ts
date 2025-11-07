@@ -144,7 +144,9 @@ export class StaffController {
   async deleteStaff(@Param('staffId', ParseIntPipe) staffId: number) {
     await this.staffService.deleteStaffAdmin(staffId);
     return {
+      statusCode: HttpStatus.OK,
       message: 'Delete staff successfully',
+      data: {},
     };
   }
 }
