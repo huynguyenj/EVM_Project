@@ -153,7 +153,7 @@ export class StaffService {
   async deleteStaffAdmin(staffId: number) {
     await this.prisma.staff.update({
       where: { id: staffId },
-      data: { isDeleted: true },
+      data: { isDeleted: true, isActive: false },
     });
   }
 
