@@ -16,6 +16,7 @@ import { SeederModule } from './seeder/seeder.module';
 import { DealerStaffModule } from './dealer-staff/dealer-staff.module';
 import { PaymentsModule } from './payments/payments.module';
 import { CustomerModule } from './customer/customer.module';
+import { EmailModule } from './email/email.module';
 import supabaseConfig from './common/config/supabase.config';
 
 @Module({
@@ -45,6 +46,7 @@ import supabaseConfig from './common/config/supabase.config';
     DealerStaffModule,
     PaymentsModule,
     CustomerModule,
+    EmailModule,
   ],
   providers: [
     {

@@ -5,6 +5,7 @@ import {
   Get,
   HttpStatus,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
 } from '@nestjs/common';
@@ -87,7 +88,7 @@ export class BatchesManagementController {
     'Get list batches success',
   )
   async getListBatchesForAgency(
-    @Param('agencyId') agencyId: number,
+    @Param('agencyId', ParseIntPipe) agencyId: number,
     @BatchesQuery() batchesQueries: BatchesQueries,
   ) {
     const listData = await this.batchesService.getAllBatchesOfAgency(
@@ -110,7 +111,7 @@ export class BatchesManagementController {
     BatchesDetailResponse,
     'Get batch detail success',
   )
-  async getBatchDetail(@Param('batchId') batchId: number) {
+  async getBatchDetail(@Param('batchId', ParseIntPipe) batchId: number) {
     const data = await this.batchesService.getBatchDetail(batchId);
     return {
       statusCode: HttpStatus.OK,
@@ -127,7 +128,7 @@ export class BatchesManagementController {
     'Update batch success',
   )
   async updateBatch(
-    @Param('batchId') batchId: number,
+    @Param('batchId', ParseIntPipe) batchId: number,
     @Body() updateBatchDto: UpdateBatchesDto,
   ) {
     const data = await this.batchesService.updateBatches(
@@ -149,7 +150,7 @@ export class BatchesManagementController {
     BatchesDetailResponse,
     'Delete batch success',
   )
-  async deleteBatch(@Param('batchId') batchId: number) {
+  async deleteBatch(@Param('batchId', ParseIntPipe) batchId: number) {
     const data = await this.batchesService.deleteBatches(batchId);
     return {
       statusCode: HttpStatus.OK,

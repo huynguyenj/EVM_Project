@@ -5,6 +5,7 @@ import {
   Get,
   HttpStatus,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
 } from '@nestjs/common';
@@ -78,7 +79,9 @@ export class CreditLineController {
     CreditLineDetailResponse,
     'Get credit line detail success',
   )
-  async getCreditLineDetail(@Param('creditLineId') creditLineId: number) {
+  async getCreditLineDetail(
+    @Param('creditLineId', ParseIntPipe) creditLineId: number,
+  ) {
     const data = await this.creditService.getCreditLineDetail(creditLineId);
     return {
       statusCode: HttpStatus.OK,
@@ -95,7 +98,7 @@ export class CreditLineController {
     'Get credit line detail success',
   )
   @Roles(Role.DEALER_MANAGER)
-  async getCreditLineAgency(@Param('agencyId') agencyId: number) {
+  async getCreditLineAgency(@Param('agencyId', ParseIntPipe) agencyId: number) {
     const data = await this.creditService.getCreditLineByAgencyId(agencyId);
     return {
       statusCode: HttpStatus.OK,
@@ -112,7 +115,7 @@ export class CreditLineController {
     'Update credit line success',
   )
   async updateCreditLine(
-    @Param('creditLineId') creditLineId: number,
+    @Param('creditLineId', ParseIntPipe) creditLineId: number,
     @Body() updateCreditLineDto: UpdateCreditLineDto,
   ) {
     const updatedData = await this.creditService.updateCreditLine(
@@ -129,7 +132,9 @@ export class CreditLineController {
   @Delete(':creditLineId')
   @ApiOperation({ summary: 'Delete credit line' })
   @ApiResponseDocument(HttpStatus.OK, Object, 'Delete credit line success')
-  async deleteCreditLine(@Param('creditLineId') creditLineId: number) {
+  async deleteCreditLine(
+    @Param('creditLineId', ParseIntPipe) creditLineId: number,
+  ) {
     const updatedData = await this.creditService.deleteCreditLine(creditLineId);
     return {
       statusCode: HttpStatus.OK,

@@ -5,6 +5,7 @@ import {
   Get,
   HttpStatus,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
 } from '@nestjs/common';
@@ -68,7 +69,7 @@ export class QuotationController {
     'Get list quotations success',
   )
   async getListQuotation(
-    @Param('agencyId') agencyId: number,
+    @Param('agencyId', ParseIntPipe) agencyId: number,
     @QuotationQuery() quotationQueries: QuotationQueriesDto,
   ) {
     const listQuotations = await this.quotationService.getListQuotation(
@@ -90,7 +91,9 @@ export class QuotationController {
     'Get quotation detail success',
   )
   @ApiOperation({ summary: 'Get quotation detail' })
-  async getQuotationDetail(@Param('quotationId') quotationId: number) {
+  async getQuotationDetail(
+    @Param('quotationId', ParseIntPipe) quotationId: number,
+  ) {
     const quotationDetail =
       await this.quotationService.getQuotationById(quotationId);
     return {
@@ -108,7 +111,7 @@ export class QuotationController {
     'Update quotation success',
   )
   async updateQuotation(
-    @Param('quotationId') quotationId: number,
+    @Param('quotationId', ParseIntPipe) quotationId: number,
     @Body() updateQuotationDto: UpdateQuotationDto,
   ) {
     const updatedQuotation = await this.quotationService.updateQuotation(
@@ -125,7 +128,9 @@ export class QuotationController {
   @Delete(':quotationId')
   @ApiOperation({ summary: 'Delete quotation' })
   @ApiResponseDocument(HttpStatus.OK, Object, 'Delete quotation success')
-  async deleteQuotation(@Param('quotationId') quotationId: number) {
+  async deleteQuotation(
+    @Param('quotationId', ParseIntPipe) quotationId: number,
+  ) {
     await this.quotationService.deleteQuotation(quotationId);
     return {
       statusCode: HttpStatus.OK,

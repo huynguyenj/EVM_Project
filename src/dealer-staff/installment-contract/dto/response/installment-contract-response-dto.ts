@@ -2,6 +2,8 @@ import { ApiResponseProperty } from '@nestjs/swagger';
 import { InstallmentContractStatus, PenaltyType } from '../../types';
 
 export class InstallmentContractResponseDto {
+  @ApiResponseProperty({ example: 1 })
+  id: number;
   @ApiResponseProperty({
     example: '2025-10-12T14:30:00.000Z',
     type: String,

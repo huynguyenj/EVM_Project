@@ -231,4 +231,44 @@ export class CustomerContractService {
       },
     });
   }
+
+  async getCustomerContractDetailForEmail(customerContractId: number) {
+    const data = await this.prisma.customer_Contract.findUnique({
+      where: { id: customerContractId },
+      include: {
+        agency: {
+          select: {
+            name: true,
+          },
+        },
+        staff: {
+          select: {
+            email: true,
+            fullname: true,
+          },
+        },
+        color: {
+          select: {
+            colorType: true,
+          },
+        },
+        electricMotorbike: {
+          select: {
+            name: true,
+            model: true,
+            makeFrom: true,
+            version: true,
+          },
+        },
+        customer: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+    if (!data) throw new NotFoundException('This contract is not found');
+    return data;
+  }
 }

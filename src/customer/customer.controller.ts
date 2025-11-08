@@ -3,6 +3,7 @@ import {
   Get,
   HttpStatus,
   Param,
+  ParseIntPipe,
   SetMetadata,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -34,8 +35,8 @@ export class CustomerController {
     'Get customer contracts successfully',
   )
   async getCustomerContracts(
-    @Param('credentialId') credentialId: string,
-    @Param('agencyId') agencyId: number,
+    @Param('credentialId', ParseIntPipe) credentialId: string,
+    @Param('agencyId', ParseIntPipe) agencyId: number,
     @CustomerInfoQuery() customerQueries: CustomerContractQueries,
   ) {
     const listData = await this.customerService.getContractByCustomer(
@@ -60,7 +61,7 @@ export class CustomerController {
     'Get installment contract detail success',
   )
   async getInstallmentDetail(
-    @Param('installmentContractId') installmentContractId: number,
+    @Param('installmentContractId', ParseIntPipe) installmentContractId: number,
   ) {
     const data = await this.customerService.getDetailInstallmentContract(
       installmentContractId,
