@@ -64,11 +64,12 @@ export class VnpayController {
     @IpAddress() ipAddress: string,
     @Body() createCustomerInstallmentPayment: CreatePaymentCustomer,
   ) {
-    const paymentData = await this.vnPayService.getInstallmentInformation(
-      platform,
-      ipAddress,
-      createCustomerInstallmentPayment,
-    );
+    const paymentData =
+      await this.vnPayService.getInstallmentPaymentInformation(
+        platform,
+        ipAddress,
+        createCustomerInstallmentPayment,
+      );
     return {
       statusCode: HttpStatus.CREATED,
       message: 'Get payment url success',

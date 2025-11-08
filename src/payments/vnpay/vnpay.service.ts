@@ -43,7 +43,7 @@ export class VnpayService {
     return vnpUrl;
   }
 
-  async getInstallmentInformation(
+  async getInstallmentPaymentInformation(
     platform: string,
     ipAddress: string,
     createPaymentCustomer: CreatePaymentCustomer,
@@ -91,7 +91,7 @@ export class VnpayService {
     //Check payment response
     if (vnp_ResponseCode === '00') {
       const apBatches = await this.batchesService.getBatchWithOrder(batchId);
-      const restAmount = apBatches.amount - vnp_Amount;
+      const restAmount = apBatches.amount - vnp_Amount / 100;
       if (restAmount === 0) {
         await this.batchesService.updateCompleteBatch(
           batchId,
