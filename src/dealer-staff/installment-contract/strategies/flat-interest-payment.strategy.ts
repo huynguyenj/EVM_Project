@@ -18,7 +18,7 @@ export class FlatInterestStrategy implements InstallmentInterestStrategy {
     const totalEachMonth = principal + interestPerMonth;
 
     return Array.from({ length: totalMonths }, (_, i) => ({
-      amountDue: totalEachMonth,
+      amountDue: Math.round(totalEachMonth),
       amountPaid: 0,
       period: this.addMonths(startDate, i + 1),
       installmentContractId: contractId,

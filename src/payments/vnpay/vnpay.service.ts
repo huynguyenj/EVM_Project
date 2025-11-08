@@ -117,6 +117,13 @@ export class VnpayService {
     //Check payment response
     if (vnp_ResponseCode === '00') {
       const apBatches = await this.batchesService.getBatchWithOrder(batchId);
+      await this.prisma.ap_Payments.create({
+        data: {
+          amount: vnp_Amount / 100,
+          paidDate: new Date(),
+          apBatchesId: apBatches.id,
+        },
+      });
       const restAmount = apBatches.amount - vnp_Amount / 100;
       if (restAmount === 0) {
         await this.batchesService.updateCompleteBatch(
