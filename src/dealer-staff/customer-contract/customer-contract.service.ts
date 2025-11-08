@@ -164,6 +164,14 @@ export class CustomerContractService {
     return data;
   }
 
+  async getCustomerContractById(customerContractId: number) {
+    const data = await this.prisma.customer_Contract.findUnique({
+      where: { id: customerContractId },
+    });
+    if (!data) throw new NotFoundException('Not found customer contract');
+    return data;
+  }
+
   async getCustomerContractTotalAmount(customerContractId: number) {
     const data = await this.prisma.customer_Contract.findUnique({
       where: {
@@ -213,5 +221,14 @@ export class CustomerContractService {
       },
     });
     return;
+  }
+
+  async updateCompleteCustomerContract(customerContractId: number) {
+    await this.prisma.customer_Contract.update({
+      where: { id: customerContractId },
+      data: {
+        status: 'COMPLETED',
+      },
+    });
   }
 }
