@@ -5,6 +5,7 @@ import {
   Get,
   HttpStatus,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
 } from '@nestjs/common';
@@ -38,7 +39,7 @@ export class DepositController {
   @Get(':depositId')
   @ApiResponseDocument(HttpStatus.OK, DepositResponseDto, 'Get Deposit success')
   @ApiOperation({ summary: 'Get Deposit by ID' })
-  async getDepositById(@Param('depositId') depositId: number) {
+  async getDepositById(@Param('depositId', ParseIntPipe) depositId: number) {
     const deposit = await this.depositService.getDepositById(depositId);
     return {
       statusCode: HttpStatus.OK,
@@ -55,7 +56,7 @@ export class DepositController {
   )
   @ApiOperation({ summary: 'Update Deposit Status' })
   async updateDepositStatus(
-    @Param('depositId') depositId: number,
+    @Param('depositId', ParseIntPipe) depositId: number,
     @Body() updateDepositDto: UpdateDepositDto,
   ) {
     const updatedDeposit = await this.depositService.updateDeposit(
@@ -72,7 +73,7 @@ export class DepositController {
   @Delete(':depositId')
   @ApiResponseDocument(HttpStatus.OK, Object, 'Delete Deposit success')
   @ApiOperation({ summary: 'Delete Deposit by ID' })
-  async deleteDeposit(@Param('depositId') depositId: number) {
+  async deleteDeposit(@Param('depositId', ParseIntPipe) depositId: number) {
     await this.depositService.deleteDeposit(depositId);
     return {
       statusCode: HttpStatus.OK,
