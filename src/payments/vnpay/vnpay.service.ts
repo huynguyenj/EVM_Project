@@ -7,12 +7,17 @@ import {
 import { type ConfigType } from '@nestjs/config';
 import vnpayConfig from 'src/common/config/vnpay.config';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreatePaymentAgencyBill, CreatePaymentCustomer } from '../dto';
+import {
+  CreateCustomerContractFullPayment,
+  CreatePaymentAgencyBill,
+  CreatePaymentCustomer,
+} from '../dto';
 import QueryString from 'qs';
 import crypto from 'crypto';
 import { VnpParam, VnpParamResponse } from '../types';
 import { BatchesManagementService } from 'src/evm-staff/batches-management/batches-management.service';
 import { sortObject } from './utils/vnpayHelper';
+import { CustomerContractService } from 'src/dealer-staff/customer-contract/customer-contract.service';
 @Injectable()
 export class VnpayService {
   constructor(
@@ -20,6 +25,7 @@ export class VnpayService {
     @Inject(vnpayConfig.KEY)
     private vnPaySetting: ConfigType<typeof vnpayConfig>,
     private batchesService: BatchesManagementService,
+    private customerContractService: CustomerContractService,
   ) {}
 
   async getApBatchPaymentInformation(
@@ -38,7 +44,27 @@ export class VnpayService {
       ipAddress,
       createPaymentBill.amount,
       data.id,
-      this.vnPaySetting.vnpayReturnUrl,
+      this.vnPaySetting.vnpayReturnUrlBatch,
+    );
+    return vnpUrl;
+  }
+
+  async getCustomerContractPaymentInformation(
+    platform: string,
+    ipAddress: string,
+    createCustomerContract: CreateCustomerContractFullPayment,
+  ) {
+    const data = await this.customerContractService.getCustomerContractById(
+      createCustomerContract.customerContractId,
+    );
+    if (data.status === 'COMPLETED')
+      throw new BadRequestException('This customer contract already completed');
+    const vnpUrl = this.createPaymentUrl(
+      platform,
+      ipAddress,
+      data.finalPrice,
+      data.id,
+      this.vnPaySetting.vnpayReturnUrlCustomerContract,
     );
     return vnpUrl;
   }
@@ -68,7 +94,7 @@ export class VnpayService {
       ipAddress,
       amount,
       data.id,
-      this.vnPaySetting.vnpayReturnUrlCustomer,
+      this.vnPaySetting.vnpayReturnUrlCustomerInstallment,
     );
     return vnpUrl;
   }
@@ -134,6 +160,32 @@ export class VnpayService {
           paidDate: new Date(),
         },
       });
+      return `${returnClientUrl + '/payment?status=success'}`;
+    } else {
+      return `${returnClientUrl + '/payment?status=fail'}`;
+    }
+  }
+
+  async updateCustomerContractPayment(vnp_Params: VnpParamResponse) {
+    const vnpData = this.checkPaymentReturn(vnp_Params);
+    if (!vnpData)
+      return `${this.vnPaySetting.vnpayClientReturn + '/payment?status=invalid'}`;
+    const { vnp_ResponseCode, vnp_OrderInfo } = vnpData;
+    const orderInfoListInfo = vnp_OrderInfo.split('-'); //vnp_OrderInfo = 1&web
+    //Customer contract id
+    const customerContractId = Number(orderInfoListInfo[0]);
+    //Platform
+    const platform = orderInfoListInfo[1];
+    //Return client url
+    const returnClientUrl =
+      platform === 'web'
+        ? this.vnPaySetting.vnpayClientReturn
+        : this.vnPaySetting.vnpayClientMobileReturn;
+
+    if (vnp_ResponseCode === '00') {
+      await this.customerContractService.updateCompleteCustomerContract(
+        customerContractId,
+      );
       return `${returnClientUrl + '/payment?status=success'}`;
     } else {
       return `${returnClientUrl + '/payment?status=fail'}`;

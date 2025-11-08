@@ -21,11 +21,11 @@ import { CustomerInfoQuery } from './decorators';
 
 @Controller('customer')
 @ApiTags('customer')
-@SetMetadata('public', true)
 export class CustomerController {
   constructor(private customerService: CustomerService) {}
 
   @Get('customer-contracts/:credentialId/:agencyId')
+  @SetMetadata('public', true)
   @ApiQueriesAndPagination()
   @ApiOperation({ summary: 'Get customer contracts' })
   @ApiResponseDocumentPagination(
@@ -52,6 +52,7 @@ export class CustomerController {
   }
 
   @Get('installment-detail/:installmentContractId')
+  @SetMetadata('public', true)
   @ApiOperation({ summary: 'Get installment contract detail' })
   @ApiResponseDocument(
     HttpStatus.OK,

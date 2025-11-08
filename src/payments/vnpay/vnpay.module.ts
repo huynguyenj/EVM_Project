@@ -5,12 +5,14 @@ import { ConfigModule } from '@nestjs/config';
 import vnpayConfig from 'src/common/config/vnpay.config';
 import { BatchesManagementModule } from 'src/evm-staff/batches-management/batches-management.module';
 import { CreditLineModule } from 'src/admin/credit-line/credit-line.module';
+import { CustomerContractModule } from 'src/dealer-staff/customer-contract/customer-contract.module';
 
 @Module({
   imports: [
     ConfigModule.forFeature(vnpayConfig),
     BatchesManagementModule,
     CreditLineModule,
+    CustomerContractModule,
   ],
   providers: [VnpayService],
   controllers: [VnpayController],
