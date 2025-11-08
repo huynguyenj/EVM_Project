@@ -20,7 +20,7 @@ export class DecliningInterestStrategy implements InstallmentInterestStrategy {
         (debtRemain * (interestRate / 100)) / rateMonths;
       const total = monthlyAmount + interestThisMonth;
       return {
-        amountDue: total,
+        amountDue: Math.round(total),
         amountPaid: 0,
         period: this.addMonths(startDate, i + 1),
         installmentContractId: contractId,
