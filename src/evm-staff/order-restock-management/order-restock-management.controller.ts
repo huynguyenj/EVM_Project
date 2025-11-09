@@ -121,7 +121,8 @@ export class OrderRestockManagementController {
     'Check credit successfully!',
   )
   async checkOrderForEvmStaff(@Param('orderId', ParseIntPipe) orderId: number) {
-    const updatedData = await this.orderManageService.updateCheckOrder(orderId);
+    const updatedData =
+      await this.orderManageService.updateCheckCreditOrder(orderId);
     return {
       statusCode: HttpStatus.OK,
       message: 'Check credit successfully!',

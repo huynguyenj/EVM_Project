@@ -17,6 +17,7 @@ import { CustomerService } from '../customer/customer.service';
 import { ColorService } from 'src/vehicle/color/color.service';
 import { v4 as uuidv4 } from 'uuid';
 import { InstallmentContractService } from '../installment-contract/installment-contract.service';
+import { AgencyStockService } from 'src/dealer-manager/agency-stock/agency-stock.service';
 
 @Injectable()
 export class CustomerContractService {
@@ -27,6 +28,7 @@ export class CustomerContractService {
     private colorService: ColorService,
     @Inject(forwardRef(() => InstallmentContractService))
     private installmentContractService: InstallmentContractService,
+    private agencyStockService: AgencyStockService,
   ) {}
 
   async createCustomerContract(
@@ -190,13 +192,22 @@ export class CustomerContractService {
     contractId: number,
     updateCustomerContractDto: UpdateCustomerContractDto,
   ) {
+    const customerContract = await this.getCustomerContractById(contractId);
+    // Block update if the contract were completed.
+    if (customerContract.status === 'COMPLETED')
+      throw new BadRequestException(
+        'This customer contract is complete and can not be updated!',
+      );
+    //Update quantity of stock if it has.
+    if (updateCustomerContractDto.status === ContractStatus.COMPLETED) {
+      await this.agencyStockService.updateAgencyStockQuantity(
+        customerContract.electricMotorbikeId,
+        customerContract.agencyId,
+        customerContract.colorId,
+        1,
+      );
+    }
     const updatedData = await this.prisma.customer_Contract.update({
-      where: {
-        id: contractId,
-      },
-      data: updateCustomerContractDto,
-    });
-    await this.prisma.customer_Contract.update({
       where: {
         id: contractId,
       },
@@ -224,12 +235,20 @@ export class CustomerContractService {
   }
 
   async updateCompleteCustomerContract(customerContractId: number) {
+    const customerContract =
+      await this.getCustomerContractById(customerContractId);
     await this.prisma.customer_Contract.update({
       where: { id: customerContractId },
       data: {
         status: 'COMPLETED',
       },
     });
+    await this.agencyStockService.updateAgencyStockQuantity(
+      customerContract.electricMotorbikeId,
+      customerContract.agencyId,
+      customerContract.colorId,
+      1,
+    );
   }
 
   async getCustomerContractDetailForEmail(customerContractId: number) {
