@@ -9,6 +9,7 @@ import vnpayConfig from 'src/common/config/vnpay.config';
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
   CreateCustomerContractFullPayment,
+  CreateDepositPayment,
   CreatePaymentAgencyBill,
   CreatePaymentCustomer,
 } from '../dto';
@@ -18,6 +19,7 @@ import { VnpParam, VnpParamResponse } from '../types';
 import { BatchesManagementService } from 'src/evm-staff/batches-management/batches-management.service';
 import { sortObject } from './utils/vnpayHelper';
 import { CustomerContractService } from 'src/dealer-staff/customer-contract/customer-contract.service';
+import { DepositService } from 'src/dealer-staff/deposit/deposit.service';
 @Injectable()
 export class VnpayService {
   constructor(
@@ -26,6 +28,7 @@ export class VnpayService {
     private vnPaySetting: ConfigType<typeof vnpayConfig>,
     private batchesService: BatchesManagementService,
     private customerContractService: CustomerContractService,
+    private depositService: DepositService,
   ) {}
 
   async getApBatchPaymentInformation(
@@ -97,6 +100,51 @@ export class VnpayService {
       this.vnPaySetting.vnpayReturnUrlCustomerInstallment,
     );
     return vnpUrl;
+  }
+
+  async getDepositPaymentInformation(
+    platform: string,
+    ipAddress: string,
+    createDepositPayment: CreateDepositPayment,
+  ) {
+    const depositData = await this.depositService.getDepositById(
+      createDepositPayment.depositId,
+    );
+    if (depositData.status === 'EXPIRED' || depositData.holdDays < new Date())
+      throw new BadRequestException('This deposit was expired.');
+
+    const vnpUrl = this.createPaymentUrl(
+      platform,
+      ipAddress,
+      depositData.depositAmount,
+      depositData.id,
+      this.vnPaySetting.vnpayReturnUrlCustomerDeposit,
+    );
+    return vnpUrl;
+  }
+
+  async updateDepositPayment(vnp_Params: VnpParamResponse) {
+    const vnpData = this.checkPaymentReturn(vnp_Params);
+    if (!vnpData)
+      return `${this.vnPaySetting.vnpayClientReturn + '/payment?status=invalid'}`;
+    const { vnp_ResponseCode, vnp_OrderInfo } = vnpData;
+    const orderInfoListInfo = vnp_OrderInfo.split('-'); //vnp_OrderInfo = 1&web
+    //Deposit id
+    const depositId = Number(orderInfoListInfo[0]);
+    //Platform type
+    const platform = orderInfoListInfo[1];
+    //Return client url
+    const returnClientUrl =
+      platform === 'web'
+        ? this.vnPaySetting.vnpayClientReturn
+        : this.vnPaySetting.vnpayClientMobileReturn;
+    //Check payment response
+    if (vnp_ResponseCode === '00') {
+      await this.depositService.updateDepositPayment(depositId);
+      return `${returnClientUrl + '/payment?status=success'}`;
+    } else {
+      return `${returnClientUrl + '/payment?status=fail'}`;
+    }
   }
 
   async updateAgencyBatchPayment(vnp_Params: VnpParamResponse) {

@@ -11,4 +11,5 @@ export default registerAs('vnpay', () => ({
     process.env.VNP_RETURN_URL_CUSTOMER_INSTALMENT,
   vnpayReturnUrlCustomerContract:
     process.env.VNP_RETURN_URL_CUSTOMER_CONTRACT_FULL,
+  vnpayReturnUrlCustomerDeposit: process.env.VNP_RETURN_URL_DEPOSIT,
 }));

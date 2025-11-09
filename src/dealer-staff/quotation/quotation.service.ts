@@ -128,4 +128,14 @@ export class QuotationService {
       where: { id: quotationId },
     });
   }
+
+  async minusQuotationWithDeposit(quotationId: number, depositAmount: number) {
+    const quotationData = await this.getQuotationById(quotationId);
+    await this.prisma.quotation.update({
+      where: { id: quotationId },
+      data: {
+        finalPrice: quotationData.finalPrice - depositAmount,
+      },
+    });
+  }
 }

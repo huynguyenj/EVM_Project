@@ -12,6 +12,7 @@ import { VnpayService } from './vnpay.service';
 import { ApiQuery, ApiTags } from '@nestjs/swagger';
 import {
   CreateCustomerContractFullPayment,
+  CreateDepositPayment,
   CreatePaymentAgencyBill,
   CreatePaymentCustomer,
   PaymentUrl,
@@ -104,6 +105,31 @@ export class VnpayController {
     };
   }
 
+  @Post('customer/deposit/payment')
+  @SetMetadata('public', true)
+  @ApiResponseDocument(
+    HttpStatus.CREATED,
+    PaymentUrl,
+    'Get payment url success',
+  )
+  @ApiQuery({ name: 'platform', required: true, example: 'web' })
+  async createCustomerDepositPaymentUrl(
+    @Query('platform') platform: string,
+    @IpAddress() ipAddress: string,
+    @Body() createCustomDeposit: CreateDepositPayment,
+  ) {
+    const paymentData = await this.vnPayService.getDepositPaymentInformation(
+      platform,
+      ipAddress,
+      createCustomDeposit,
+    );
+    return {
+      statusCode: HttpStatus.CREATED,
+      message: 'Get payment url success',
+      data: paymentData,
+    };
+  }
+
   @Get('check/batch')
   @SetMetadata('public', true)
   async checkPayment(
@@ -132,6 +158,16 @@ export class VnpayController {
   ) {
     const returnUrl =
       await this.vnPayService.updateCustomerContractPayment(query);
+    return res.redirect(returnUrl);
+  }
+
+  @Get('check/customer/deposit')
+  @SetMetadata('public', true)
+  async checkCustomerDepositPayment(
+    @VnpQueryQueries() query: VnpParamQuery,
+    @Res() res: Response,
+  ) {
+    const returnUrl = await this.vnPayService.updateDepositPayment(query);
     return res.redirect(returnUrl);
   }
 }
