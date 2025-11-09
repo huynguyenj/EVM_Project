@@ -35,7 +35,7 @@ export class CustomerController {
     'Get customer contracts successfully',
   )
   async getCustomerContracts(
-    @Param('credentialId', ParseIntPipe) credentialId: string,
+    @Param('credentialId') credentialId: string,
     @Param('agencyId', ParseIntPipe) agencyId: number,
     @CustomerInfoQuery() customerQueries: CustomerContractQueries,
   ) {
