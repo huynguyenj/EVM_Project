@@ -113,6 +113,9 @@ export class VnpayService {
     if (depositData.status === 'EXPIRED' || depositData.holdDays < new Date())
       throw new BadRequestException('This deposit was expired.');
 
+    if (depositData.status === 'APPLIED')
+      throw new BadRequestException('This deposit already paid');
+
     const vnpUrl = this.createPaymentUrl(
       platform,
       ipAddress,
