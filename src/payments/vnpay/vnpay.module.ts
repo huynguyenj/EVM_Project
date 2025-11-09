@@ -6,6 +6,7 @@ import vnpayConfig from 'src/common/config/vnpay.config';
 import { BatchesManagementModule } from 'src/evm-staff/batches-management/batches-management.module';
 import { CreditLineModule } from 'src/admin/credit-line/credit-line.module';
 import { CustomerContractModule } from 'src/dealer-staff/customer-contract/customer-contract.module';
+import { DepositModule } from 'src/dealer-staff/deposit/deposit.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { CustomerContractModule } from 'src/dealer-staff/customer-contract/custo
     BatchesManagementModule,
     CreditLineModule,
     CustomerContractModule,
+    DepositModule,
   ],
   providers: [VnpayService],
   controllers: [VnpayController],

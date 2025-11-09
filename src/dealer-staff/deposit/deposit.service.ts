@@ -50,4 +50,15 @@ export class DepositService {
       where: { id: depositId },
     });
   }
+
+  async updateDepositPayment(depositId: number) {
+    const updatedDeposit = await this.prisma.deposit.update({
+      where: { id: depositId },
+      data: { status: 'APPLIED' },
+    });
+    await this.quotationService.minusQuotationWithDeposit(
+      updatedDeposit.quotationId,
+      updatedDeposit.depositAmount,
+    );
+  }
 }

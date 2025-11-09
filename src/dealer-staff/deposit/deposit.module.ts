@@ -7,5 +7,6 @@ import { QuotationModule } from '../quotation/quotation.module';
   imports: [QuotationModule],
   controllers: [DepositController],
   providers: [DepositService],
+  exports: [DepositService],
 })
 export class DepositModule {}
