@@ -68,8 +68,10 @@ export class InstallmentContractService {
     const finalPrice = finalAmount * (prePaidPercent / 100) - processFee;
     return finalPrice > 0 ? finalPrice : 0;
   }
-  calculateTotalDebt(finalAmount: number, prePaidTotal: number) {
-    return finalAmount - prePaidTotal;
+
+  private calculateTotalDebt(finalAmount: number, prePaidTotal: number) {
+    const finalAmountPaid = finalAmount - prePaidTotal;
+    return finalAmountPaid > 0 ? finalAmountPaid : 0;
   }
 
   async generateInterest(installmentContractId: number) {
@@ -142,7 +144,11 @@ export class InstallmentContractService {
         id: installmentContractId,
       },
       include: {
-        installmentPayments: true,
+        installmentPayments: {
+          orderBy: {
+            period: 'asc',
+          },
+        },
         customerContract: true,
         installmentPlan: true,
       },
@@ -150,6 +156,33 @@ export class InstallmentContractService {
     if (!data)
       throw new NotFoundException('Can not found installment contract');
     return data;
+  }
+
+  async getListInstallmentPaymentsForEmail(installmentContractId: number) {
+    const installmentContractDetail =
+      await this.prisma.installment_Contract.findUnique({
+        where: { id: installmentContractId },
+        include: {
+          installmentPayments: {
+            orderBy: {
+              period: 'asc',
+            },
+          },
+          customerContract: {
+            include: {
+              customer: {
+                select: {
+                  name: true,
+                  email: true,
+                },
+              },
+            },
+          },
+        },
+      });
+    if (!installmentContractDetail)
+      throw new NotFoundException('Can not found installment contract');
+    return installmentContractDetail;
   }
 
   async getInstallmentPaymentDetail(installmentPaymentId: number) {
@@ -208,5 +241,14 @@ export class InstallmentContractService {
       },
     });
     return;
+  }
+
+  async getInstallmentPaymentByInstallmentContractId(
+    installmentContractId: number,
+  ) {
+    const listPayments = await this.prisma.installment_Schedule.findMany({
+      where: { installmentContractId: installmentContractId },
+    });
+    return listPayments;
   }
 }

@@ -25,15 +25,16 @@ export class AgencyStockService {
     );
     const isMotorbikeStockExited = await this.prisma.agency_Stock.findUnique({
       where: {
-        motorbikeId_colorId: {
+        motorbikeId_colorId_agencyId: {
           colorId: motorbikeColor.colorId,
           motorbikeId: createAgencyStockDto.motorbikeId,
+          agencyId: createAgencyStockDto.agencyId,
         },
       },
     });
     if (isMotorbikeStockExited)
       throw new BadRequestException(
-        'This motorbike with this color already available in stock.',
+        'This motorbike with this color already available in stock of the agency.',
       );
     const createdData = await this.prisma.agency_Stock.create({
       data: createAgencyStockDto,
@@ -140,5 +141,35 @@ export class AgencyStockService {
       },
     });
     return;
+  }
+
+  async updateAgencyStockQuantity(
+    motorbikeId: number,
+    agencyId: number,
+    colorId: number,
+    minusQuantity: number,
+  ) {
+    const isStockHas = await this.prisma.agency_Stock.findUnique({
+      where: {
+        motorbikeId_colorId_agencyId: {
+          agencyId: agencyId,
+          colorId: colorId,
+          motorbikeId: motorbikeId,
+        },
+      },
+    });
+    if (!isStockHas) return;
+    await this.prisma.agency_Stock.update({
+      where: {
+        motorbikeId_colorId_agencyId: {
+          agencyId: agencyId,
+          colorId: colorId,
+          motorbikeId: motorbikeId,
+        },
+      },
+      data: {
+        quantity: isStockHas.quantity - minusQuantity,
+      },
+    });
   }
 }

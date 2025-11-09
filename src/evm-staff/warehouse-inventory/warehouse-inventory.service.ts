@@ -82,6 +82,19 @@ export class WarehouseInventoryService {
     };
   }
 
+  async getInventoryById(motorbikeId: number, warehouseId: number) {
+    const data = await this.prisma.inventory.findUnique({
+      where: {
+        electricMotorbikeId_warehouseId: {
+          electricMotorbikeId: motorbikeId,
+          warehouseId: warehouseId,
+        },
+      },
+    });
+    if (!data) throw new NotFoundException('Not found the inventory!');
+    return data;
+  }
+
   async updateInventory(
     motorbikeId: number,
     warehouseId: number,
@@ -105,8 +118,9 @@ export class WarehouseInventoryService {
   async updateInventoryQuantity(
     motorbikeId: number,
     warehouseId: number,
-    restQuantity: number,
+    requiredQuantity: number,
   ) {
+    const inventoryData = await this.getInventoryById(motorbikeId, warehouseId);
     await this.prisma.inventory.update({
       where: {
         electricMotorbikeId_warehouseId: {
@@ -115,7 +129,7 @@ export class WarehouseInventoryService {
         },
       },
       data: {
-        quantity: restQuantity,
+        quantity: inventoryData.quantity - requiredQuantity,
       },
     });
   }
@@ -130,5 +144,26 @@ export class WarehouseInventoryService {
       },
     });
     return;
+  }
+
+  async checkInventory(
+    motorbikeId: number,
+    warehouseId: number,
+    requestQuantity: number,
+  ) {
+    const inventory = await this.prisma.inventory.findUnique({
+      where: {
+        electricMotorbikeId_warehouseId: {
+          electricMotorbikeId: motorbikeId,
+          warehouseId: warehouseId,
+        },
+      },
+    });
+    if (!inventory)
+      throw new BadRequestException('Not find inventory of the warehouse');
+    if (requestQuantity > inventory.quantity)
+      throw new BadRequestException(
+        `Your request quantity ${requestQuantity} is over the warehouse quantity ${inventory.quantity}`,
+      );
   }
 }

@@ -5,8 +5,13 @@ import emailConfig from 'src/common/config/email.config';
 import { ConfigModule, ConfigType } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 import { CustomerContractModule } from 'src/dealer-staff/customer-contract/customer-contract.module';
+import { InstallmentContractModule } from 'src/dealer-staff/installment-contract/installment-contract.module';
 @Module({
-  imports: [CustomerContractModule, ConfigModule.forFeature(emailConfig)],
+  imports: [
+    InstallmentContractModule,
+    CustomerContractModule,
+    ConfigModule.forFeature(emailConfig),
+  ],
   controllers: [EmailController],
   providers: [
     EmailService,

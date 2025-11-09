@@ -40,6 +40,11 @@ export class OrderRestockService {
 
     //Insert order item to order_items table
     for (const orderItem of createOrderDto.orderItems) {
+      await this.inventoryService.checkInventory(
+        orderItem.motorbikeId,
+        orderItem.warehouseId,
+        orderItem.quantity,
+      );
       const motorbikeData = await this.motorbikeService.getMotorbikePrice(
         orderItem.motorbikeId,
       );
@@ -320,6 +325,9 @@ export class OrderRestockService {
       where: {
         id: orderId,
       },
+      include: {
+        orderItems: true,
+      },
     });
     if (!data) throw new NotFoundException('Not found order!');
     return data;
@@ -334,25 +342,4 @@ export class OrderRestockService {
     });
     return updatedData;
   }
-
-  // async inventoryUpdate(
-  //   motorbikeId: number,
-  //   warehouseId: number,
-  //   requestQuantity: number,
-  // ) {
-  //   const inventory = await this.inventoryService.getInventoryDetail(
-  //     motorbikeId,
-  //     warehouseId,
-  //   );
-  //   if (requestQuantity > inventory.quantity)
-  //     throw new BadRequestException(
-  //       `Your request quantity ${requestQuantity} is over the warehouse quantity ${inventory.quantity}`,
-  //     );
-  //   const restQuantity = inventory.quantity - requestQuantity;
-  //   await this.inventoryService.updateInventoryQuantity(
-  //     motorbikeId,
-  //     warehouseId,
-  //     restQuantity,
-  //   );
-  // }
 }

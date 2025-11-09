@@ -31,4 +31,20 @@ export class EmailController {
       data: {},
     };
   }
+
+  @Post('customer/installment-schedule/:installmentContractId')
+  @ApiOperation({
+    summary: 'Send customer installment schedule to customer email',
+  })
+  @ApiResponseDocument(HttpStatus.CREATED, Object, 'Sending email success')
+  async sendCustomerInstallmentPaymentScheduleEmail(
+    @Param('installmentContractId', ParseIntPipe) installmentContractId: number,
+  ) {
+    await this.emailService.sendInstallmentScheduleEmail(installmentContractId);
+    return {
+      statusCode: HttpStatus.CREATED,
+      message: 'Sending email success',
+      data: {},
+    };
+  }
 }

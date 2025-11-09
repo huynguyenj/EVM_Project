@@ -148,7 +148,7 @@ model Agency_Stock {
   colorId Int
   color Color @relation(fields: [colorId], references: [id])
   agencyStockPromotion Agency_Stock_Promotion[]
-  @@unique([motorbikeId, colorId])
+  @@unique([motorbikeId, colorId, agencyId])
   @@map("agency_stocks")
 }
 

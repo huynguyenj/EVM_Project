@@ -7,11 +7,13 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { OrderManageQueries, UpdateOrderStock } from './dto';
 import { OrderRestockService } from 'src/dealer-manager/order-restock/order-restock.service';
 import { OrderStatus } from 'src/dealer-manager/order-restock/types';
+import { WarehouseInventoryService } from '../warehouse-inventory/warehouse-inventory.service';
 
 @Injectable()
 export class OrderRestockManagementService {
   constructor(
     private orderRestockService: OrderRestockService,
+    private warehouseInventoryService: WarehouseInventoryService,
     private prisma: PrismaService,
   ) {}
 
@@ -97,20 +99,36 @@ export class OrderRestockManagementService {
     return data;
   }
 
-  async updateCheckOrder(orderId: number) {
+  async updateCheckCreditOrder(orderId: number) {
     return await this.orderRestockService.updateCheckedOrder(orderId);
   }
 
   async updateStatusOrder(orderId: number, updateOrderDto: UpdateOrderStock) {
     const order = await this.orderRestockService.getOrderDetail(orderId);
-    if (
-      (updateOrderDto.status === OrderStatus.DELIVERED ||
-        updateOrderDto.status === OrderStatus.APPROVED) &&
-      !order.creditChecked
-    )
+
+    //Restrict not allow EVM Staff to change status while order is not official yet.
+    if (updateOrderDto.status !== OrderStatus.DRAFT && order.status === 'DRAFT')
+      throw new BadRequestException(
+        'This order is in draft status, just wait the agreement from agency to update',
+      );
+
+    //Make sure EVM Staff is check credit before change status
+    if (updateOrderDto.status !== OrderStatus.PENDING && !order.creditChecked)
       throw new BadRequestException(
         'Please check credit of this order, make sure it is allowed.',
       );
+
+    //Update inventory if EVM Staff approve the order
+    if (order.status === 'APPROVED') {
+      for (const orderItem of order.orderItems) {
+        await this.warehouseInventoryService.updateInventoryQuantity(
+          orderItem.electricMotorbikeId,
+          orderItem.warehouseId,
+          orderItem.quantity,
+        );
+      }
+    }
+
     const updatedData = await this.prisma.agency_Order.update({
       where: {
         id: orderId,
@@ -121,6 +139,11 @@ export class OrderRestockManagementService {
   }
 
   async deleteOrder(orderId: number) {
+    await this.prisma.order_Items.deleteMany({
+      where: {
+        orderId: orderId,
+      },
+    });
     await this.prisma.agency_Order.delete({
       where: {
         id: orderId,

@@ -7,5 +7,6 @@ import { MotorbikeModule } from 'src/vehicle/electric-motorbike/motorbike.module
   imports: [MotorbikeModule],
   controllers: [AgencyStockController],
   providers: [AgencyStockService],
+  exports: [AgencyStockService],
 })
 export class AgencyStockModule {}

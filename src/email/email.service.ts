@@ -2,10 +2,14 @@ import { Inject, Injectable } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 import SMTPTransport from 'nodemailer/lib/smtp-transport';
 import { CustomerContractService } from 'src/dealer-staff/customer-contract/customer-contract.service';
-import { CustomerContractTemplate } from './email-html';
+import {
+  CustomerContractTemplate,
+  CustomerScheduleTemplate,
+} from './email-html';
 import { emailOptions } from './utils';
 import emailConfig from 'src/common/config/email.config';
 import { type ConfigType } from '@nestjs/config';
+import { InstallmentContractService } from 'src/dealer-staff/installment-contract/installment-contract.service';
 @Injectable()
 export class EmailService {
   constructor(
@@ -14,6 +18,7 @@ export class EmailService {
     @Inject(emailConfig.KEY)
     private emailSetting: ConfigType<typeof emailConfig>,
     private customerContractService: CustomerContractService,
+    private installmentContractService: InstallmentContractService,
   ) {}
 
   async sendCustomerContractEmail(customerContractId: number) {
@@ -56,6 +61,40 @@ export class EmailService {
         this.emailSetting.email_user ?? '',
         [customerInfo.customer.email],
         `Customer contract - ${customerInfo.title}`,
+        contentEmail,
+      ),
+    );
+  }
+
+  async sendInstallmentScheduleEmail(installmentContractId: number) {
+    const listInstallmentData =
+      await this.installmentContractService.getListInstallmentPaymentsForEmail(
+        installmentContractId,
+      );
+    const tableRow: string[] = [];
+    for (const installmentPayment of listInstallmentData.installmentPayments) {
+      const cell = `
+        <tr>
+          <td>${installmentPayment.period.toLocaleDateString()}</td>
+          <td>${installmentPayment.dueDate ? installmentPayment.dueDate.toLocaleDateString() : 'Not decided yet'}</td>
+          <td>${installmentPayment.paidDate ? installmentPayment.paidDate.toLocaleDateString() : 'Not pay yet'}</td>
+          <td>${installmentPayment.amountDue}</td>
+          <td>${installmentPayment.amountPaid}</td>
+          <td>${installmentPayment.penaltyAmount}</td>
+          <td>${installmentPayment.status}</td>
+        </tr>
+      `;
+      tableRow.push(cell);
+    }
+    const contentEmail = CustomerScheduleTemplate.replace(
+      '{tableBody}',
+      tableRow.join(''),
+    );
+    await this.emailTransporter.sendMail(
+      emailOptions(
+        this.emailSetting.email_user ?? '',
+        [listInstallmentData.customerContract.customer.email],
+        `Payment schedule - Customer ${listInstallmentData.customerContract.customer.name}`,
         contentEmail,
       ),
     );
