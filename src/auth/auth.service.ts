@@ -8,10 +8,12 @@ import {
 import { type ConfigType } from '@nestjs/config';
 import authConfig from 'src/common/config/auth.config';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { SignIn } from './dto';
+import { CreateNewPassword, ForgetPasswordDto, SignIn } from './dto';
 import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './types/jwt.payload';
+import { EmailService } from 'src/email/email.service';
+import { generateCode } from './utils';
 
 @Injectable()
 export class AuthService {
@@ -20,6 +22,7 @@ export class AuthService {
     @Inject(authConfig.KEY)
     private authSettings: ConfigType<typeof authConfig>,
     private jwtService: JwtService,
+    private emailService: EmailService,
   ) {}
 
   async signIn(signInDto: SignIn) {
@@ -187,5 +190,23 @@ export class AuthService {
     });
     if (!data) throw new BadRequestException('Not found profile');
     return data;
+  }
+
+  async forgetPassword(forgetPasswordDto: ForgetPasswordDto) {
+    const { email } = await this.validateEmail(forgetPasswordDto.email);
+    await this.emailService.sendVerifyCode(generateCode(), email);
+    return;
+  }
+
+  async updatePassword(createPasswordDto: CreateNewPassword) {
+    await this.prisma.staff.update({
+      where: {
+        email: createPasswordDto.email,
+      },
+      data: {
+        password: createPasswordDto.newPassword,
+      },
+    });
+    return;
   }
 }

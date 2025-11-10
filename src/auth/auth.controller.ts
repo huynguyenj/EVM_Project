@@ -6,12 +6,19 @@ import {
   HttpStatus,
   Inject,
   Param,
+  Patch,
   Post,
   Req,
   Res,
   SetMetadata,
 } from '@nestjs/common';
-import { NewAccessTokenResponse, SignIn, SignInResponseDto } from './dto';
+import {
+  CreateNewPassword,
+  ForgetPasswordDto,
+  NewAccessTokenResponse,
+  SignIn,
+  SignInResponseDto,
+} from './dto';
 import { AuthService } from './auth.service';
 import { type Request, type Response } from 'express';
 import { UserId } from 'src/common/decorator/user-decorator/userId.decorator';
@@ -51,6 +58,23 @@ export class AuthController {
     });
   }
 
+  @Post('forget-password')
+  @SetMetadata('public', true)
+  @ApiOperation({ summary: 'Forget password' })
+  @ApiResponseDocument(
+    HttpStatus.OK,
+    Object,
+    'Please check your mail to get verification code',
+  )
+  async forgetPassword(@Body() forgetPasswordDto: ForgetPasswordDto) {
+    await this.authService.forgetPassword(forgetPasswordDto);
+    return {
+      statusCode: HttpStatus.CREATED,
+      message: 'Please check your email to get verification code',
+      data: {},
+    };
+  }
+
   @Get('token')
   @SetMetadata('public', true)
   @ApiOperation({ summary: 'Get new access token when it invalid' })
@@ -71,6 +95,23 @@ export class AuthController {
         accessToken: newToken,
       },
       message: 'Get new access token success!',
+    };
+  }
+
+  @Patch('update-password')
+  @SetMetadata('public', true)
+  @ApiOperation({ summary: 'Update new password' })
+  @ApiResponseDocument(
+    HttpStatus.CREATED,
+    Object,
+    'Update new password success',
+  )
+  async updateNewPassword(@Body() updateNewPasswordDto: CreateNewPassword) {
+    await this.authService.updatePassword(updateNewPasswordDto);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Update new password success',
+      data: {},
     };
   }
 
