@@ -32,5 +32,6 @@ import { InstallmentContractModule } from 'src/dealer-staff/installment-contract
       },
     },
   ],
+  exports: [EmailService],
 })
 export class EmailModule {}

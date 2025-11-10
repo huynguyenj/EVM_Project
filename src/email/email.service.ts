@@ -5,6 +5,7 @@ import { CustomerContractService } from 'src/dealer-staff/customer-contract/cust
 import {
   CustomerContractTemplate,
   CustomerScheduleTemplate,
+  VALIDATION_CODE_TEMPLATE,
 } from './email-html';
 import { emailOptions } from './utils';
 import emailConfig from 'src/common/config/email.config';
@@ -20,6 +21,22 @@ export class EmailService {
     private customerContractService: CustomerContractService,
     private installmentContractService: InstallmentContractService,
   ) {}
+
+  async sendVerifyCode(verifiedCode: string, email: string) {
+    const contentEmail = VALIDATION_CODE_TEMPLATE.replace(
+      '{code}',
+      verifiedCode,
+    );
+    await this.emailTransporter.sendMail(
+      emailOptions(
+        this.emailSetting.email_user,
+        [email],
+        'Validation code',
+        contentEmail,
+      ),
+    );
+    return;
+  }
 
   async sendCustomerContractEmail(customerContractId: number) {
     const customerInfo =
@@ -58,7 +75,7 @@ export class EmailService {
 
     await this.emailTransporter.sendMail(
       emailOptions(
-        this.emailSetting.email_user ?? '',
+        this.emailSetting.email_user,
         [customerInfo.customer.email],
         `Customer contract - ${customerInfo.title}`,
         contentEmail,
@@ -92,7 +109,7 @@ export class EmailService {
     );
     await this.emailTransporter.sendMail(
       emailOptions(
-        this.emailSetting.email_user ?? '',
+        this.emailSetting.email_user,
         [listInstallmentData.customerContract.customer.email],
         `Payment schedule - Customer ${listInstallmentData.customerContract.customer.name}`,
         contentEmail,
