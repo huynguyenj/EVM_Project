@@ -5,6 +5,7 @@ import { AgencyStockModule } from './agency-stock/agency-stock.module';
 import { InstallmentPlanModule } from './installment-plan/installment-plan.module';
 import { StockPromotionModule } from './stock-promotion/stock-promotion.module';
 import { RevenueModule } from './revenue/revenue.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { RevenueModule } from './revenue/revenue.module';
     InstallmentPlanModule,
     StockPromotionModule,
     RevenueModule,
+    DashboardModule,
   ],
 })
 export class DealerManagerModule {}
