@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import { IsDate, IsNumber, IsOptional, IsPositive } from 'class-validator';
 
 export class UpdateInventoryDto {
@@ -15,6 +16,7 @@ export class UpdateInventoryDto {
     description: 'The next date that will restock quantity',
   })
   @IsDate()
+  @Type(() => Date)
   @IsOptional()
   stockDate?: Date;
 }
