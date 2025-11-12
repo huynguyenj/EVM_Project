@@ -19,9 +19,17 @@ export class DepositService {
     const isDepositExist = await this.prisma.deposit.findUnique({
       where: { quotationId: createDepositDto.quotationId },
     });
+    const quotation = await this.quotationService.getQuotationBasicById(
+      createDepositDto.quotationId,
+    );
     if (isDepositExist)
       throw new BadRequestException(
         'Deposit already exists for this quotation',
+      );
+
+    if (createDepositDto.depositAmount > quotation.finalPrice)
+      throw new BadRequestException(
+        'Your deposit amount is higher than quotation final price, please try again!',
       );
     return await this.prisma.deposit.create({
       data: createDepositDto,

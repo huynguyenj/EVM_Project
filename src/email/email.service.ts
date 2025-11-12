@@ -111,9 +111,9 @@ export class EmailService {
           <td>${installmentPayment.period.toLocaleDateString()}</td>
           <td>${installmentPayment.dueDate ? installmentPayment.dueDate.toLocaleDateString() : 'Not decided yet'}</td>
           <td>${installmentPayment.paidDate ? installmentPayment.paidDate.toLocaleDateString() : 'Not pay yet'}</td>
-          <td>${installmentPayment.amountDue}</td>
-          <td>${installmentPayment.amountPaid}</td>
-          <td>${installmentPayment.penaltyAmount}</td>
+          <td>${installmentPayment.amountDue} vnd</td>
+          <td>${installmentPayment.amountPaid} vnd</td>
+          <td>${installmentPayment.penaltyAmount} vnd</td>
           <td>${installmentPayment.status}</td>
         </tr>
       `;

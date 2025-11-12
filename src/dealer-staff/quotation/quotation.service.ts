@@ -116,6 +116,14 @@ export class QuotationService {
     return data;
   }
 
+  async getQuotationBasicById(quotationId: number) {
+    const data = await this.prisma.quotation.findUnique({
+      where: { id: quotationId },
+    });
+    if (!data) throw new NotFoundException('Quotation not found');
+    return data;
+  }
+
   async updateQuotation(quotationId: number, updateData: UpdateQuotationDto) {
     return await this.prisma.quotation.update({
       where: { id: quotationId },
