@@ -94,6 +94,18 @@ export class StaffController {
     };
   }
 
+  @Patch(':staffId/unassign')
+  @ApiOperation({ summary: 'Unassign staff to agency' })
+  @ApiResponseDocument(HttpStatus.OK, Object, 'Unassign successfully!')
+  async unassignStaffAgencyAdmin(@Param('staffId') staffId: number) {
+    await this.staffService.unassignStaffWithAgency(staffId);
+    return {
+      statusCode: HttpStatus.OK,
+      data: Object,
+      message: 'Unassign successfully',
+    };
+  }
+
   @Get('detail/:staffId')
   @ApiOperation({ summary: 'Get staff information' })
   @HttpCode(200)

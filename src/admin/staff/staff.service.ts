@@ -209,4 +209,14 @@ export class StaffService {
       role: updatedData.role.map((item) => item.role.roleName),
     };
   }
+
+  async unassignStaffWithAgency(staffId: number) {
+    await this.prisma.staff.update({
+      where: { id: staffId },
+      data: {
+        agencyId: null,
+      },
+    });
+    return;
+  }
 }
