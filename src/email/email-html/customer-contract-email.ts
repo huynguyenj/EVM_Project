@@ -90,7 +90,7 @@ export const CustomerContractTemplate = `
           </table>
           
           <p>Paid type: {paidType}</p>
-          <p class="price">Total amount: {finalPrice}</p>
+          <p class="price">Total amount: {finalPrice} vnd</p>
           <hr>
           
           <p class="product">Product:</p>
