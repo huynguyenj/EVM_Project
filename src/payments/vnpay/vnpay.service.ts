@@ -38,10 +38,22 @@ export class VnpayService {
   ) {
     const data = await this.prisma.ap_Batches.findUnique({
       where: { id: createPaymentBill.batchId },
+      include: {
+        agencyOrder: true,
+      },
     });
     if (!data) throw new NotFoundException('This batch is not existed');
     if (data.amount === 0)
       throw new BadRequestException('This batch is already paid');
+    if (
+      data.agencyOrder.orderType === 'FULL' &&
+      (createPaymentBill.amount < data.amount ||
+        createPaymentBill.amount > data.amount)
+    )
+      throw new BadRequestException(
+        'Your order is full type so you must pay exactly the price',
+      );
+
     const vnpUrl = this.createPaymentUrl(
       platform,
       ipAddress,
