@@ -538,7 +538,6 @@ model Deposit {
 
 enum DepositStatus {
   PENDING
-  HOLDING
   APPLIED
   EXPIRED
 }
