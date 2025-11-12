@@ -1,40 +1,54 @@
-import { Inject, Injectable } from '@nestjs/common';
-import * as nodemailer from 'nodemailer';
-import SMTPTransport from 'nodemailer/lib/smtp-transport';
+import {
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { CustomerContractService } from 'src/dealer-staff/customer-contract/customer-contract.service';
 import {
   CustomerContractTemplate,
   CustomerScheduleTemplate,
   VALIDATION_CODE_TEMPLATE,
 } from './email-html';
-import { emailOptions } from './utils';
-import emailConfig from 'src/common/config/email.config';
 import { type ConfigType } from '@nestjs/config';
 import { InstallmentContractService } from 'src/dealer-staff/installment-contract/installment-contract.service';
+import resendConfig from 'src/common/config/resend.config';
+import { Resend } from 'resend';
 @Injectable()
 export class EmailService {
+  private resend: Resend;
   constructor(
-    @Inject('EMAIL_TRANSPORTER')
-    private emailTransporter: nodemailer.Transporter<SMTPTransport.SentMessageInfo>,
-    @Inject(emailConfig.KEY)
-    private emailSetting: ConfigType<typeof emailConfig>,
+    @Inject(resendConfig.KEY)
+    private resendSetting: ConfigType<typeof resendConfig>,
     private customerContractService: CustomerContractService,
     private installmentContractService: InstallmentContractService,
-  ) {}
+  ) {
+    this.resend = new Resend(this.resendSetting.resendApiKey);
+  }
+
+  private async sendEmail(
+    to: string | string[],
+    subject: string,
+    html: string,
+  ) {
+    try {
+      await this.resend.emails.send({
+        from: `EVM system <${this.resendSetting.resendSender}>`,
+        to: Array.isArray(to) ? to : [to],
+        subject,
+        html,
+      });
+      return;
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
 
   async sendVerifyCode(verifiedCode: string, email: string) {
     const contentEmail = VALIDATION_CODE_TEMPLATE.replace(
       '{code}',
       verifiedCode,
     );
-    await this.emailTransporter.sendMail(
-      emailOptions(
-        this.emailSetting.email_user,
-        [email],
-        'Validation code',
-        contentEmail,
-      ),
-    );
+    await this.sendEmail(email, 'Validation code', contentEmail);
     return;
   }
 
@@ -73,13 +87,10 @@ export class EmailService {
       .replace('{staffEmail}', customerInfo.staff.email)
       .replace('{agencyName}', customerInfo.agency.name);
 
-    await this.emailTransporter.sendMail(
-      emailOptions(
-        this.emailSetting.email_user,
-        [customerInfo.customer.email],
-        `Customer contract - ${customerInfo.title}`,
-        contentEmail,
-      ),
+    await this.sendEmail(
+      customerInfo.customer.email,
+      `Customer contract - ${customerInfo.title}`,
+      contentEmail,
     );
   }
 
@@ -107,13 +118,10 @@ export class EmailService {
       '{tableBody}',
       tableRow.join(''),
     );
-    await this.emailTransporter.sendMail(
-      emailOptions(
-        this.emailSetting.email_user,
-        [listInstallmentData.customerContract.customer.email],
-        `Payment schedule - Customer ${listInstallmentData.customerContract.customer.name}`,
-        contentEmail,
-      ),
+    await this.sendEmail(
+      listInstallmentData.customerContract.customer.email,
+      `Payment schedule - Customer ${listInstallmentData.customerContract.customer.name}`,
+      contentEmail,
     );
   }
 }

@@ -1,37 +1,18 @@
 import { Module } from '@nestjs/common';
 import { EmailController } from './email.controller';
 import { EmailService } from './email.service';
-import emailConfig from 'src/common/config/email.config';
-import { ConfigModule, ConfigType } from '@nestjs/config';
-import * as nodemailer from 'nodemailer';
+import { ConfigModule } from '@nestjs/config';
 import { CustomerContractModule } from 'src/dealer-staff/customer-contract/customer-contract.module';
 import { InstallmentContractModule } from 'src/dealer-staff/installment-contract/installment-contract.module';
+import resendConfig from 'src/common/config/resend.config';
 @Module({
   imports: [
     InstallmentContractModule,
     CustomerContractModule,
-    ConfigModule.forFeature(emailConfig),
+    ConfigModule.forFeature(resendConfig),
   ],
   controllers: [EmailController],
-  providers: [
-    EmailService,
-    {
-      provide: 'EMAIL_TRANSPORTER',
-      inject: [emailConfig.KEY],
-      useFactory: (emailSetting: ConfigType<typeof emailConfig>) => {
-        const transporter = nodemailer.createTransport({
-          host: emailSetting.email_host,
-          port: emailSetting.email_port,
-          secure: false,
-          auth: {
-            user: emailSetting.email_user,
-            pass: emailSetting.email_password,
-          },
-        } as nodemailer.TransportOptions);
-        return transporter;
-      },
-    },
-  ],
+  providers: [EmailService],
   exports: [EmailService],
 })
 export class EmailModule {}
