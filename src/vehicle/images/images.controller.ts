@@ -118,6 +118,7 @@ export class ImagesController {
   }
 
   @Post('customer-contract-document/:contractId')
+  @Roles(Role.DEALER_STAFF)
   @ApiOperation({ summary: 'Upload multiple files document contract image' })
   @ApiResponseDocumentArray(
     HttpStatus.CREATED,
@@ -144,6 +145,7 @@ export class ImagesController {
   }
 
   @Delete('document-contract/:imageId')
+  @Roles(Role.DEALER_STAFF)
   @ApiOperation({ summary: 'Delete file image document contract' })
   async deleteDocumentContractImage(
     @Param('imageId', ParseIntPipe) imageId: number,
