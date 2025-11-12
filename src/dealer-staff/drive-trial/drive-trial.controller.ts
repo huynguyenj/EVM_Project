@@ -18,6 +18,7 @@ import {
 import {
   CreateDriveTrailDto,
   DriveTrailResponse,
+  DriveTrialDetailResponse,
   DriveTrialQueries,
   UpdateDriveTrailDto,
 } from './dto';
@@ -87,7 +88,7 @@ export class DriveTrialController {
   @ApiOperation({ summary: 'Get detail drive trial' })
   @ApiResponseDocument(
     HttpStatus.OK,
-    DriveTrailResponse,
+    DriveTrialDetailResponse,
     'Get booking drive trial detail success',
   )
   async getBookingDriveTrailDetail(

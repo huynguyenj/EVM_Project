@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
   CreateDriveTrailDto,
@@ -7,6 +12,7 @@ import {
 } from './dto';
 import { MotorbikeService } from 'src/vehicle/electric-motorbike/motorbike.service';
 import { AgencyService } from 'src/admin/agency/agency.service';
+import { EmailService } from 'src/email/email.service';
 
 @Injectable()
 export class DriveTrialService {
@@ -14,6 +20,7 @@ export class DriveTrialService {
     private prisma: PrismaService,
     private motorbikeService: MotorbikeService,
     private agencyService: AgencyService,
+    @Inject(forwardRef(() => EmailService)) private emailService: EmailService,
   ) {}
 
   async createDriveTrial(createBookingDriveTrial: CreateDriveTrailDto) {
@@ -33,6 +40,7 @@ export class DriveTrialService {
         electricMotorbikeId: createBookingDriveTrial.motorbikeId,
       },
     });
+    await this.emailService.sendDriveTrialInformation(createdData.id);
     return createdData;
   }
 
@@ -90,6 +98,16 @@ export class DriveTrialService {
       where: {
         id: driveTrialId,
       },
+      include: {
+        electricMotorbike: {
+          select: {
+            name: true,
+            makeFrom: true,
+            model: true,
+            version: true,
+          },
+        },
+      },
     });
     if (!data) throw new NotFoundException('Not found drive trial');
     return data;
@@ -105,6 +123,7 @@ export class DriveTrialService {
       },
       data: updateBookingDriveTrial,
     });
+    await this.emailService.sendDriveTrialInformation(updatedData.id);
     return updatedData;
   }
 
