@@ -1,14 +1,16 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { EmailController } from './email.controller';
 import { EmailService } from './email.service';
 import { ConfigModule } from '@nestjs/config';
 import { CustomerContractModule } from 'src/dealer-staff/customer-contract/customer-contract.module';
 import { InstallmentContractModule } from 'src/dealer-staff/installment-contract/installment-contract.module';
 import resendConfig from 'src/common/config/resend.config';
+import { DriveTrialModule } from 'src/dealer-staff/drive-trial/drive-trial.module';
 @Module({
   imports: [
     InstallmentContractModule,
     CustomerContractModule,
+    forwardRef(() => DriveTrialModule),
     ConfigModule.forFeature(resendConfig),
   ],
   controllers: [EmailController],

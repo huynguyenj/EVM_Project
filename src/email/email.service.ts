@@ -1,4 +1,5 @@
 import {
+  forwardRef,
   Inject,
   Injectable,
   InternalServerErrorException,
@@ -7,12 +8,14 @@ import { CustomerContractService } from 'src/dealer-staff/customer-contract/cust
 import {
   CustomerContractTemplate,
   CustomerScheduleTemplate,
+  DriveTrialTemplate,
   VALIDATION_CODE_TEMPLATE,
 } from './email-html';
 import { type ConfigType } from '@nestjs/config';
 import { InstallmentContractService } from 'src/dealer-staff/installment-contract/installment-contract.service';
 import resendConfig from 'src/common/config/resend.config';
 import { Resend } from 'resend';
+import { DriveTrialService } from 'src/dealer-staff/drive-trial/drive-trial.service';
 @Injectable()
 export class EmailService {
   private resend: Resend;
@@ -21,6 +24,8 @@ export class EmailService {
     private resendSetting: ConfigType<typeof resendConfig>,
     private customerContractService: CustomerContractService,
     private installmentContractService: InstallmentContractService,
+    @Inject(forwardRef(() => DriveTrialService))
+    private driveTrialService: DriveTrialService,
   ) {
     this.resend = new Resend(this.resendSetting.resendApiKey);
   }
@@ -122,6 +127,29 @@ export class EmailService {
       listInstallmentData.customerContract.customer.email,
       `Payment schedule - Customer ${listInstallmentData.customerContract.customer.name}`,
       contentEmail,
+    );
+  }
+
+  async sendDriveTrialInformation(driveTrialId: number) {
+    const driveTrialData =
+      await this.driveTrialService.getDriveTrialDetail(driveTrialId);
+    const contentHtml = DriveTrialTemplate.replace(
+      '{customerName}',
+      driveTrialData.fullname,
+    )
+      .replace('{customerPhone}', driveTrialData.phone)
+      .replace('{customerEmail}', driveTrialData.email)
+      .replace('{driveDate}', driveTrialData.driveDate.toLocaleDateString())
+      .replace('{driveTime}', driveTrialData.driveTime)
+      .replace('{vehicleName}', driveTrialData.electricMotorbike.name)
+      .replace('{model}', driveTrialData.electricMotorbike.model)
+      .replace('{makeFrom}', driveTrialData.electricMotorbike.makeFrom)
+      .replace('{version}', driveTrialData.electricMotorbike.version)
+      .replace('{status}', driveTrialData.status);
+    await this.sendEmail(
+      driveTrialData.email,
+      `Drive trial - ${driveTrialData.fullname}`,
+      contentHtml,
     );
   }
 }
