@@ -88,7 +88,7 @@ export class CustomerContractService {
       Object.values(ContractType).includes(customerContractQueries.contractType)
     ) {
       filters.push({
-        contractType: customerContractQueries.contractType.toUpperCase(),
+        contractPaidType: customerContractQueries.contractType.toUpperCase(),
       });
     }
     if (
