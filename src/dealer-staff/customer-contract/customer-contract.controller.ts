@@ -25,7 +25,7 @@ import {
   UpdateCustomerContractDto,
 } from './dto';
 import { ApiResponseDocumentPagination } from 'src/common/decorator/swagger-decorator/api.response.document.pagination';
-import { ContractStatus, ContractType } from './types';
+import { ContractPaidType, ContractStatus } from './types';
 import { CustomerContractQuery } from './decorators';
 
 @Controller('customer-contract')
@@ -67,7 +67,7 @@ export class CustomerContractController {
     { name: 'staffId', example: 1, required: false },
     { name: 'customerId', example: 1, required: false },
     { name: 'status', example: ContractStatus.PENDING, required: false },
-    { name: 'contractType', example: ContractType.AT_STORE, required: false },
+    { name: 'contractType', example: ContractPaidType.DEBT, required: false },
   )
   async getListCustomerContract(
     @Param('agencyId', ParseIntPipe) agencyId: number,
