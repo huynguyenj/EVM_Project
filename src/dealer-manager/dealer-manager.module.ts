@@ -4,7 +4,6 @@ import { OrderRestockModule } from './order-restock/order-restock.module';
 import { AgencyStockModule } from './agency-stock/agency-stock.module';
 import { InstallmentPlanModule } from './installment-plan/installment-plan.module';
 import { StockPromotionModule } from './stock-promotion/stock-promotion.module';
-import { RevenueModule } from './revenue/revenue.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
@@ -14,7 +13,6 @@ import { DashboardModule } from './dashboard/dashboard.module';
     AgencyStockModule,
     InstallmentPlanModule,
     StockPromotionModule,
-    RevenueModule,
     DashboardModule,
   ],
 })
