@@ -53,6 +53,7 @@ export class QuotationController {
   }
 
   @Get('list/:agencyId')
+  @Roles(Role.DEALER_STAFF, Role.DEALER_MANAGER)
   @ApiOperation({ summary: 'Get list quotations' })
   @ApiQueriesAndPagination(
     { name: 'type', example: QuotationType.AT_STORE, required: false },
