@@ -11,7 +11,7 @@ import {
   CustomerContractQueries,
   UpdateCustomerContractDto,
 } from './dto';
-import { ContractStatus, ContractType } from './types';
+import { ContractPaidType, ContractStatus } from './types';
 import { MotorbikeService } from 'src/vehicle/electric-motorbike/motorbike.service';
 import { CustomerService } from '../customer/customer.service';
 import { ColorService } from 'src/vehicle/color/color.service';
@@ -85,7 +85,9 @@ export class CustomerContractService {
     const filters: any[] = [{ agencyId: agencyId }];
     if (
       customerContractQueries.contractType &&
-      Object.values(ContractType).includes(customerContractQueries.contractType)
+      Object.values(ContractPaidType).includes(
+        customerContractQueries.contractType,
+      )
     ) {
       filters.push({
         contractPaidType: customerContractQueries.contractType.toUpperCase(),
