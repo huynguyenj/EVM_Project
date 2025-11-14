@@ -95,7 +95,7 @@ model Agency {
   customerContracts Customer_Contract[]
   transferContract Agency_Order[]
   driveTrial Drive_Trial[]
-  revenue Revenue[]
+  // revenue Revenue[]
   pricePolicy Price_Policy[]
   discountPolicy Discount_Policy[]
   agencyStock Agency_Stock[]
@@ -125,15 +125,15 @@ model Credit_Line {
 }
 
 /**Revenue table*/
-model Revenue {
-  id Int @id @default(autoincrement())
-  total Float
-  createAt DateTime @db.Date
-  updateAt DateTime @db.Date
-  agencyId Int
-  agency Agency @relation(fields: [agencyId], references: [id])
-  @@map("revenue")
-}
+// model Revenue {
+//   id Int @id @default(autoincrement())
+//   total Float
+//   createAt DateTime @db.Date
+//   updateAt DateTime @db.Date
+//   agencyId Int
+//   agency Agency @relation(fields: [agencyId], references: [id])
+//   @@map("revenue")
+// }
 /**Agency stock*/
 model Agency_Stock {
   id Int @id @default(autoincrement())
@@ -425,7 +425,7 @@ model Customer {
   feedback Feedback[]
   customerContract Customer_Contract[]
   quotation Quotation[]
-  voucher Voucher[]
+  // voucher Voucher[]
   @@unique([credentialId, email, agencyId])
   @@map("customers")
 }
@@ -592,15 +592,15 @@ enum InstallmentPaymentStatus {
 }
 
 /**Voucher table*/
-model Voucher {
-  id Int @id @default(autoincrement())
-  percentReduce Float
-  description String
-  expiredDate DateTime @db.Date
-  usageLimit Float
-  customerId Int
-  customer Customer @relation(fields: [customerId], references: [id])
-}
+// model Voucher {
+//   id Int @id @default(autoincrement())
+//   percentReduce Float
+//   description String
+//   expiredDate DateTime @db.Date
+//   usageLimit Float
+//   customerId Int
+//   customer Customer @relation(fields: [customerId], references: [id])
+// }
 
 /**Feedback table*/
 model Feedback {
@@ -615,6 +615,7 @@ model Feedback {
   customer Customer @relation(fields: [customerId], references: [id])
   staffId Int
   staff Staff @relation(fields: [staffId], references: [id])
+  @@map("feedback")
 }
 
 /**Drive trial table*/
