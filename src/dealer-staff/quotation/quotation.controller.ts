@@ -86,6 +86,7 @@ export class QuotationController {
   }
 
   @Get('detail/:quotationId')
+  @Roles(Role.DEALER_STAFF, Role.DEALER_MANAGER)
   @ApiResponseDocument(
     HttpStatus.OK,
     QuotationDetailResponseDto,
@@ -105,6 +106,7 @@ export class QuotationController {
   }
 
   @Patch(':quotationId')
+  @Roles(Role.DEALER_STAFF, Role.DEALER_MANAGER)
   @ApiOperation({ summary: 'Update quotation' })
   @ApiResponseDocument(
     HttpStatus.OK,
