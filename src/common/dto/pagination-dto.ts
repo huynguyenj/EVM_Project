@@ -6,5 +6,5 @@ export class PaginationDto {
   @ApiResponseProperty({ example: 5, type: Number })
   limit: number;
   @ApiResponseProperty({ example: 15, type: Number })
-  totalItems: number;
+  total: number;
 }
