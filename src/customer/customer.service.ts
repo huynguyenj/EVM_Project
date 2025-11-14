@@ -47,14 +47,15 @@ export class CustomerService {
       paginationInfo: {
         page: customerQueries.page,
         limit: customerQueries.limit,
-        total: await this.getTotalCustomerContract(agencyId),
+        total: await this.getTotalCustomerContract(customer.id, agencyId),
       },
     };
   }
 
-  async getTotalCustomerContract(customerId: number) {
+  async getTotalCustomerContract(customerId: number, agencyId: number) {
     return await this.prisma.customer_Contract.count({
       where: {
+        agencyId: agencyId,
         customerId: customerId,
       },
     });
