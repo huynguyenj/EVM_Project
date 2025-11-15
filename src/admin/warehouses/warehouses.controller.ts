@@ -61,6 +61,7 @@ export class WarehousesController {
   @ApiQueriesAndPagination(
     { name: 'location', example: 'USA', required: false },
     { name: 'address', example: 'Washinton', required: false },
+    { name: 'sort', example: 'newest', required: false },
   )
   async getListWarehouse(@WarehouseQuery() warehouseQuery: WarehouseQueries) {
     const dataList =

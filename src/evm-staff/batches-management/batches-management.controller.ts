@@ -54,11 +54,14 @@ export class BatchesManagementController {
 
   @Get('list')
   @ApiOperation({ summary: 'Get list batches' })
-  @ApiQueriesAndPagination({
-    name: 'status',
-    example: BatchesStatus.OPEN,
-    required: false,
-  })
+  @ApiQueriesAndPagination(
+    {
+      name: 'status',
+      example: BatchesStatus.OPEN,
+      required: false,
+    },
+    { name: 'sort', example: 'newest', required: false },
+  )
   @ApiResponseDocumentPagination(
     HttpStatus.OK,
     ApBatchesResponseDto,
@@ -77,11 +80,14 @@ export class BatchesManagementController {
   @Get('list/agency/:agencyId')
   @Roles(Role.DEALER_MANAGER)
   @ApiOperation({ summary: 'Get list batches for agency' })
-  @ApiQueriesAndPagination({
-    name: 'status',
-    example: BatchesStatus,
-    required: false,
-  })
+  @ApiQueriesAndPagination(
+    {
+      name: 'status',
+      example: BatchesStatus,
+      required: false,
+    },
+    { name: 'sort', example: 'newest', required: false },
+  )
   @ApiResponseDocumentPagination(
     HttpStatus.OK,
     ApBatchesResponseDto,

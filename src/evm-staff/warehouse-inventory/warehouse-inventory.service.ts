@@ -45,12 +45,14 @@ export class WarehouseInventoryService {
       skip: skipData,
       take: inventoryQuery.limit,
     });
+    const totalInventory = await this.getTotalInventory();
     return {
       data: dataList,
       paginationInfo: {
         page: inventoryQuery.page,
         limit: inventoryQuery.limit,
-        total: await this.getTotalInventory(),
+        total: totalInventory,
+        totalPages: Math.ceil(totalInventory / inventoryQuery.limit),
       },
     };
   }

@@ -128,7 +128,11 @@ export class StaffService {
             },
           }
         : {},
+      orderBy: {
+        id: staffQuery.sort === 'newest' ? 'desc' : 'asc',
+      },
     });
+    const totalStaff = await this.getTotalStaffAdmin();
     return {
       staffList: staffList.map((staff) => {
         return {
@@ -141,7 +145,8 @@ export class StaffService {
       paginationInfo: {
         page: staffQuery.page,
         limit: staffQuery.limit,
-        total: await this.getTotalStaffAdmin(),
+        total: totalStaff,
+        totalPages: Math.ceil(totalStaff / staffQuery.limit),
       },
     };
   }

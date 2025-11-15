@@ -5,4 +5,5 @@ export class OrderQueries implements PaginationRequestQuery {
   limit: number;
   page: number;
   status?: OrderStatus;
+  sort: string;
 }

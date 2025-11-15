@@ -57,6 +57,7 @@ export class MotorbikeController {
   @ApiQueriesAndPagination(
     { name: 'model', type: String, required: false, example: 'Model X' },
     { name: 'makeFrom', type: String, required: false, example: 'Viet Nam' },
+    { name: 'sort', example: 'newest', required: false },
   )
   @ApiResponseDocumentPagination(
     HttpStatus.OK,
@@ -78,6 +79,7 @@ export class MotorbikeController {
   @ApiQueriesAndPagination(
     { name: 'model', type: String, required: false, example: 'Model X' },
     { name: 'makeFrom', type: String, required: false, example: 'Viet Nam' },
+    { name: 'sort', example: 'newest', required: false },
   )
   @ApiResponseDocumentPagination(
     HttpStatus.OK,

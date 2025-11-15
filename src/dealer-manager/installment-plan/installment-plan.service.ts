@@ -39,14 +39,21 @@ export class InstallmentPlanService {
       where: {
         AND: [{ agencyId: agencyId }, ...filters],
       },
+      orderBy: {
+        id: installmentPlanQueries.sort === 'newest' ? 'desc' : 'asc',
+      },
     });
-
+    const totalInstallmentPlans =
+      await this.getTotalAgencyInstallmentPlan(agencyId);
     return {
       data: listData,
       paginationInfo: {
         page: installmentPlanQueries.page,
         limit: installmentPlanQueries.limit,
-        total: await this.getTotalAgencyInstallmentPlan(agencyId),
+        total: totalInstallmentPlans,
+        totalPages: Math.ceil(
+          totalInstallmentPlans / installmentPlanQueries.limit,
+        ),
       },
     };
   }

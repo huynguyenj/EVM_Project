@@ -8,4 +8,5 @@ export class DriveTrialQueries implements PaginationRequestQuery {
   phone?: string;
   fullname?: string;
   status?: DriveTrailStatus;
+  sort: string;
 }

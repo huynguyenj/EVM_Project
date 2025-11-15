@@ -6,4 +6,5 @@ export class OrderManageQueries implements PaginationRequestQuery {
   page: number;
   status?: OrderStatus;
   agencyId?: number;
+  sort: string;
 }

@@ -118,13 +118,18 @@ export class CustomerContractService {
       skip: skipData,
       take: customerContractQueries.limit,
       where: filters.length > 0 ? { AND: filters } : {},
+      orderBy: {
+        id: customerContractQueries.sort === 'newest' ? 'desc' : 'asc',
+      },
     });
+    const totalContracts = await this.getTotalCustomerContract(agencyId);
     return {
       data: listData,
       paginationInfo: {
         page: customerContractQueries.page,
         limit: customerContractQueries.limit,
-        total: await this.getTotalCustomerContract(agencyId),
+        total: totalContracts,
+        totalPages: Math.ceil(totalContracts / customerContractQueries.limit),
       },
     };
   }

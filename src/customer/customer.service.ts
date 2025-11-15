@@ -41,13 +41,21 @@ export class CustomerService {
         contractDocuments: true,
         quotation: true,
       },
+      orderBy: {
+        id: customerQueries.sort === 'newest' ? 'desc' : 'asc',
+      },
     });
+    const totalContract = await this.getTotalCustomerContract(
+      customer.id,
+      agencyId,
+    );
     return {
       data: contracts,
       paginationInfo: {
         page: customerQueries.page,
         limit: customerQueries.limit,
-        total: await this.getTotalCustomerContract(customer.id, agencyId),
+        total: totalContract,
+        totalPages: Math.ceil(totalContract / customerQueries.limit),
       },
     };
   }
@@ -126,13 +134,18 @@ export class CustomerService {
           ...filters,
         ],
       },
+      orderBy: {
+        id: quotationQueries.sort === 'newest' ? 'desc' : 'asc',
+      },
     });
+    const totalQuotations = await this.getTotalCustomerQuotation(credentialId);
     return {
       data: listData,
       paginationInfo: {
         page: quotationQueries.page,
         limit: quotationQueries.limit,
-        total: await this.getTotalCustomerQuotation(credentialId),
+        total: totalQuotations,
+        totalPages: Math.ceil(totalQuotations / quotationQueries.limit),
       },
     };
   }

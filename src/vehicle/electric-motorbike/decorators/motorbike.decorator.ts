@@ -4,12 +4,13 @@ import { Request } from 'express';
 export const Motorbike = createParamDecorator(
   (data: unknown, ctx: ExecutionContext) => {
     const request = ctx.switchToHttp().getRequest<Request>();
-    const { page, limit, model, makeFrom } = request.query;
+    const { page, limit, model, makeFrom, sort } = request.query;
     return {
       page: page ? +page : 1,
       limit: limit ? +limit : 5,
       model,
       makeFrom,
+      sort,
     };
   },
 );

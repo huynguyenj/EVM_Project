@@ -98,7 +98,11 @@ export class StaffService {
           },
         },
       },
+      orderBy: {
+        id: staffQuery.sort === 'newest' ? 'desc' : 'asc',
+      },
     });
+    const totalStaffs = await this.getTotalStaffAgency(agencyId);
     return {
       staffList: staffList.map((staff) => {
         return {
@@ -111,7 +115,8 @@ export class StaffService {
       paginationInfo: {
         page: staffQuery.page,
         limit: staffQuery.limit,
-        total: await this.getTotalStaffAgency(agencyId),
+        total: totalStaffs,
+        totalPages: Math.ceil(totalStaffs / staffQuery.limit),
       },
     };
   }

@@ -81,13 +81,18 @@ export class QuotationService {
       skip: skipData,
       take: quotationQueries.limit,
       where: filters.length > 0 ? { AND: filters } : {},
+      orderBy: {
+        id: quotationQueries.sort === 'newest' ? 'desc' : 'asc',
+      },
     });
+    const totalQuotations = await this.getTotalQuotation(agencyId);
     return {
       data: listData,
       paginationInfo: {
         page: quotationQueries.page,
         limit: quotationQueries.limit,
-        total: await this.getTotalQuotation(agencyId),
+        total: totalQuotations,
+        totalPages: Math.ceil(totalQuotations / quotationQueries.limit),
       },
     };
   }

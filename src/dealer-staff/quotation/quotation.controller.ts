@@ -63,6 +63,7 @@ export class QuotationController {
       example: '123e4567-e89b-12d3-a456-426614174000',
       required: false,
     },
+    { name: 'sort', example: 'newest', required: false },
   )
   @ApiResponseDocumentPagination(
     HttpStatus.OK,

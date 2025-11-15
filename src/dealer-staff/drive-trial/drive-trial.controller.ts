@@ -66,6 +66,7 @@ export class DriveTrialController {
     { name: 'phone', example: '047979789', required: false },
     { name: 'email', example: 'nguyenvana@gmail.com', required: false },
     { name: 'status', example: DriveTrailStatus.PENDING, required: false },
+    { name: 'sort', example: 'newest', required: false },
   )
   async getAllListDriveTrial(
     @Param('agencyId', ParseIntPipe) agencyId: number,

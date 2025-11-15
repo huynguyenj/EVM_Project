@@ -8,4 +8,5 @@ export class QuotationQueriesDto implements PaginationRequestQuery {
   status?: QuotationStatus;
   quoteCode?: string;
   customerId?: number;
+  sort: string;
 }

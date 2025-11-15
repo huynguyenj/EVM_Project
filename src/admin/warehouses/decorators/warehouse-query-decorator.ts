@@ -4,12 +4,13 @@ import { Request } from 'express';
 export const WarehouseQuery = createParamDecorator(
   (data: unknown, ctx: ExecutionContext) => {
     const request = ctx.switchToHttp().getRequest<Request>();
-    const { page, limit, location, address } = request.query;
+    const { page, limit, location, address, sort } = request.query;
     return {
       page: page ? +page : 1,
       limit: limit ? +limit : 5,
       location,
       address,
+      sort: sort ? sort : 'newest',
     };
   },
 );

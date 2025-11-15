@@ -68,6 +68,7 @@ export class CustomerContractController {
     { name: 'customerId', example: 1, required: false },
     { name: 'status', example: ContractStatus.PENDING, required: false },
     { name: 'contractType', example: ContractPaidType.DEBT, required: false },
+    { name: 'sort', example: 'newest', required: false },
   )
   async getListCustomerContract(
     @Param('agencyId', ParseIntPipe) agencyId: number,

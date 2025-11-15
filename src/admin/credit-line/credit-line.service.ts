@@ -50,14 +50,19 @@ export class CreditLineService {
       skip,
       take: creditLineQuery.limit,
       where: filters.length > 0 ? { AND: filters } : {},
+      orderBy: {
+        id: creditLineQuery.sort === 'newest' ? 'desc' : 'asc',
+      },
     });
 
+    const totalCreditLines = await this.getTotalCreditLine();
     return {
       data,
       paginationInfo: {
         page: creditLineQuery.page,
         limit: creditLineQuery.limit,
-        total: await this.getTotalCreditLine(),
+        total: totalCreditLines,
+        totalPages: Math.ceil(totalCreditLines / creditLineQuery.limit),
       },
     };
   }

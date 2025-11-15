@@ -38,13 +38,18 @@ export class CustomerService {
       where: {
         AND: [{ agencyId: agencyId }],
       },
+      orderBy: {
+        id: customerQueries.sort === 'newest' ? 'desc' : 'asc',
+      },
     });
+    const totalCustomers = await this.getTotalCustomer(agencyId);
     return {
       data: listData,
       paginationInfo: {
         page: customerQueries.page,
         limit: customerQueries.limit,
-        total: await this.getTotalCustomer(agencyId),
+        total: totalCustomers,
+        totalPages: Math.ceil(totalCustomers / customerQueries.limit),
       },
     };
   }

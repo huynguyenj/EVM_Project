@@ -218,15 +218,17 @@ export class OrderRestockService {
         orderItems: true,
       },
       orderBy: {
-        id: 'desc',
+        id: orderQuery.sort === 'newest' ? 'desc' : 'asc',
       },
     });
+    const totalOrders = await this.getTotalOrderAgency(agencyId);
     return {
       listData,
       paginationInfo: {
         page: orderQuery.page,
         limit: orderQuery.limit,
-        total: await this.getTotalOrderAgency(agencyId),
+        total: totalOrders,
+        totalPages: Math.ceil(totalOrders / orderQuery.limit),
       },
     };
   }

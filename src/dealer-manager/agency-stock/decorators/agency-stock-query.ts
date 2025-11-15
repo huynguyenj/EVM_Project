@@ -4,12 +4,13 @@ import { Request } from 'express';
 export const AgencyStockQuery = createParamDecorator(
   (data: unknown, ctx: ExecutionContext) => {
     const request = ctx.switchToHttp().getRequest<Request>();
-    const { page, limit, colorId, motorbikeId } = request.query;
+    const { page, limit, colorId, motorbikeId, sort } = request.query;
     return {
       page: page ? +page : 1,
       limit: limit ? +limit : 5,
       colorId,
       motorbikeId,
+      sort: sort ? sort : 'newest',
     };
   },
 );

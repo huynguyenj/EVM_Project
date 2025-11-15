@@ -33,13 +33,18 @@ export class BatchesManagementService {
       skip: skipData,
       take: batchesQueries.limit,
       where: filters.length > 0 ? { AND: filters } : {},
+      orderBy: {
+        id: batchesQueries.sort === 'newest' ? 'desc' : 'asc',
+      },
     });
+    const totalBatches = await this.getTotalBatches();
     return {
       data: listData,
       paginationInfo: {
         page: batchesQueries.page,
         limit: batchesQueries.limit,
-        total: await this.getTotalBatches(),
+        total: totalBatches,
+        totalPages: Math.ceil(totalBatches / batchesQueries.limit),
       },
     };
   }
@@ -66,13 +71,18 @@ export class BatchesManagementService {
       skip: skipData,
       take: batchesQueries.limit,
       where: filters.length > 0 ? { AND: filters } : {},
+      orderBy: {
+        id: batchesQueries.sort === 'newest' ? 'desc' : 'asc',
+      },
     });
+    const totalBatches = await this.getTotalBatchesOfAgency(agencyId);
     return {
       data: listData,
       paginationInfo: {
         page: batchesQueries.page,
         limit: batchesQueries.limit,
-        total: await this.getTotalBatchesOfAgency(agencyId),
+        total: totalBatches,
+        totalPages: Math.ceil(totalBatches / batchesQueries.limit),
       },
     };
   }

@@ -6,4 +6,5 @@ export class InstallmentPlanQueries implements PaginationRequestQuery {
   page: number;
   interestPaidType?: InterestPaidType;
   status?: InstallmentPlanStatus;
+  sort: string;
 }

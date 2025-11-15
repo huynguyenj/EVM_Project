@@ -61,6 +61,7 @@ export class AgencyStockController {
   @ApiQueriesAndPagination(
     { name: 'motorbikeId', example: 1, required: false },
     { name: 'colorId', example: 1, required: false },
+    { name: 'sort', example: 'newest', required: false },
   )
   async getListAgencyStocks(
     @Param('agencyId', ParseIntPipe) agencyId: number,
