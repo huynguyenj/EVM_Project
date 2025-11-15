@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
   CreateQuotationDto,
@@ -125,10 +129,20 @@ export class QuotationService {
   }
 
   async updateQuotation(quotationId: number, updateData: UpdateQuotationDto) {
-    return await this.prisma.quotation.update({
+    const quotationData = await this.getQuotationBasicById(quotationId);
+
+    if (
+      quotationData.status === 'ACCEPTED' &&
+      updateData.status !== QuotationStatus.REVERSED
+    )
+      throw new BadRequestException(
+        'This quotation is accepted and can not be edited!',
+      );
+    const updatedQuotationData = await this.prisma.quotation.update({
       where: { id: quotationId },
       data: updateData,
     });
+    return updatedQuotationData;
   }
 
   async deleteQuotation(quotationId: number) {
@@ -137,13 +151,13 @@ export class QuotationService {
     });
   }
 
-  async minusQuotationWithDeposit(quotationId: number, depositAmount: number) {
-    const quotationData = await this.getQuotationById(quotationId);
-    await this.prisma.quotation.update({
-      where: { id: quotationId },
-      data: {
-        finalPrice: quotationData.finalPrice - depositAmount,
-      },
-    });
-  }
+  // async minusQuotationWithDeposit(quotationId: number, depositAmount: number) {
+  //   const quotationData = await this.getQuotationById(quotationId);
+  //   await this.prisma.quotation.update({
+  //     where: { id: quotationId },
+  //     data: {
+  //       finalPrice: quotationData.finalPrice - depositAmount,
+  //     },
+  //   });
+  // }
 }

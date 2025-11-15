@@ -436,7 +436,7 @@ model Customer_Contract {
   contractCode String @db.Text
   title String @db.VarChar(100)
   content String @db.Text
-  signDate DateTime @db.Date
+  signDate DateTime? @db.Date
   deliveryDate DateTime? @db.Date
   contractPaidType CustomerContractPaidType
   status CustomerContractStatus @default(PENDING)
@@ -455,6 +455,7 @@ model Customer_Contract {
   quotationId Int @unique
   quotation Quotation @relation(fields: [quotationId], references: [id])
   contractDocuments Contract_Document[]
+  contractFullPayment Contract_Full_Payments[]
   @@map("customer_contracts")
 }
 
@@ -469,9 +470,19 @@ enum CustomerContractStatus {
   PENDING
   CONFIRMED
   PROCESSING
-  DELIVERED
   COMPLETED
-  CANCELED
+  REJECTED
+}
+
+model Contract_Full_Payments {
+  id Int @id @default(autoincrement())
+  period Int
+  amount Float
+  createAt DateTime @db.Date @default(now())
+  paidAt DateTime? @db.Date
+  customerContractId Int
+  customerContract Customer_Contract @relation(fields: [customerContractId], references: [id])
+  @@map("contract_full_payments")
 }
 
 model Contract_Document {
@@ -539,6 +550,7 @@ model Deposit {
 enum DepositStatus {
   PENDING
   APPLIED
+  PUNISH
   EXPIRED
 }
 

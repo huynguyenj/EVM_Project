@@ -31,6 +31,12 @@ export class InstallmentContractService {
       await this.customerContractService.getCustomerContractTotalAmount(
         createInstallmentContractDto.customerContractId,
       );
+
+    if (customerContract.status !== 'COMPLETED')
+      throw new BadRequestException(
+        'Please complete the contract before create installment contract',
+      );
+
     const installmentPlan =
       await this.installmentPlanService.getInstallmentPlanDetail(
         createInstallmentContractDto.installmentPlanId,

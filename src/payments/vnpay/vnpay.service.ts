@@ -8,18 +8,18 @@ import { type ConfigType } from '@nestjs/config';
 import vnpayConfig from 'src/common/config/vnpay.config';
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
-  CreateCustomerContractFullPayment,
   CreateDepositPayment,
   CreatePaymentAgencyBill,
   CreatePaymentCustomer,
+  CreatePeriodCustomerContractFullPayment,
 } from '../dto';
 import QueryString from 'qs';
 import crypto from 'crypto';
 import { VnpParam, VnpParamResponse } from '../types';
 import { BatchesManagementService } from 'src/evm-staff/batches-management/batches-management.service';
 import { sortObject } from './utils/vnpayHelper';
-import { CustomerContractService } from 'src/dealer-staff/customer-contract/customer-contract.service';
 import { DepositService } from 'src/dealer-staff/deposit/deposit.service';
+import { ContractFullPaymentService } from 'src/dealer-staff/contract-full-payment/contract-full-payment.service';
 @Injectable()
 export class VnpayService {
   constructor(
@@ -27,8 +27,8 @@ export class VnpayService {
     @Inject(vnpayConfig.KEY)
     private vnPaySetting: ConfigType<typeof vnpayConfig>,
     private batchesService: BatchesManagementService,
-    private customerContractService: CustomerContractService,
     private depositService: DepositService,
+    private contractFullPaymentService: ContractFullPaymentService,
   ) {}
 
   async getApBatchPaymentInformation(
@@ -67,17 +67,16 @@ export class VnpayService {
   async getCustomerContractPaymentInformation(
     platform: string,
     ipAddress: string,
-    createCustomerContract: CreateCustomerContractFullPayment,
+    createPeriodCustomerContract: CreatePeriodCustomerContractFullPayment,
   ) {
-    const data = await this.customerContractService.getCustomerContractById(
-      createCustomerContract.customerContractId,
-    );
-    if (data.status === 'COMPLETED')
-      throw new BadRequestException('This customer contract already completed');
+    const data =
+      await this.contractFullPaymentService.getCustomerContractFullPaymentById(
+        createPeriodCustomerContract.periodId,
+      );
     const vnpUrl = this.createPaymentUrl(
       platform,
       ipAddress,
-      data.finalPrice,
+      data.amount,
       data.id,
       this.vnPaySetting.vnpayReturnUrlCustomerContract,
     );
@@ -236,14 +235,14 @@ export class VnpayService {
     }
   }
 
-  async updateCustomerContractPayment(vnp_Params: VnpParamResponse) {
+  async updateCustomerContractPeriodPayment(vnp_Params: VnpParamResponse) {
     const vnpData = this.checkPaymentReturn(vnp_Params);
     if (!vnpData)
       return `${this.vnPaySetting.vnpayClientReturn + '/payment?status=invalid'}`;
     const { vnp_ResponseCode, vnp_OrderInfo } = vnpData;
     const orderInfoListInfo = vnp_OrderInfo.split('-'); //vnp_OrderInfo = 1&web
     //Customer contract id
-    const customerContractId = Number(orderInfoListInfo[0]);
+    const periodId = Number(orderInfoListInfo[0]);
     //Platform
     const platform = orderInfoListInfo[1];
     //Return client url
@@ -253,9 +252,7 @@ export class VnpayService {
         : this.vnPaySetting.vnpayClientMobileReturn;
 
     if (vnp_ResponseCode === '00') {
-      await this.customerContractService.updateCompleteCustomerContract(
-        customerContractId,
-      );
+      await this.contractFullPaymentService.updatePayment(periodId);
       return `${returnClientUrl + '/payment?status=success'}`;
     } else {
       return `${returnClientUrl + '/payment?status=fail'}`;

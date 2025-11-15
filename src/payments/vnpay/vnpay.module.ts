@@ -7,9 +7,11 @@ import { BatchesManagementModule } from 'src/evm-staff/batches-management/batche
 import { CreditLineModule } from 'src/admin/credit-line/credit-line.module';
 import { CustomerContractModule } from 'src/dealer-staff/customer-contract/customer-contract.module';
 import { DepositModule } from 'src/dealer-staff/deposit/deposit.module';
+import { ContractFullPaymentModule } from 'src/dealer-staff/contract-full-payment/contract-full-payment.module';
 
 @Module({
   imports: [
+    ContractFullPaymentModule,
     ConfigModule.forFeature(vnpayConfig),
     BatchesManagementModule,
     CreditLineModule,

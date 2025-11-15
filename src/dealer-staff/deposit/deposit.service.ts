@@ -45,6 +45,13 @@ export class DepositService {
   }
 
   async updateDeposit(depositId: number, updateDeposit: UpdateDepositDto) {
+    const depositData = await this.getDepositById(depositId);
+
+    if (depositData.status === 'EXPIRED')
+      throw new BadRequestException(
+        'This deposit is expired and can not be edited.',
+      );
+
     const updatedData = await this.prisma.deposit.update({
       where: { id: depositId },
       data: updateDeposit,
@@ -60,13 +67,13 @@ export class DepositService {
   }
 
   async updateDepositPayment(depositId: number) {
-    const updatedDeposit = await this.prisma.deposit.update({
+    await this.prisma.deposit.update({
       where: { id: depositId },
       data: { status: 'APPLIED' },
     });
-    await this.quotationService.minusQuotationWithDeposit(
-      updatedDeposit.quotationId,
-      updatedDeposit.depositAmount,
-    );
+    // await this.quotationService.minusQuotationWithDeposit(
+    //   updatedDeposit.quotationId,
+    //   updatedDeposit.depositAmount,
+    // );
   }
 }
