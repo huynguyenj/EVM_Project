@@ -217,6 +217,9 @@ export class OrderRestockService {
         status: true,
         orderItems: true,
       },
+      orderBy: {
+        id: 'desc',
+      },
     });
     return {
       listData,
