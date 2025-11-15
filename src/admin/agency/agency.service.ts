@@ -47,13 +47,18 @@ export class AgencyService {
       skip: skipData,
       take: agencyQueries.limit,
       where: filters.length > 0 ? { AND: filters } : {},
+      orderBy: {
+        id: agencyQueries.sort === 'newest' ? 'desc' : 'asc',
+      },
     });
+    const totalAgencies = await this.getTotalAgency();
     return {
       dataList,
       paginationInfo: {
         page: agencyQueries.page,
         limit: agencyQueries.limit,
-        total: await this.getTotalAgency(),
+        total: totalAgencies,
+        totalPages: Math.ceil(totalAgencies / agencyQueries.limit),
       },
     };
   }

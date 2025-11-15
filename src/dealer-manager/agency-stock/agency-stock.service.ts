@@ -60,13 +60,18 @@ export class AgencyStockService {
       where: {
         AND: filters,
       },
+      orderBy: {
+        id: agencyStockQueries.sort === 'newest' ? 'desc' : 'asc',
+      },
     });
+    const totalAgencyStock = await this.getTotalAgencyStock(agencyId);
     return {
       data: listData,
       paginationInfo: {
         page: agencyStockQueries.page,
         limit: agencyStockQueries.limit,
-        total: await this.getTotalAgencyStock(agencyId),
+        total: totalAgencyStock,
+        totalPages: Math.ceil(totalAgencyStock / agencyStockQueries.limit),
       },
     };
   }

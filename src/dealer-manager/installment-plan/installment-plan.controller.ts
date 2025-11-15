@@ -66,6 +66,7 @@ export class InstallmentPlanController {
       required: false,
     },
     { name: 'status', example: InstallmentStatus.ACTIVE, required: false },
+    { name: 'sort', example: 'newest', required: false },
   )
   async getListInstallmentPlan(
     @Param('agencyId', ParseIntPipe) agencyId: number,

@@ -34,7 +34,7 @@ export class CustomerController {
 
   @Get('customer-contracts/:credentialId/:agencyId')
   @SetMetadata('public', true)
-  @ApiQueriesAndPagination()
+  @ApiQueriesAndPagination({ name: 'sort', example: 'newest', required: false })
   @ApiOperation({ summary: 'Get customer contracts' })
   @ApiResponseDocumentPagination(
     HttpStatus.OK,
@@ -92,6 +92,7 @@ export class CustomerController {
       required: false,
     },
     { name: 'agencyId', example: 1, required: false },
+    { name: 'sort', example: 'newest', required: false },
   )
   @ApiResponseDocumentPagination(
     HttpStatus.OK,

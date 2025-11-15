@@ -5,4 +5,5 @@ export class BatchesQueries implements PaginationRequestQuery {
   limit: number;
   page: number;
   status?: BatchesStatus;
+  sort: string;
 }

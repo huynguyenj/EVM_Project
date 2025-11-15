@@ -56,6 +56,7 @@ export class AgencyController {
   @ApiQueriesAndPagination(
     { name: 'location', example: 'china', required: false },
     { name: 'address', example: 'Bejing', required: false },
+    { name: 'sort', example: 'newest', required: false },
   )
   @ApiResponseDocumentPagination(
     HttpStatus.OK,
@@ -78,6 +79,7 @@ export class AgencyController {
   @ApiQueriesAndPagination(
     { name: 'location', example: 'china', required: false },
     { name: 'address', example: 'Bejing', required: false },
+    { name: 'sort', example: 'newest', required: false },
   )
   @ApiResponseDocumentPagination(
     HttpStatus.OK,

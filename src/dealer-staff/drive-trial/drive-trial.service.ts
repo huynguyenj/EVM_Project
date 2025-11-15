@@ -73,14 +73,18 @@ export class DriveTrialService {
       where: {
         AND: [{ agencyId: agencyId }, ...filters],
       },
+      orderBy: {
+        id: driveTrialQueries.sort === 'newest' ? 'desc' : 'asc',
+      },
     });
-
+    const totalDriveTrial = await this.getTotalDriveTrialAgency(agencyId);
     return {
       data: listDriveTrial,
       paginationInfo: {
         page: driveTrialQueries.page,
         limit: driveTrialQueries.limit,
-        total: await this.getTotalDriveTrialAgency(agencyId),
+        total: totalDriveTrial,
+        totalPages: Math.ceil(totalDriveTrial / driveTrialQueries.limit),
       },
     };
   }

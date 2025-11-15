@@ -4,4 +4,5 @@ export class CreditLineQueries implements PaginationRequestQuery {
   limit: number;
   page: number;
   agencyId?: number;
+  sort: string;
 }

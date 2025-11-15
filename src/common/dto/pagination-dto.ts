@@ -7,4 +7,6 @@ export class PaginationDto {
   limit: number;
   @ApiResponseProperty({ example: 15, type: Number })
   total: number;
+  @ApiResponseProperty({ example: 3 })
+  totalPages: number;
 }

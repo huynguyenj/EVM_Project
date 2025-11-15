@@ -37,13 +37,18 @@ export class WarehousesService {
       skip: skipData,
       take: warehouseQueries.limit,
       where: filters.length > 0 ? { AND: filters } : {},
+      orderBy: {
+        id: warehouseQueries.sort === 'newest' ? 'desc' : 'asc',
+      },
     });
+    const totalWarehouses = await this.getTotalWarehouse();
     return {
       dataList,
       paginationInfo: {
         page: warehouseQueries.page,
         limit: warehouseQueries.limit,
-        total: await this.getTotalWarehouse(),
+        total: totalWarehouses,
+        totalPages: Math.ceil(totalWarehouses / warehouseQueries.limit),
       },
     };
   }

@@ -50,12 +50,15 @@ export class StaffController {
 
   @Get('list')
   @ApiOperation({ summary: 'Get staff list' })
-  @ApiQueriesAndPagination({
-    name: 'role',
-    required: false,
-    type: String,
-    example: 'Staff',
-  })
+  @ApiQueriesAndPagination(
+    {
+      name: 'role',
+      required: false,
+      type: String,
+      example: 'Staff',
+    },
+    { name: 'sort', example: 'newest', required: false },
+  )
   @ApiResponseDocumentPagination(
     HttpStatus.OK,
     ResponseAccountDto,

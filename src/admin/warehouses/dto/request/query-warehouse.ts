@@ -5,4 +5,5 @@ export class WarehouseQueries implements PaginationRequestQuery {
   page: number;
   location: string;
   address: string;
+  sort: string;
 }

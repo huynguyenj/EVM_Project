@@ -66,7 +66,7 @@ export class StaffController {
   }
 
   @Get('list/:agencyId')
-  @ApiQueriesAndPagination()
+  @ApiQueriesAndPagination({ name: 'sort', example: 'newest', required: false })
   @ApiResponseDocumentPagination(
     HttpStatus.OK,
     StaffResponseDto,

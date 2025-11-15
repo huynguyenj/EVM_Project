@@ -8,4 +8,5 @@ export class CustomerContractQueries implements PaginationRequestQuery {
   staffId?: number;
   status?: ContractStatus;
   contractType?: ContractPaidType;
+  sort: string;
 }

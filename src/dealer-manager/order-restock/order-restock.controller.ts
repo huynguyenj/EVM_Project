@@ -70,11 +70,14 @@ export class OrderRestockController {
     OrderResponseDto,
     'Get list orders restock successfully!',
   )
-  @ApiQueriesAndPagination({
-    name: 'status',
-    example: OrderStatus.DRAFT,
-    required: false,
-  })
+  @ApiQueriesAndPagination(
+    {
+      name: 'status',
+      example: OrderStatus.DRAFT,
+      required: false,
+    },
+    { name: 'sort', example: 'newest', required: false },
+  )
   async getOrderRestockList(
     @Param('agencyId', ParseIntPipe) agencyId: number,
     @OrderStockQuery() orderQueries: OrderQueries,

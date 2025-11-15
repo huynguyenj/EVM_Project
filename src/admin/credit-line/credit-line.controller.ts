@@ -53,7 +53,10 @@ export class CreditLineController {
 
   @Get('list')
   @ApiOperation({ summary: 'Get list credit line' })
-  @ApiQueriesAndPagination({ name: 'agencyId', example: 1, required: false })
+  @ApiQueriesAndPagination(
+    { name: 'agencyId', example: 1, required: false },
+    { name: 'sort', example: 'newest', required: false },
+  )
   @ApiResponseDocumentPagination(
     HttpStatus.OK,
     CreditLineResponseDto,

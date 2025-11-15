@@ -44,6 +44,7 @@ export class OrderRestockManagementController {
   @ApiQueriesAndPagination(
     { name: 'status', example: OrderStatus.PENDING, required: false },
     { name: 'agencyId', example: 1, required: false },
+    { name: 'sort', example: 'newest', required: false },
   )
   async getListOrder(
     @OrderStockManageQuery() orderQueries: OrderManageQueries,

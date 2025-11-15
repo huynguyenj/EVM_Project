@@ -81,6 +81,7 @@ export class StockPromotionController {
       required: false,
     },
     { name: 'status', example: StockPromotionStatus.ACTIVE, required: false },
+    { name: 'sort', example: 'newest', required: false },
   )
   @ApiResponseDocumentPagination(
     HttpStatus.OK,
@@ -105,11 +106,14 @@ export class StockPromotionController {
 
   @Get('/list/staff/:agencyId')
   @ApiOperation({ summary: 'Get stock promotion list for staff' })
-  @ApiQueriesAndPagination({
-    name: 'valueType',
-    example: StockPromotionValueType.FIXED,
-    required: false,
-  })
+  @ApiQueriesAndPagination(
+    {
+      name: 'valueType',
+      example: StockPromotionValueType.FIXED,
+      required: false,
+    },
+    { name: 'sort', example: 'newest', required: false },
+  )
   @ApiResponseDocumentPagination(
     HttpStatus.OK,
     StockPromotionResponseDto,

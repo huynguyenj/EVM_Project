@@ -6,4 +6,5 @@ export class StockPromotionQueries implements PaginationRequestQuery {
   page: number;
   valueType?: StockPromotionValueType;
   status?: StockPromotionStatus;
+  sort: string;
 }

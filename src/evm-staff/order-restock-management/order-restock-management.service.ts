@@ -30,13 +30,18 @@ export class OrderRestockManagementService {
       skip: skipData,
       take: orderManageQueries.limit,
       where: filters.length > 0 ? { AND: filters } : {},
+      orderBy: {
+        id: orderManageQueries.sort === 'newest' ? 'desc' : 'asc',
+      },
     });
+    const totalOrders = await this.getTotalOrderRestock();
     return {
       listData,
       paginationInfo: {
         page: orderManageQueries.page,
         limit: orderManageQueries.limit,
-        total: await this.getTotalOrderRestock(),
+        total: totalOrders,
+        totalPages: Math.ceil(totalOrders / orderManageQueries.limit),
       },
     };
   }

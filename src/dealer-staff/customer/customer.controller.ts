@@ -57,7 +57,7 @@ export class CustomerController {
     CustomerResponseDto,
     'Get list customers success',
   )
-  @ApiQueriesAndPagination()
+  @ApiQueriesAndPagination({ name: 'sort', example: 'newest', required: false })
   async getListCustomers(
     @Param('agencyId', ParseIntPipe) agencyId: number,
     @CustomerQuery() customerQueries: CustomerQueries,

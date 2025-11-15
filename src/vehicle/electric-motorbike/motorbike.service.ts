@@ -44,13 +44,18 @@ export class MotorbikeService {
         },
       },
       where: filters.length > 0 ? { AND: filters } : {},
+      orderBy: {
+        id: motorbikeParams.sort === 'newest' ? 'desc' : 'asc',
+      },
     });
+    const totalMotorbikes = await this.getTotalMotorbikeNotCountDeleted();
     return {
       motorbikeList,
       paginationInfo: {
         page: motorbikeParams.page,
         limit: motorbikeParams.limit,
-        total: await this.getTotalMotorbikeNotCountDeleted(),
+        total: totalMotorbikes,
+        totalPages: Math.ceil(totalMotorbikes / motorbikeParams.limit),
       },
     };
   }
@@ -80,13 +85,18 @@ export class MotorbikeService {
         },
       },
       where: filters.length > 0 ? { AND: filters } : {},
+      orderBy: {
+        id: motorbikeParams.sort === 'newest' ? 'desc' : 'asc',
+      },
     });
+    const totalMotorbikes = await this.getTotalMotorbikeCountDeleted();
     return {
       motorbikeList,
       paginationInfo: {
         page: motorbikeParams.page,
         limit: motorbikeParams.limit,
-        total: await this.getTotalMotorbikeCountDeleted(),
+        total: totalMotorbikes,
+        totalPages: Math.ceil(totalMotorbikes / motorbikeParams.limit),
       },
     };
   }

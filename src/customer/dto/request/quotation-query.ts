@@ -11,4 +11,5 @@ export class QuotationQueriesCustomerDto implements PaginationRequestQuery {
   status?: QuotationStatus;
   quoteCode?: string;
   agencyId?: number;
+  sort: string;
 }

@@ -94,13 +94,18 @@ export class StockPromotionService {
       skip: skipData,
       take: stockPromotionQueries.limit,
       where: filters.length > 0 ? { AND: filters } : {},
+      orderBy: {
+        id: stockPromotionQueries.sort === 'newest' ? 'desc' : 'asc',
+      },
     });
+    const totalPromotions = await this.getTotalStockPromotion(agencyId);
     return {
       data: listData,
       paginationInfo: {
         page: stockPromotionQueries.page,
         limit: stockPromotionQueries.limit,
-        total: await this.getTotalStockPromotion(agencyId),
+        total: totalPromotions,
+        totalPages: Math.ceil(totalPromotions / stockPromotionQueries.limit),
       },
     };
   }
@@ -136,13 +141,18 @@ export class StockPromotionService {
       where: {
         AND: [{ status: 'ACTIVE' }, ...filters],
       },
+      orderBy: {
+        id: stockPromotionQueries.sort === 'newest' ? 'desc' : 'asc',
+      },
     });
+    const totalPromotions = await this.getTotalStockPromotion(agencyId);
     return {
       data: listData,
       paginationInfo: {
         page: stockPromotionQueries.page,
         limit: stockPromotionQueries.limit,
-        total: await this.getTotalStockPromotion(agencyId),
+        total: totalPromotions,
+        totalPages: Math.ceil(totalPromotions / stockPromotionQueries.limit),
       },
     };
   }

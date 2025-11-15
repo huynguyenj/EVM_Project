@@ -4,4 +4,5 @@ export class MotorbikeRequestQuery implements PaginationRequestQuery {
   page: number;
   model: string | undefined;
   makeFrom: string | undefined;
+  sort: string;
 }
