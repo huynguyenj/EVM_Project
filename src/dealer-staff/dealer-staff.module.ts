@@ -5,6 +5,7 @@ import { InstallmentContractModule } from './installment-contract/installment-co
 import { DriveTrialModule } from './drive-trial/drive-trial.module';
 import { QuotationModule } from './quotation/quotation.module';
 import { DepositModule } from './deposit/deposit.module';
+import { ContractFullPaymentModule } from './contract-full-payment/contract-full-payment.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { DepositModule } from './deposit/deposit.module';
     DriveTrialModule,
     QuotationModule,
     DepositModule,
+    ContractFullPaymentModule,
   ],
 })
 export class DealerStaffModule {}

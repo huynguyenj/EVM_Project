@@ -183,6 +183,7 @@ export class CustomerContractService {
       },
       select: {
         finalPrice: true,
+        status: true,
       },
     });
     if (!data)
@@ -200,6 +201,15 @@ export class CustomerContractService {
       throw new BadRequestException(
         'This customer contract is complete and can not be updated!',
       );
+
+    if (
+      updateCustomerContractDto.signDate &&
+      customerContract.status !== 'CONFIRMED'
+    )
+      throw new BadRequestException(
+        'This contract is not confirm yet. Please confirm to sign.',
+      );
+
     //Update quantity of stock if it has.
     if (updateCustomerContractDto.status === ContractStatus.COMPLETED) {
       await this.agencyStockService.updateAgencyStockQuantity(

@@ -11,10 +11,10 @@ import {
 import { VnpayService } from './vnpay.service';
 import { ApiQuery, ApiTags } from '@nestjs/swagger';
 import {
-  CreateCustomerContractFullPayment,
   CreateDepositPayment,
   CreatePaymentAgencyBill,
   CreatePaymentCustomer,
+  CreatePeriodCustomerContractFullPayment,
   PaymentUrl,
   VnpParamQuery,
 } from '../dto';
@@ -90,13 +90,14 @@ export class VnpayController {
   async createCustomerContractPaymentUrl(
     @Query('platform') platform: string,
     @IpAddress() ipAddress: string,
-    @Body() createCustomerContractPayment: CreateCustomerContractFullPayment,
+    @Body()
+    createPeriodCustomerContractPayment: CreatePeriodCustomerContractFullPayment,
   ) {
     const paymentData =
       await this.vnPayService.getCustomerContractPaymentInformation(
         platform,
         ipAddress,
-        createCustomerContractPayment,
+        createPeriodCustomerContractPayment,
       );
     return {
       statusCode: HttpStatus.CREATED,
@@ -157,7 +158,7 @@ export class VnpayController {
     @Res() res: Response,
   ) {
     const returnUrl =
-      await this.vnPayService.updateCustomerContractPayment(query);
+      await this.vnPayService.updateCustomerContractPeriodPayment(query);
     return res.redirect(returnUrl);
   }
 
