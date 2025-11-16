@@ -97,6 +97,19 @@ export class DriveTrialService {
     });
   }
 
+  async getListMotorbikeExistInAgencyStock(agencyId: number) {
+    const listData = await this.prisma.$queryRaw`
+          SELECT distinct on (em.id) em.id, em.name
+          FROM electric_motorbikes em
+          WHERE EXISTS (
+          SELECT 1
+          FROM agency_stocks agst
+          WHERE agst."motorbikeId" = em.id
+          AND agst."agencyId" = ${agencyId}
+  )`;
+    return listData;
+  }
+
   async getDriveTrialDetail(driveTrialId: number) {
     const data = await this.prisma.drive_Trial.findUnique({
       where: {

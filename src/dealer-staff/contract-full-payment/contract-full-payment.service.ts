@@ -38,7 +38,10 @@ export class ContractFullPaymentService {
       );
 
     const paidAmount = await this.calculateRestAmount(customerContractData.id);
-    if (createCustomerContractPaymentDto.amount > paidAmount)
+    if (
+      createCustomerContractPaymentDto.amount >
+      customerContractData.finalPrice - paidAmount
+    )
       throw new BadRequestException(
         `This contract already paid ${paidAmount}. The rest need to paid is ${customerContractData.finalPrice - paidAmount}. Please try another amount that suitable`,
       );

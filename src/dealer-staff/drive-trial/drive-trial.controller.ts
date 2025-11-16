@@ -14,11 +14,13 @@ import { DriveTrialService } from './drive-trial.service';
 import {
   ApiQueriesAndPagination,
   ApiResponseDocument,
+  ApiResponseDocumentArray,
 } from 'src/common/decorator';
 import {
   CreateDriveTrailDto,
   DriveTrailResponse,
   DriveTrialDetailResponse,
+  DriveTrialListMotorbike,
   DriveTrialQueries,
   UpdateDriveTrailDto,
 } from './dto';
@@ -81,6 +83,26 @@ export class DriveTrialController {
       message: 'Get list drive trials success',
       data: listData.data,
       paginationInfo: listData.paginationInfo,
+    };
+  }
+
+  @Get('list/motorbike-available/:agencyId')
+  @ApiOperation({ summary: 'Get list motorbike available in agency' })
+  @SetMetadata('public', true)
+  @ApiResponseDocumentArray(
+    HttpStatus.OK,
+    DriveTrialListMotorbike,
+    'Get list motorbike in agency drive trial success',
+  )
+  async getListMotorbikeAvailableInAgencyDriveTrial(
+    @Param('agencyId', ParseIntPipe) agencyId: number,
+  ) {
+    const listData =
+      await this.driveTrialService.getListMotorbikeExistInAgencyStock(agencyId);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Get list motorbike in agency drive trial success',
+      data: listData,
     };
   }
 
