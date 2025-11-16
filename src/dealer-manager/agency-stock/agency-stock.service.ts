@@ -10,6 +10,7 @@ import {
   UpdateAgencyStockDto,
 } from './dto';
 import { MotorbikeService } from 'src/vehicle/electric-motorbike/motorbike.service';
+import { Prisma } from 'generated/prisma';
 
 @Injectable()
 export class AgencyStockService {
@@ -74,6 +75,96 @@ export class AgencyStockService {
         totalPages: Math.ceil(totalAgencyStock / agencyStockQueries.limit),
       },
     };
+  }
+
+  async getListAgencyStockMoreInfo(
+    agencyId: number,
+    agencyStockQueries: AgencyStockQueries,
+  ) {
+    const skipData = (agencyStockQueries.page - 1) * agencyStockQueries.limit;
+    const listData = await this.prisma.$queryRaw`
+      select agst.id, agst.price, agst.quantity, agst."createAt", agst."updateAt", agst."agencyId", agst."motorbikeId", agst."colorId", em.name, em.description, em.model, em."makeFrom", em.version, mc."imageUrl", cl."colorType"
+      from electric_motorbikes em 
+      join (
+        select id, price, quantity, "createAt", "updateAt", "agencyId", "motorbikeId", "colorId" 
+        from agency_stocks
+        where "agencyId" = ${agencyId}
+               ${agencyStockQueries.motorbikeId ? Prisma.sql`and "motorbikeId" = ${agencyStockQueries.motorbikeId}::integer` : Prisma.empty}
+               ${agencyStockQueries.colorId ? Prisma.sql`and "colorId" = ${agencyStockQueries.colorId}::integer` : Prisma.empty}
+      ) as agst
+      on em.id = agst."motorbikeId"
+      join motorbike_color mc
+      on agst."motorbikeId" = mc."motorbikeId" and agst."colorId" = mc."colorId"
+      join colors cl on agst."colorId" = cl.id
+      order by agst.id ${agencyStockQueries.sort === 'newest' ? Prisma.sql`desc` : Prisma.sql`asc`}
+      offset ${skipData}
+      limit ${agencyStockQueries.limit}
+    `;
+    const totalAgencyStock = await this.getTotalAgencyStock(agencyId);
+    return {
+      data: listData,
+      paginationInfo: {
+        page: agencyStockQueries.page,
+        limit: agencyStockQueries.limit,
+        total: totalAgencyStock,
+        totalPages: Math.ceil(totalAgencyStock / agencyStockQueries.limit),
+      },
+    };
+  }
+
+  async getListMotorbikeNotInStock(
+    agencyId: number,
+    agencyStockQueries: AgencyStockQueries,
+  ) {
+    const skipData = (agencyStockQueries.page - 1) * agencyStockQueries.limit;
+    const listData = await this.prisma.$queryRaw`
+       SELECT distinct on (em.id) em.*, mi."imageUrl"
+       FROM electric_motorbikes em
+       join motorbike_images mi 
+       on mi."motorbikeId" = em.id 
+       WHERE NOT EXISTS (
+        SELECT 1
+        FROM agency_stocks agst
+        WHERE agst."motorbikeId" = em.id
+        AND agst."agencyId" = ${agencyId} 
+  )
+      and em."isDeleted" = false
+      ${agencyStockQueries.makeFrom ? Prisma.sql`and em."makeFrom" = ${agencyStockQueries.makeFrom}` : Prisma.empty}
+      ${agencyStockQueries.version ? Prisma.sql`and em.version = ${agencyStockQueries.version}` : Prisma.empty}
+      ${agencyStockQueries.model ? Prisma.sql`and em.model = ${agencyStockQueries.model}` : Prisma.empty}
+      ORDER BY em.id ${agencyStockQueries.sort === 'newest' ? Prisma.sql`desc` : Prisma.sql`asc`}
+      OFFSET ${skipData}
+      LIMIT ${agencyStockQueries.limit}
+    `;
+    const totalAgencyStock = await this.getTotalMotorbikeNotInStock(agencyId);
+    return {
+      data: listData,
+      paginationInfo: {
+        page: agencyStockQueries.page,
+        limit: agencyStockQueries.limit,
+        total: totalAgencyStock,
+        totalPages: Math.ceil(totalAgencyStock / agencyStockQueries.limit),
+      },
+    };
+  }
+
+  async getTotalMotorbikeNotInStock(agencyId: number) {
+    const data = await this.prisma.$queryRaw<{ total: number }[]>`
+        SELECT count (ems.id) as total
+        FROM (
+          SELECT distinct on (em.id) em.id::integer
+          FROM electric_motorbikes em
+          join motorbike_images mi 
+          on mi."motorbikeId" = em.id 
+          WHERE NOT EXISTS (
+          SELECT 1
+          FROM agency_stocks agst
+          WHERE agst."motorbikeId" = em.id
+          AND agst."agencyId" = ${agencyId}
+      )
+        and em."isDeleted" = false
+  ) as ems`;
+    return Number(data[0].total);
   }
 
   async getTotalAgencyStock(agencyId: number) {
