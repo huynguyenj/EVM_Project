@@ -19,7 +19,6 @@ export class SeederService implements OnModuleInit {
   private async createRoleDefaults() {
     const requiredRoles = [
       Role.ADMIN,
-      Role.CUSTOMER,
       Role.DEALER_MANAGER,
       Role.DEALER_STAFF,
       Role.EVM_STAFF,
