@@ -30,6 +30,18 @@ export class ContractFullPaymentService {
         'This contract is debt type not full type. Can not be created. ',
       );
 
+    if (
+      createCustomerContractPaymentDto.amount > customerContractData.finalPrice
+    )
+      throw new BadRequestException(
+        'Payment can not greater than the price in contract',
+      );
+
+    const paidAmount = await this.calculateRestAmount(customerContractData.id);
+    if (createCustomerContractPaymentDto.amount > paidAmount)
+      throw new BadRequestException(
+        `This contract already paid ${paidAmount}. The rest need to paid is ${customerContractData.finalPrice - paidAmount}. Please try another amount that suitable`,
+      );
     const createdData = await this.prisma.contract_Full_Payments.create({
       data: createCustomerContractPaymentDto,
     });
@@ -41,6 +53,20 @@ export class ContractFullPaymentService {
       where: { customerContractId: contractId },
     });
     return listData;
+  }
+
+  async calculateRestAmount(customerContractId: number) {
+    const listPayments = await this.prisma.contract_Full_Payments.findMany({
+      where: {
+        customerContractId: customerContractId,
+        NOT: {
+          paidAt: null,
+        },
+      },
+    });
+    return listPayments.reduce((total, payment) => {
+      return total + payment.amount;
+    }, 0);
   }
 
   async getCustomerContractFullPaymentById(id: number) {
