@@ -30,7 +30,7 @@ model Staff {
   isDeleted Boolean @default(false)
   agencyId Int?
   agency Agency? @relation(fields: [agencyId], references: [id])
-  feedback Feedback[]
+  // feedback Feedback[]
   role Role_Staff[]
   customerContract Customer_Contract[]
   quotation Quotation[]
@@ -422,7 +422,7 @@ model Customer {
   dob DateTime @db.Date
   agencyId Int
   agency Agency @relation(fields: [agencyId], references: [id])
-  feedback Feedback[]
+  // feedback Feedback[]
   customerContract Customer_Contract[]
   quotation Quotation[]
   // voucher Voucher[]
@@ -615,20 +615,20 @@ enum InstallmentPaymentStatus {
 // }
 
 /**Feedback table*/
-model Feedback {
-  id Int @id @default(autoincrement())
-  title String
-  content String
-  image String?
-  createAt DateTime @db.Date
-  isResolve Boolean
-  isDeleted Boolean
-  customerId Int
-  customer Customer @relation(fields: [customerId], references: [id])
-  staffId Int
-  staff Staff @relation(fields: [staffId], references: [id])
-  @@map("feedback")
-}
+// model Feedback {
+//   id Int @id @default(autoincrement())
+//   title String
+//   content String
+//   image String?
+//   createAt DateTime @db.Date
+//   isResolve Boolean
+//   isDeleted Boolean
+//   customerId Int
+//   customer Customer @relation(fields: [customerId], references: [id])
+//   staffId Int
+//   staff Staff @relation(fields: [staffId], references: [id])
+//   @@map("feedback")
+// }
 
 /**Drive trial table*/
 model Drive_Trial {
