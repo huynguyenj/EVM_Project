@@ -207,14 +207,6 @@ export class CustomerContractService {
         'This customer contract is complete and can not be updated!',
       );
 
-    if (
-      updateCustomerContractDto.signDate &&
-      customerContract.status !== 'CONFIRMED'
-    )
-      throw new BadRequestException(
-        'This contract is not confirm yet. Please confirm to sign.',
-      );
-
     //Update quantity of stock if it has.
     if (updateCustomerContractDto.status === ContractStatus.COMPLETED) {
       await this.agencyStockService.updateAgencyStockQuantity(
@@ -234,6 +226,14 @@ export class CustomerContractService {
   }
 
   async deleteCustomerContract(contractId: number) {
+    const customerContractData = await this.getCustomerContractById(contractId);
+    if (
+      customerContractData.status !== 'PENDING' &&
+      customerContractData.status !== 'REJECTED'
+    )
+      throw new BadRequestException(
+        'Customer contract is not pending or rejected state. Cannot be deleted',
+      );
     const installmentContract =
       await this.installmentContractService.getInstallmentContractByCustomerContractForDelete(
         contractId,

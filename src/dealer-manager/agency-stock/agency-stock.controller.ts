@@ -17,6 +17,8 @@ import {
 } from 'src/common/decorator';
 import {
   AgencyStockDetailResponseDto,
+  AgencyStockListDetailResponse,
+  AgencyStockNotAvailableResponse,
   AgencyStockQueries,
   AgencyStockResponse,
   CreateAgencyStockDto,
@@ -74,6 +76,63 @@ export class AgencyStockController {
     return {
       statusCode: HttpStatus.OK,
       message: 'Get list agency stocks success',
+      data: listData.data,
+      paginationInfo: listData.paginationInfo,
+    };
+  }
+
+  @Get('/list/info/:agencyId')
+  @ApiOperation({ summary: 'Get list stocks more information' })
+  @ApiResponseDocumentPagination(
+    HttpStatus.OK,
+    AgencyStockListDetailResponse,
+    'Get list agency stocks info success',
+  )
+  @ApiQueriesAndPagination(
+    { name: 'motorbikeId', example: 1, required: false },
+    { name: 'colorId', example: 1, required: false },
+    { name: 'sort', example: 'newest', required: false },
+  )
+  async getListAgencyStocksInfo(
+    @Param('agencyId', ParseIntPipe) agencyId: number,
+    @AgencyStockQuery() agencyQueries: AgencyStockQueries,
+  ) {
+    const listData = await this.agencyStockService.getListAgencyStockMoreInfo(
+      agencyId,
+      agencyQueries,
+    );
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Get list agency stocks info success',
+      data: listData.data,
+      paginationInfo: listData.paginationInfo,
+    };
+  }
+
+  @Get('/not-available/:agencyId')
+  @ApiOperation({ summary: 'Get list vehicle not available' })
+  @ApiResponseDocumentPagination(
+    HttpStatus.OK,
+    AgencyStockNotAvailableResponse,
+    'Get list agency stocks info success',
+  )
+  @ApiQueriesAndPagination(
+    { name: 'version', example: '2025', required: false },
+    { name: 'model', type: String, required: false, example: 'Model X' },
+    { name: 'makeFrom', type: String, required: false, example: 'Viet Nam' },
+    { name: 'sort', example: 'newest', required: false },
+  )
+  async getListMotorbikeNotInStocksInfo(
+    @Param('agencyId', ParseIntPipe) agencyId: number,
+    @AgencyStockQuery() agencyQueries: AgencyStockQueries,
+  ) {
+    const listData = await this.agencyStockService.getListMotorbikeNotInStock(
+      agencyId,
+      agencyQueries,
+    );
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Get list agency stocks info success',
       data: listData.data,
       paginationInfo: listData.paginationInfo,
     };

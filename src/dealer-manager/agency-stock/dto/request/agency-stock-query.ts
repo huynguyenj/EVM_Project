@@ -6,4 +6,7 @@ export class AgencyStockQueries implements PaginationRequestQuery {
   motorbikeId?: number;
   colorId?: number;
   sort: string;
+  model?: string;
+  makeFrom?: string;
+  version?: string;
 }

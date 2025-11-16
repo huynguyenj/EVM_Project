@@ -4,3 +4,5 @@ export * from './request/update-agency-stock-dto';
 export * from './response/agency-stock-response';
 export * from './response/agency-stock-detail-response';
 export * from './request/agency-stock-query';
+export * from './response/agency-stock-list-detail-response';
+export * from './response/agency-stock-not-available-response';
