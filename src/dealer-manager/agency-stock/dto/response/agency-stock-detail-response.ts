@@ -42,4 +42,10 @@ export class AgencyStockDetailResponseDto {
 
   @ApiResponseProperty({ type: ColorResponseDto })
   color: ColorResponseDto;
+
+  @ApiResponseProperty({
+    example:
+      'https://mavpbibesdtunlwhiunp.supabase.co/storage/v1/object/public/vehicle_color_image/color/green/PowerStorm%20GT/1762967184023-xe-tay-ga-50cc-osakar-nispa-viva-mau-cam-mo_71d7bee6b84e461e85d0399bc1e4bb99.jpg',
+  })
+  imageColor: string;
 }
