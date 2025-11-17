@@ -17,8 +17,17 @@ export class CorsConfig {
           return callback(error, false);
         }
       },
+      optionsSuccessStatus: 200,
       credentials: true,
-      allowedHeaders: '*',
+      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
+      allowedHeaders: [
+        'Content-Type',
+        'Authorization',
+        'X-Requested-With',
+        'Accept',
+        'Origin',
+        'Access-Control-Allow-Headers',
+      ],
     };
   }
 }
