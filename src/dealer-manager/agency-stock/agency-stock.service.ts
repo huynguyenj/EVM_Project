@@ -206,7 +206,19 @@ export class AgencyStockService {
       },
     });
     if (!data) throw new NotFoundException('Not found this stock!');
-    return data;
+    const colorImageUrl = await this.prisma.motorbike_Color.findUnique({
+      where: {
+        motorbikeId_colorId: {
+          colorId: data.colorId,
+          motorbikeId: data.motorbikeId,
+        },
+      },
+    });
+    const finalDataResponse = {
+      ...data,
+      imageColor: colorImageUrl?.imageUrl,
+    };
+    return finalDataResponse;
   }
 
   async updateAgencyStock(
