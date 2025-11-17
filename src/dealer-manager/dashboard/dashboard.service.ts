@@ -75,9 +75,19 @@ export class DashboardService {
       where "contractPaidType" = 'FULL'
       and "agencyId" = ${agencyId}
     `;
-
+    const depositPunish = await this.prisma.deposit.findMany({
+      where: {
+        status: 'PUNISH',
+      },
+      select: {
+        depositAmount: true,
+      },
+    });
+    const totalDepositAmount = depositPunish.reduce((total, deposit) => {
+      return total + deposit.depositAmount;
+    }, 0);
     return {
-      totalRevenue: Number(contracts[0].total_revenue),
+      totalRevenue: Number(contracts[0].total_revenue) + totalDepositAmount,
     };
   }
 

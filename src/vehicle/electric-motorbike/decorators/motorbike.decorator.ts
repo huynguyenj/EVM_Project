@@ -10,7 +10,7 @@ export const Motorbike = createParamDecorator(
       limit: limit ? +limit : 5,
       model,
       makeFrom,
-      sort,
+      sort: sort ? sort : 'newest',
     };
   },
 );
