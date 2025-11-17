@@ -10,7 +10,7 @@ export const OrderStockManageQuery = createParamDecorator(
       limit: limit ? +limit : 5,
       status,
       agencyId,
-      sort,
+      sort: sort ? sort : 'newest',
     };
   },
 );
