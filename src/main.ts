@@ -11,16 +11,13 @@ import {
   ValidationPipeException,
 } from './common/exception';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { CorsConfig } from './common/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const httpAdapter = app.get(HttpAdapterHost);
   const config = app.get(ConfigService);
-  app.enableCors({
-    origin: '*',
-    allowedHeaders: '*',
-    credentials: true,
-  });
+  app.enableCors(CorsConfig.getCorsOptions());
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
