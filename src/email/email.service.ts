@@ -48,10 +48,10 @@ export class EmailService {
     }
   }
 
-  async sendVerifyCode(verifiedCode: string, email: string) {
+  async sendVerifyCode(verifiedCode: number, email: string) {
     const contentEmail = VALIDATION_CODE_TEMPLATE.replace(
       '{code}',
-      verifiedCode,
+      String(verifiedCode),
     );
     await this.sendEmail(email, 'Validation code', contentEmail);
     return;

@@ -46,14 +46,13 @@ export const VALIDATION_CODE_TEMPLATE = `
                   <p>Verify code</p>
             </div>
             <div class="section-body">
-                  <p>Hello, {name}</p>
                   <p>This is your verification code:</p>
                   <div class="code-container">
                         <p class="code">{code}</p>
                   </div>
             </div>
             <div class="section-footer">
-                  <p>This code is only available for tge next 90 second. Please use code as soon as possible.</p>
+                  <p>This code is only available for tge next 60 second. Please use code as soon as possible.</p>
             </div>
       </section>
       <footer>

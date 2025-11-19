@@ -35,8 +35,21 @@ model Staff {
   customerContract Customer_Contract[]
   quotation Quotation[]
   token Token? 
+  verificationCode Verification_Code?
   @@map("staffs")
 }
+
+/**Verification code table*/
+model Verification_Code {
+  id Int @id @default(autoincrement())
+  code Int?
+  expiredAt DateTime? @db.Timestamp()
+  isVerified Boolean @default(false)
+  staffId Int @unique
+  staff Staff @relation(fields: [staffId], references: [id])
+  @@map("verification_code")
+}
+
 /**Token table*/
 model Token {
   id Int @id @default(autoincrement())
