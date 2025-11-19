@@ -4,6 +4,7 @@ export class CorsConfig {
   private static readonly ALLOWED_ORIGINS = [
     'http://localhost:5173',
     'https://wdp-391-fe.vercel.app',
+    'https://evm-project-v2-1.onrender.com',
   ];
   static getCorsOptions(): CorsOptions {
     return {
