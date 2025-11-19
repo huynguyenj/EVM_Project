@@ -8,12 +8,17 @@ import {
 import { type ConfigType } from '@nestjs/config';
 import authConfig from 'src/common/config/auth.config';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateNewPassword, ForgetPasswordDto, SignIn } from './dto';
+import {
+  CreateNewPassword,
+  ForgetPasswordDto,
+  SignIn,
+  VerificationCodeDto,
+} from './dto';
 import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './types/jwt.payload';
 import { EmailService } from 'src/email/email.service';
-import { generateCode } from './utils';
+import { codeExpiredTime, generateCode } from './utils';
 
 @Injectable()
 export class AuthService {
@@ -193,18 +198,84 @@ export class AuthService {
   }
 
   async forgetPassword(forgetPasswordDto: ForgetPasswordDto) {
-    const { email } = await this.validateEmail(forgetPasswordDto.email);
-    await this.emailService.sendVerifyCode(generateCode(), email);
+    const { email, id } = await this.validateEmail(forgetPasswordDto.email);
+    const verificationCode = generateCode();
+    const expiredTime = codeExpiredTime();
+    await this.emailService.sendVerifyCode(verificationCode, email);
+    const verifiedCode = await this.prisma.verification_Code.findUnique({
+      where: {
+        staffId: id,
+      },
+    });
+    if (!verifiedCode) {
+      await this.prisma.verification_Code.create({
+        data: {
+          code: verificationCode,
+          expiredAt: new Date(expiredTime),
+          staffId: id,
+        },
+      });
+    } else {
+      await this.prisma.verification_Code.update({
+        where: { id: verifiedCode.id },
+        data: {
+          code: verificationCode,
+          expiredAt: new Date(expiredTime),
+        },
+      });
+    }
     return;
   }
 
+  async verificationCode(verificationCodeDto: VerificationCodeDto) {
+    const { id } = await this.validateEmail(verificationCodeDto.email);
+    const verificationCodeData = await this.prisma.verification_Code.findUnique(
+      {
+        where: { staffId: id },
+      },
+    );
+    if (!verificationCodeData)
+      throw new NotFoundException('Can not found verification code.');
+    if (verificationCodeData.code !== verificationCodeDto.code)
+      throw new BadRequestException('Your code is not correct.');
+    if (verificationCodeData.code === null)
+      throw new BadRequestException('Please do generate verify code first');
+    if (verificationCodeData.expiredAt === null)
+      throw new BadRequestException(
+        'Please try to create a verify code process again',
+      );
+    const timeRemaining = verificationCodeData.expiredAt.getTime() - Date.now();
+    if (timeRemaining <= 0) throw new BadRequestException('Code has expired');
+    await this.prisma.verification_Code.update({
+      where: { id: verificationCodeData.id },
+      data: {
+        isVerified: true,
+      },
+    });
+  }
+
   async updatePassword(createPasswordDto: CreateNewPassword) {
+    const { id } = await this.validateEmail(createPasswordDto.email);
+    const isVerificationCodeExisted =
+      await this.prisma.verification_Code.findUnique({
+        where: { staffId: id },
+      });
+    if (!isVerificationCodeExisted || !isVerificationCodeExisted.isVerified)
+      throw new BadRequestException('Please do generate verify code process');
     await this.prisma.staff.update({
       where: {
         email: createPasswordDto.email,
       },
       data: {
-        password: createPasswordDto.newPassword,
+        password: await this.hashPassword(createPasswordDto.newPassword),
+      },
+    });
+    await this.prisma.verification_Code.update({
+      where: { id: isVerificationCodeExisted.id },
+      data: {
+        code: null,
+        expiredAt: null,
+        isVerified: false,
       },
     });
     return;

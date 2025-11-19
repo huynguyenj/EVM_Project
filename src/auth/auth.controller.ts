@@ -18,6 +18,7 @@ import {
   NewAccessTokenResponse,
   SignIn,
   SignInResponseDto,
+  VerificationCodeDto,
 } from './dto';
 import { AuthService } from './auth.service';
 import { type Request, type Response } from 'express';
@@ -97,7 +98,18 @@ export class AuthController {
       message: 'Get new access token success!',
     };
   }
-
+  @Post('verify')
+  @SetMetadata('public', true)
+  @ApiOperation({ summary: 'Update new password' })
+  @ApiResponseDocument(HttpStatus.CREATED, Object, 'Verify code success')
+  async verifyCode(@Body() verificationCodeDto: VerificationCodeDto) {
+    await this.authService.verificationCode(verificationCodeDto);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Verify code success',
+      data: {},
+    };
+  }
   @Patch('update-password')
   @SetMetadata('public', true)
   @ApiOperation({ summary: 'Update new password' })
