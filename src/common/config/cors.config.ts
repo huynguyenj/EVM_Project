@@ -5,6 +5,7 @@ export class CorsConfig {
     'http://localhost:5173',
     'https://wdp-391-fe.vercel.app',
     'https://evm-project-v2-1.onrender.com',
+    'https://evm-project.onrender.com',
   ];
   static getCorsOptions(): CorsOptions {
     return {
