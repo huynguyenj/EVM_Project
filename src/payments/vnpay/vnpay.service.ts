@@ -186,16 +186,11 @@ export class VnpayService {
           apBatchesId: apBatches.id,
         },
       });
-      const restAmount = apBatches.amount - vnp_Amount / 100;
-      if (restAmount === 0) {
-        await this.batchesService.updateCompleteBatch(
-          batchId,
-          apBatches.agencyId,
-          restAmount,
-        );
-      } else {
-        await this.batchesService.updatePartialBatch(batchId, restAmount);
-      }
+      await this.batchesService.updateBatchPayment(
+        batchId,
+        apBatches.agencyId,
+        vnp_Amount / 100,
+      );
       return `${returnClientUrl + '/payment?status=success'}`;
     } else {
       return `${returnClientUrl + '/payment?status=fail'}`;
