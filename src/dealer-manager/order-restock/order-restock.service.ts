@@ -38,14 +38,57 @@ export class OrderRestockService {
       },
     });
 
+    //Validate order items
     for (const orderItem of createOrderDto.orderItems) {
+      const currentDate = new Date();
       await this.inventoryService.checkInventory(
         orderItem.motorbikeId,
         orderItem.warehouseId,
         orderItem.colorId,
         orderItem.quantity,
       );
+      if (orderItem.discountId) {
+        const discountData = await this.discountService.getDiscountPrice(
+          orderItem.discountId,
+        );
+        if (discountData.status === 'INACTIVE')
+          throw new BadRequestException('Discount is inactive!');
+        if (currentDate > discountData.endAt)
+          throw new BadRequestException('Discount is expired!');
+        if (
+          discountData.agencyId !== null &&
+          createOrder.agencyId !== discountData.agencyId
+        )
+          throw new BadRequestException(
+            `This discount ${discountData.name} only available for agency ${discountData.agency?.name}.`,
+          );
+        if (orderItem.motorbikeId !== discountData.motorbikeId)
+          throw new BadRequestException(
+            `This discount ${discountData.name} only available for motorbike ${discountData.motorbike.name}`,
+          );
+        if (orderItem.quantity < discountData.min_quantity)
+          throw new BadRequestException(
+            `This discount is required at least ${discountData.min_quantity} of motorbike to have the usage`,
+          );
+      }
+      if (orderItem.promotionId) {
+        const promotion = await this.promotionService.getPromotionPrice(
+          orderItem.promotionId,
+        );
+        if (
+          promotion.motorbikeId !== null &&
+          promotion.motorbikeId !== orderItem.motorbikeId
+        )
+          throw new BadRequestException(
+            `This promotion is special for motorbike ${promotion.motorbike?.name}`,
+          );
+        if (promotion.status === 'INACTIVE')
+          throw new BadRequestException('Promotion is inactive!');
+        if (currentDate > promotion.endAt)
+          throw new BadRequestException('Promotion is expired!');
+      }
     }
+
     //Insert order item to order_items table
     for (const orderItem of createOrderDto.orderItems) {
       const motorbikeData = await this.motorbikeService.getMotorbikePrice(
@@ -58,8 +101,6 @@ export class OrderRestockService {
       let discountTotal: number = 0;
       let promotionTotal: number = 0;
       let wholesalePrice: number = motorbikeData.price;
-      const currentDate = new Date();
-
       //Get price policy information
       const pricePolicy =
         await this.pricePolicyService.getPricePolicyAgencyAndMotorbike(
@@ -69,19 +110,11 @@ export class OrderRestockService {
 
       if (pricePolicy) wholesalePrice = pricePolicy.wholesalePrice;
 
-      //Discount policy check and calculate
+      //Discount policy calculate
       if (orderItem.discountId) {
         const discountData = await this.discountService.getDiscountPrice(
           orderItem.discountId,
         );
-        if (discountData.status === 'INACTIVE')
-          throw new BadRequestException('Discount is inactive!');
-        if (currentDate > discountData.endAt)
-          throw new BadRequestException('Discount is expired!');
-        if (orderItem.quantity < discountData.min_quantity)
-          throw new BadRequestException(
-            `This discount is required at least ${discountData.min_quantity} of motorbike to have the usage`,
-          );
         // Calculate price of order item when apply discount
         discountTotal = this.calculatePriceWithSpecialDeal(
           wholesalePrice,
@@ -89,16 +122,11 @@ export class OrderRestockService {
           discountData.value,
         );
       }
-
-      //Promotion policy check and calculate
+      //Promotion policy calculate
       if (orderItem.promotionId) {
         const promotion = await this.promotionService.getPromotionPrice(
           orderItem.promotionId,
         );
-        if (promotion.status === 'INACTIVE')
-          throw new BadRequestException('Promotion is inactive!');
-        if (currentDate > promotion.endAt)
-          throw new BadRequestException('Promotion is expired!');
         // Calculate price of order item when apply promotion
         promotionTotal = this.calculatePriceWithSpecialDeal(
           wholesalePrice,
@@ -345,10 +373,12 @@ export class OrderRestockService {
     await this.prisma.agency_Order.delete({
       where: { id: orderId },
     });
-    await this.creditLineService.addCreditLimit(
-      orderRestock.agencyId,
-      orderRestock.subtotal,
-    );
+    if (orderRestock.orderType === 'DEFERRED') {
+      await this.creditLineService.addCreditLimit(
+        orderRestock.agencyId,
+        orderRestock.subtotal,
+      );
+    }
     return;
   }
 
