@@ -105,6 +105,8 @@ export class PromotionService {
         valueType: true,
         status: true,
         endAt: true,
+        motorbikeId: true,
+        motorbike: true,
       },
     });
     if (!data) throw new NotFoundException('This promotion is not existed!');

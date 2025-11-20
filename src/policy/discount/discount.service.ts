@@ -113,11 +113,16 @@ export class DiscountService {
         id: discountId,
       },
       select: {
+        name: true,
         value: true,
         valueType: true,
         status: true,
         endAt: true,
         min_quantity: true,
+        motorbikeId: true,
+        agencyId: true,
+        motorbike: true,
+        agency: true,
       },
     });
     if (!data) throw new NotFoundException('This discount is not existed!');
