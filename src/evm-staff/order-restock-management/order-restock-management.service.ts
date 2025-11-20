@@ -125,8 +125,13 @@ export class OrderRestockManagementService {
         'Please check credit of this order, make sure it is allowed.',
       );
 
-    //Update inventory if EVM Staff approve the order
-    if (order.status === 'APPROVED') {
+    //Update inventory if EVM Staff delivered the order
+    if (updateOrderDto.status === OrderStatus.DELIVERED) {
+      const isApBatchesExisted = await this.prisma.ap_Batches.findMany({
+        where: { agencyOrderId: order.id },
+      });
+      if (isApBatchesExisted.length === 0)
+        throw new BadRequestException('Please create batch before delivery');
       for (const orderItem of order.orderItems) {
         await this.warehouseInventoryService.updateInventoryQuantity(
           orderItem.electricMotorbikeId,
