@@ -345,6 +345,10 @@ export class OrderRestockService {
     await this.prisma.agency_Order.delete({
       where: { id: orderId },
     });
+    await this.creditLineService.addCreditLimit(
+      orderRestock.agencyId,
+      orderRestock.subtotal,
+    );
     return;
   }
 
