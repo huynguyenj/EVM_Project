@@ -211,8 +211,12 @@ export class OrderRestockService {
       skip: skipData,
       take: orderQuery.limit,
       where: {
-        agencyId: agencyId,
-        ...filters,
+        AND: [
+          {
+            agencyId: agencyId,
+          },
+          ...filters,
+        ],
       },
       select: {
         id: true,
