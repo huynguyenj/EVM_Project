@@ -159,17 +159,20 @@ export class AgencyStockService {
   ) {
     const skipData = (agencyStockQueries.page - 1) * agencyStockQueries.limit;
     const listData = await this.prisma.$queryRaw`
-       SELECT distinct on (em.id) em.*, mi."imageUrl"
-       FROM electric_motorbikes em
-       join motorbike_images mi 
-       on mi."motorbikeId" = em.id 
-       WHERE NOT EXISTS (
-        SELECT 1
-        FROM agency_stocks agst
-        WHERE agst."motorbikeId" = em.id
-        AND agst."agencyId" = ${agencyId} 
-  )
-      and em."isDeleted" = false
+       select em.*, mc."imageUrl"
+       from electric_motorbikes em
+       join (
+        SELECT *
+        FROM motorbike_color mc
+        WHERE NOT EXISTS (
+          SELECT 1
+          FROM agency_stocks agst
+          WHERE agst."motorbikeId" = mc."motorbikeId" and agst."colorId" = mc."colorId"
+          AND agst."agencyId" = ${agencyId}
+        ) 
+      ) as mc
+      on em.id = mc."motorbikeId"
+      where em."isDeleted" = false
       ${agencyStockQueries.makeFrom ? Prisma.sql`and em."makeFrom" = ${agencyStockQueries.makeFrom}` : Prisma.empty}
       ${agencyStockQueries.version ? Prisma.sql`and em.version = ${agencyStockQueries.version}` : Prisma.empty}
       ${agencyStockQueries.model ? Prisma.sql`and em.model = ${agencyStockQueries.model}` : Prisma.empty}
