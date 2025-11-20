@@ -125,7 +125,7 @@ export class WarehouseInventoryController {
     };
   }
 
-  @Patch(':motorbikeId/:warehouseId:colorId')
+  @Patch(':motorbikeId/:warehouseId/:colorId')
   @ApiResponseDocument(
     HttpStatus.OK,
     InventoryResponseDto,
