@@ -317,7 +317,6 @@ model Discount_Policy {
   motorbikeId Int
   motorbike Electric_Motorbike @relation(fields: [motorbikeId], references: [id])
   orderItems Order_Items[]
-  @@unique([agencyId, motorbikeId, type])
   @@map("discount_policy")
 }
 

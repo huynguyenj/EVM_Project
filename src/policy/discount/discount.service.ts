@@ -6,6 +6,7 @@ import {
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateDiscountDto, DiscountQueries, UpdateDiscountDto } from './dto';
 import { ValueType, DiscountType, DiscountStatus } from './types';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class DiscountService {
@@ -19,21 +20,6 @@ export class DiscountService {
       throw new BadRequestException(
         'Your value type is percent then value must in range 0 - 100',
       );
-    if (createDiscountDto.agencyId && createDiscountDto.motorbikeId) {
-      const dataExited = await this.prisma.discount_Policy.findUnique({
-        where: {
-          agencyId_motorbikeId_type: {
-            agencyId: createDiscountDto.agencyId,
-            motorbikeId: createDiscountDto.motorbikeId,
-            type: createDiscountDto.type,
-          },
-        },
-      });
-      if (dataExited)
-        throw new BadRequestException(
-          'This discount with agency, motorbike and type already created',
-        );
-    }
     const createdData = await this.prisma.discount_Policy.create({
       data: {
         name: createDiscountDto.name,
@@ -262,6 +248,7 @@ export class DiscountService {
     return;
   }
 
+  @Cron(CronExpression.EVERY_HOUR)
   async checkExpiredDiscount() {
     const today = new Date();
     const listDiscounts = await this.prisma.discount_Policy.findMany({

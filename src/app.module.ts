@@ -18,9 +18,11 @@ import { PaymentsModule } from './payments/payments.module';
 import { CustomerModule } from './customer/customer.module';
 import { EmailModule } from './email/email.module';
 import supabaseConfig from './common/config/supabase.config';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
       load: [authConfig, supabaseConfig],

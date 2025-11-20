@@ -10,6 +10,7 @@ import {
   UpdatePromotionDto,
 } from './dto';
 import { PromotionStatus, PromotionValueType } from './types';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class PromotionService {
@@ -172,6 +173,7 @@ export class PromotionService {
     return;
   }
 
+  @Cron(CronExpression.EVERY_HOUR)
   async checkExpiredPromotion() {
     const today = new Date();
     const listPromotion = await this.prisma.promotion.findMany({
