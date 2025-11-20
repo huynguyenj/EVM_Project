@@ -24,4 +24,7 @@ export class InventoryDetailResponseDto {
 
   @ApiResponseProperty({ type: MotorbikeResponseDto })
   motorbike: MotorbikeResponseDto;
+
+  @ApiResponseProperty({ example: 'Red' })
+  color: string;
 }

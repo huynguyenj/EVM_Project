@@ -4,7 +4,8 @@ import { Request } from 'express';
 export const QuotationCustomerQuery = createParamDecorator(
   (data: unknown, ctx: ExecutionContext) => {
     const request = ctx.switchToHttp().getRequest<Request>();
-    const { page, limit, type, status, quoteCode, agencyId } = request.query;
+    const { page, limit, type, status, quoteCode, agencyId, sort } =
+      request.query;
     return {
       page: page ? +page : 1,
       limit: limit ? +limit : 5,
@@ -12,6 +13,7 @@ export const QuotationCustomerQuery = createParamDecorator(
       type,
       status,
       agencyId,
+      sort,
     };
   },
 );

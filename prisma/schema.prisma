@@ -420,8 +420,10 @@ model Inventory {
   quantity Int
   stockDate DateTime @db.Date
   lastUpdate DateTime @db.Date
+  colorId Int
+  color Color @relation(fields: [colorId], references: [id])
   @@map("inventory")
-  @@id([electricMotorbikeId, warehouseId])
+  @@id([electricMotorbikeId, warehouseId, colorId])
 }
 /**Customer*/
 model Customer {
@@ -721,6 +723,7 @@ model Color {
   agencyStock Agency_Stock[]
   customerContract Customer_Contract[]
   quotation Quotation[]
+  inventory Inventory[]
   @@map("colors")
 }
 

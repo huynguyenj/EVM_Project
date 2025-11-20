@@ -13,24 +13,27 @@ export class WarehouseInventoryService {
   async createInventory(
     motorbikeId: number,
     warehouseId: number,
+    colorId: number,
     createInventory: CreateInventoryDto,
   ) {
     const isInventoryExisted = await this.prisma.inventory.findUnique({
       where: {
-        electricMotorbikeId_warehouseId: {
+        electricMotorbikeId_warehouseId_colorId: {
           electricMotorbikeId: motorbikeId,
           warehouseId: warehouseId,
+          colorId: colorId,
         },
       },
     });
     if (isInventoryExisted)
       throw new BadRequestException(
-        'Inventory with this warehouse and motorbike already created!',
+        'Inventory with this warehouse and motorbike with the color already created!',
       );
     const createData = await this.prisma.inventory.create({
       data: {
         electricMotorbikeId: motorbikeId,
         warehouseId: warehouseId,
+        colorId: colorId,
         quantity: createInventory.quantity,
         stockDate: createInventory.stockDate,
         lastUpdate: new Date(),
@@ -61,35 +64,47 @@ export class WarehouseInventoryService {
     return await this.prisma.inventory.count();
   }
 
-  async getInventoryDetail(motorbikeId: number, warehouseId: number) {
+  async getInventoryDetail(
+    motorbikeId: number,
+    warehouseId: number,
+    colorId: number,
+  ) {
     const data = await this.prisma.inventory.findUnique({
       where: {
-        electricMotorbikeId_warehouseId: {
+        electricMotorbikeId_warehouseId_colorId: {
           electricMotorbikeId: motorbikeId,
           warehouseId: warehouseId,
+          colorId: colorId,
         },
       },
       include: {
         warehouse: true,
         electricMotorbike: true,
+        color: true,
       },
     });
     if (!data) throw new NotFoundException('Not found the inventory!');
     return {
       warehouse: data.warehouse,
       motorbike: data.electricMotorbike,
+      color: data.color.colorType,
       quantity: data.quantity,
       stockDate: data.stockDate,
       lastUpdate: data.lastUpdate,
     };
   }
 
-  async getInventoryById(motorbikeId: number, warehouseId: number) {
+  async getInventoryById(
+    motorbikeId: number,
+    warehouseId: number,
+    colorId: number,
+  ) {
     const data = await this.prisma.inventory.findUnique({
       where: {
-        electricMotorbikeId_warehouseId: {
+        electricMotorbikeId_warehouseId_colorId: {
           electricMotorbikeId: motorbikeId,
           warehouseId: warehouseId,
+          colorId: colorId,
         },
       },
     });
@@ -100,13 +115,15 @@ export class WarehouseInventoryService {
   async updateInventory(
     motorbikeId: number,
     warehouseId: number,
+    colorId: number,
     updateInventoryDto: UpdateInventoryDto,
   ) {
     const updatedData = await this.prisma.inventory.update({
       where: {
-        electricMotorbikeId_warehouseId: {
+        electricMotorbikeId_warehouseId_colorId: {
           electricMotorbikeId: motorbikeId,
           warehouseId: warehouseId,
+          colorId: colorId,
         },
       },
       data: {
@@ -120,14 +137,20 @@ export class WarehouseInventoryService {
   async updateInventoryQuantity(
     motorbikeId: number,
     warehouseId: number,
+    colorId: number,
     requiredQuantity: number,
   ) {
-    const inventoryData = await this.getInventoryById(motorbikeId, warehouseId);
+    const inventoryData = await this.getInventoryById(
+      motorbikeId,
+      warehouseId,
+      colorId,
+    );
     await this.prisma.inventory.update({
       where: {
-        electricMotorbikeId_warehouseId: {
+        electricMotorbikeId_warehouseId_colorId: {
           electricMotorbikeId: motorbikeId,
           warehouseId: warehouseId,
+          colorId: colorId,
         },
       },
       data: {
@@ -136,12 +159,17 @@ export class WarehouseInventoryService {
     });
   }
 
-  async deleteInventory(motorbikeId: number, warehouseId: number) {
+  async deleteInventory(
+    motorbikeId: number,
+    warehouseId: number,
+    colorId: number,
+  ) {
     await this.prisma.inventory.delete({
       where: {
-        electricMotorbikeId_warehouseId: {
+        electricMotorbikeId_warehouseId_colorId: {
           electricMotorbikeId: motorbikeId,
           warehouseId: warehouseId,
+          colorId: colorId,
         },
       },
     });
@@ -160,13 +188,15 @@ export class WarehouseInventoryService {
   async checkInventory(
     motorbikeId: number,
     warehouseId: number,
+    colorId: number,
     requestQuantity: number,
   ) {
     const inventory = await this.prisma.inventory.findUnique({
       where: {
-        electricMotorbikeId_warehouseId: {
+        electricMotorbikeId_warehouseId_colorId: {
           electricMotorbikeId: motorbikeId,
           warehouseId: warehouseId,
+          colorId: colorId,
         },
       },
     });
