@@ -36,7 +36,7 @@ import { WarehouseResponseDto } from 'src/admin/warehouses/dto';
 export class WarehouseInventoryController {
   constructor(private inventoryService: WarehouseInventoryService) {}
 
-  @Post(':motorbikeId/:warehouseId')
+  @Post(':motorbikeId/:warehouseId/:colorId')
   @ApiResponseDocument(
     HttpStatus.CREATED,
     InventoryResponseDto,
@@ -46,11 +46,13 @@ export class WarehouseInventoryController {
   async createInventory(
     @Param('motorbikeId', ParseIntPipe) motorbikeId: number,
     @Param('warehouseId', ParseIntPipe) warehouseId: number,
+    @Param('colorId', ParseIntPipe) colorId: number,
     @Body() createInventoryDto: CreateInventoryDto,
   ) {
     const createdData = await this.inventoryService.createInventory(
       motorbikeId,
       warehouseId,
+      colorId,
       createInventoryDto,
     );
     return {
@@ -99,20 +101,22 @@ export class WarehouseInventoryController {
     };
   }
 
-  @Get('detail/:motorbikeId/:warehouseId')
+  @Get('detail/:motorbikeId/:warehouseId/:colorId')
   @ApiResponseDocument(
     HttpStatus.OK,
     InventoryDetailResponseDto,
-    'Create inventory successfully!',
+    'Get inventory detail successfully!',
   )
   @ApiOperation({ summary: 'Get inventory detail' })
   async getInventoryDetail(
     @Param('motorbikeId', ParseIntPipe) motorbikeId: number,
     @Param('warehouseId', ParseIntPipe) warehouseId: number,
+    @Param('colorId', ParseIntPipe) colorId: number,
   ) {
     const data = await this.inventoryService.getInventoryDetail(
       motorbikeId,
       warehouseId,
+      colorId,
     );
     return {
       statusCode: HttpStatus.OK,
@@ -131,11 +135,13 @@ export class WarehouseInventoryController {
   async updateInventory(
     @Param('motorbikeId', ParseIntPipe) motorbikeId: number,
     @Param('warehouseId', ParseIntPipe) warehouseId: number,
+    @Param('colorId', ParseIntPipe) colorId: number,
     @Body() updateInventoryDto: UpdateInventoryDto,
   ) {
     const updateData = await this.inventoryService.updateInventory(
       motorbikeId,
       warehouseId,
+      colorId,
       updateInventoryDto,
     );
     return {
@@ -145,14 +151,19 @@ export class WarehouseInventoryController {
     };
   }
 
-  @Delete(':motorbikeId/:warehouseId')
+  @Delete(':motorbikeId/:warehouseId/:colorId')
   @ApiResponseDocument(HttpStatus.OK, Object, 'Delete inventory successfully!')
   @ApiOperation({ summary: 'Delete inventory' })
   async deleteInventory(
     @Param('motorbikeId', ParseIntPipe) motorbikeId: number,
     @Param('warehouseId', ParseIntPipe) warehouseId: number,
+    @Param('colorId', ParseIntPipe) colorId: number,
   ) {
-    await this.inventoryService.deleteInventory(motorbikeId, warehouseId);
+    await this.inventoryService.deleteInventory(
+      motorbikeId,
+      warehouseId,
+      colorId,
+    );
     return {
       statusCode: HttpStatus.OK,
       message: 'Delete inventory successfully!',

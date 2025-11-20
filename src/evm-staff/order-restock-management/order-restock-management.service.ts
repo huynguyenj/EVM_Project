@@ -132,6 +132,7 @@ export class OrderRestockManagementService {
           orderItem.electricMotorbikeId,
           orderItem.warehouseId,
           orderItem.quantity,
+          orderItem.colorId,
         );
       }
     }

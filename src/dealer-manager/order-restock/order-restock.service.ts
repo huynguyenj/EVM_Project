@@ -44,6 +44,7 @@ export class OrderRestockService {
         orderItem.motorbikeId,
         orderItem.warehouseId,
         orderItem.quantity,
+        orderItem.colorId,
       );
       const motorbikeData = await this.motorbikeService.getMotorbikePrice(
         orderItem.motorbikeId,

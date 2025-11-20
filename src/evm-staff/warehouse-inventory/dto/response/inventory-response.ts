@@ -5,6 +5,8 @@ export class InventoryResponseDto {
   electricMotorbikeId: number;
   @ApiResponseProperty({ example: 1 })
   warehouseId: number;
+  @ApiResponseProperty({ example: 1 })
+  colorId: number;
   @ApiResponseProperty({ example: 100 })
   quantity: number;
   @ApiResponseProperty({
