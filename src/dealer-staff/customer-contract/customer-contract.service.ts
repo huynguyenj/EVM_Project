@@ -82,7 +82,7 @@ export class CustomerContractService {
   ) {
     const skipData =
       (customerContractQueries.page - 1) * customerContractQueries.limit;
-    const filters: any[] = [{ agencyId: agencyId }];
+    const filters: object[] = [];
     if (
       customerContractQueries.contractType &&
       Object.values(ContractPaidType).includes(
@@ -117,12 +117,18 @@ export class CustomerContractService {
     const listData = await this.prisma.customer_Contract.findMany({
       skip: skipData,
       take: customerContractQueries.limit,
-      where: filters.length > 0 ? { AND: filters } : {},
+      where: {
+        AND: [{ agencyId: agencyId }, ...filters],
+      },
       orderBy: {
         id: customerContractQueries.sort === 'newest' ? 'desc' : 'asc',
       },
     });
-    const totalContracts = await this.getTotalCustomerContract(agencyId);
+    const totalContracts = await this.prisma.customer_Contract.count({
+      where: {
+        AND: [{ agencyId: agencyId }, ...filters],
+      },
+    });
     return {
       data: listData,
       paginationInfo: {

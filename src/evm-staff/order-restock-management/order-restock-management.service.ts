@@ -34,7 +34,9 @@ export class OrderRestockManagementService {
         id: orderManageQueries.sort === 'newest' ? 'desc' : 'asc',
       },
     });
-    const totalOrders = await this.getTotalOrderRestock();
+    const totalOrders = await this.prisma.agency_Order.count({
+      where: filters.length > 0 ? { AND: filters } : {},
+    });
     return {
       listData,
       paginationInfo: {

@@ -41,7 +41,9 @@ export class WarehousesService {
         id: warehouseQueries.sort === 'newest' ? 'desc' : 'asc',
       },
     });
-    const totalWarehouses = await this.getTotalWarehouse();
+    const totalWarehouses = await this.prisma.warehouse.count({
+      where: filters.length > 0 ? { AND: filters } : {},
+    });
     return {
       dataList,
       paginationInfo: {

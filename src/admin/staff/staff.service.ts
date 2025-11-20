@@ -132,7 +132,22 @@ export class StaffService {
         id: staffQuery.sort === 'newest' ? 'desc' : 'asc',
       },
     });
-    const totalStaff = await this.getTotalStaffAdmin();
+    const totalStaff = await this.prisma.staff.count({
+      where: staffQuery.role
+        ? {
+            role: {
+              some: {
+                role: {
+                  roleName: {
+                    contains: staffQuery.role,
+                    mode: 'insensitive',
+                  },
+                },
+              },
+            },
+          }
+        : {},
+    });
     return {
       staffList: staffList.map((staff) => {
         return {

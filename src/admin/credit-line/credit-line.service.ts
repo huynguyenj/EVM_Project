@@ -55,7 +55,9 @@ export class CreditLineService {
       },
     });
 
-    const totalCreditLines = await this.getTotalCreditLine();
+    const totalCreditLines = await this.prisma.credit_Line.count({
+      where: filters.length > 0 ? { AND: filters } : {},
+    });
     return {
       data,
       paginationInfo: {

@@ -47,7 +47,7 @@ export class QuotationService {
     quotationQueries: QuotationQueriesDto,
   ) {
     const skipData = (quotationQueries.page - 1) * quotationQueries.limit;
-    const filters: any[] = [];
+    const filters: object[] = [];
     if (
       quotationQueries.type &&
       Object.values(QuotationType).includes(quotationQueries.type)
@@ -80,12 +80,18 @@ export class QuotationService {
     const listData = await this.prisma.quotation.findMany({
       skip: skipData,
       take: quotationQueries.limit,
-      where: filters.length > 0 ? { AND: filters } : {},
+      where: {
+        AND: [{ agencyId: agencyId }, ...filters],
+      },
       orderBy: {
         id: quotationQueries.sort === 'newest' ? 'desc' : 'asc',
       },
     });
-    const totalQuotations = await this.getTotalQuotation(agencyId);
+    const totalQuotations = await this.prisma.quotation.count({
+      where: {
+        AND: [{ agencyId: agencyId }, ...filters],
+      },
+    });
     return {
       data: listData,
       paginationInfo: {

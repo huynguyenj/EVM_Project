@@ -232,7 +232,16 @@ export class OrderRestockService {
         id: orderQuery.sort === 'newest' ? 'desc' : 'asc',
       },
     });
-    const totalOrders = await this.getTotalOrderAgency(agencyId);
+    const totalOrders = await this.prisma.agency_Order.count({
+      where: {
+        AND: [
+          {
+            agencyId: agencyId,
+          },
+          ...filters,
+        ],
+      },
+    });
     return {
       listData,
       paginationInfo: {
