@@ -148,6 +148,15 @@ export class WarehouseInventoryService {
     return;
   }
 
+  async getListWarehouseByMotorbikeId(motorbikeId: number) {
+    const listData = await this.prisma.inventory.findMany({
+      where: {
+        electricMotorbikeId: motorbikeId,
+      },
+    });
+    return listData;
+  }
+
   async checkInventory(
     motorbikeId: number,
     warehouseId: number,

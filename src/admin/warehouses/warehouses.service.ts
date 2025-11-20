@@ -82,7 +82,6 @@ export class WarehousesService {
     if (!data) throw new NotFoundException('Not found the warehouse!');
     return data;
   }
-
   async deleteWarehouse(warehouseId: number) {
     await this.prisma.warehouse.delete({
       where: {

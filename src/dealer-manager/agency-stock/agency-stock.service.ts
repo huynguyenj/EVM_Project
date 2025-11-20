@@ -159,7 +159,7 @@ export class AgencyStockService {
   ) {
     const skipData = (agencyStockQueries.page - 1) * agencyStockQueries.limit;
     const listData = await this.prisma.$queryRaw`
-       select em.*, mc."imageUrl"
+       select em.*, mc."imageUrl", mc."colorId"
        from electric_motorbikes em
        join (
         SELECT *
@@ -209,6 +209,31 @@ export class AgencyStockService {
         and em."isDeleted" = false
   ) as ems`;
     return Number(data[0].total);
+  }
+
+  async getDetailMotorbikeNotInStock(motorbikeId: number, colorId: number) {
+    const data = await this.prisma.motorbike_Color.findUnique({
+      where: {
+        motorbikeId_colorId: {
+          motorbikeId: motorbikeId,
+          colorId: colorId,
+        },
+      },
+      select: {
+        motorbike: {
+          include: {
+            appearance: true,
+            battery: true,
+            safeFeature: true,
+            configuration: true,
+            images: true,
+          },
+        },
+        imageUrl: true,
+      },
+    });
+    if (!data) throw new NotFoundException('Not found motorbike detail');
+    return data;
   }
 
   async getTotalAgencyStock(agencyId: number) {

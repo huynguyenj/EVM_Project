@@ -18,6 +18,7 @@ import {
 import {
   AgencyStockDetailResponseDto,
   AgencyStockListDetailResponse,
+  AgencyStockNotAvailableDetailResponse,
   AgencyStockNotAvailableResponse,
   AgencyStockQueries,
   AgencyStockResponse,
@@ -179,6 +180,28 @@ export class AgencyStockController {
     return {
       statusCode: HttpStatus.OK,
       message: 'Get agency stock detail success!',
+      data: data,
+    };
+  }
+
+  @Get('detail/not-in-stock/:motorbikeId/:colorId')
+  @ApiOperation({ summary: 'Get agency stock not available detail' })
+  @ApiResponseDocument(
+    HttpStatus.OK,
+    AgencyStockNotAvailableDetailResponse,
+    'Get agency stock not available detail success',
+  )
+  async getAgencyNotInStockDetail(
+    @Param('motorbikeId', ParseIntPipe) motorbikeId: number,
+    @Param('colorId', ParseIntPipe) colorId: number,
+  ) {
+    const data = await this.agencyStockService.getDetailMotorbikeNotInStock(
+      motorbikeId,
+      colorId,
+    );
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Get agency stock not available detail success',
       data: data,
     };
   }
