@@ -32,4 +32,6 @@ export class AgencyStockNotAvailableResponse {
       'https://mavpbibesdtunlwhiunp.supabase.co/storage/v1/object/public/vehicle_color_image/common/UrbanSwift%20E-City/xe-may-dien-vinfast-evo-200-1-1663743428.jpg',
   })
   imageUrl: string;
+  @ApiResponseProperty({ example: 1 })
+  colorId: number;
 }

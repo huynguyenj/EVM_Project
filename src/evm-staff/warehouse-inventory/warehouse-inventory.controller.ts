@@ -16,6 +16,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   ApiQueriesAndPagination,
   ApiResponseDocument,
+  ApiResponseDocumentArray,
 } from 'src/common/decorator';
 import {
   CreateInventoryDto,
@@ -26,6 +27,7 @@ import {
 } from './dto';
 import { ApiResponseDocumentPagination } from 'src/common/decorator/swagger-decorator/api.response.document.pagination';
 import { InventoryDecorator } from './decorators';
+import { WarehouseResponseDto } from 'src/admin/warehouses/dto';
 
 @Controller('inventory')
 @ApiBearerAuth('access-token')
@@ -74,6 +76,26 @@ export class WarehouseInventoryController {
       message: 'Get inventory list successfully!',
       data: dataList.data,
       paginationInfo: dataList.paginationInfo,
+    };
+  }
+
+  @Get('list/warehouse/:motorbikeId')
+  @Roles(Role.DEALER_STAFF, Role.DEALER_MANAGER)
+  @ApiOperation({ summary: 'Get warehouse by motorbikeId' })
+  @ApiResponseDocumentArray(
+    HttpStatus.OK,
+    WarehouseResponseDto,
+    'Get list warehouse by motorbikeId successfully',
+  )
+  async getListWarehouseByMotorbikeId(
+    @Param('motorbikeId', ParseIntPipe) motorbikeId: number,
+  ) {
+    const dataList =
+      await this.inventoryService.getListWarehouseByMotorbikeId(motorbikeId);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Get list warehouse by motorbikeId successfully',
+      data: dataList,
     };
   }
 
