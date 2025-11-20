@@ -34,6 +34,12 @@ export class CustomerContractService {
   async createCustomerContract(
     createCustomerContract: CreateCustomerContractDto,
   ) {
+    const isContractWithQuotationExisted =
+      await this.prisma.customer_Contract.findUnique({
+        where: { quotationId: createCustomerContract.quotationId },
+      });
+    if (isContractWithQuotationExisted)
+      throw new BadRequestException('This quotation already have contract');
     const staffInfo = await this.prisma.staff.findUnique({
       where: {
         id: createCustomerContract.staffId,
