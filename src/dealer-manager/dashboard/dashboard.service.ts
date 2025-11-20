@@ -146,6 +146,7 @@ export class DashboardService {
       on cc."staffId" = s.id
       where cc.status = 'COMPLETED'
       group by s.email, s.id, s.username
+      order by total_contract_revenue desc
       offset ${skipData}
       limit ${staffRevenueQueries.limit}
     `;
