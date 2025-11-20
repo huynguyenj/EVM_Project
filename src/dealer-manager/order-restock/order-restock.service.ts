@@ -27,17 +27,6 @@ export class OrderRestockService {
 
   async createOrderRestock(createOrderDto: CreateAgencyOrderDto) {
     await this.checkCredit(createOrderDto.agencyId);
-    //Create order with no subtotal and item quantity
-    const createOrder = await this.prisma.agency_Order.create({
-      data: {
-        creditChecked: false,
-        itemQuantity: createOrderDto.orderItems.length,
-        orderType: createOrderDto.orderType,
-        agencyId: createOrderDto.agencyId,
-        subtotal: 0,
-      },
-    });
-
     //Validate order items
     for (const orderItem of createOrderDto.orderItems) {
       const currentDate = new Date();
@@ -57,7 +46,7 @@ export class OrderRestockService {
           throw new BadRequestException('Discount is expired!');
         if (
           discountData.agencyId !== null &&
-          createOrder.agencyId !== discountData.agencyId
+          createOrderDto.agencyId !== discountData.agencyId
         )
           throw new BadRequestException(
             `This discount ${discountData.name} only available for agency ${discountData.agency?.name}.`,
@@ -88,6 +77,16 @@ export class OrderRestockService {
           throw new BadRequestException('Promotion is expired!');
       }
     }
+    //Create order with no subtotal and item quantity
+    const createOrder = await this.prisma.agency_Order.create({
+      data: {
+        creditChecked: false,
+        itemQuantity: createOrderDto.orderItems.length,
+        orderType: createOrderDto.orderType,
+        agencyId: createOrderDto.agencyId,
+        subtotal: 0,
+      },
+    });
 
     //Insert order item to order_items table
     for (const orderItem of createOrderDto.orderItems) {
