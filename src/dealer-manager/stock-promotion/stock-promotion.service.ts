@@ -71,7 +71,7 @@ export class StockPromotionService {
   ) {
     const skipData =
       (stockPromotionQueries.page - 1) * stockPromotionQueries.limit;
-    const filters: any[] = [];
+    const filters: object[] = [];
     if (
       stockPromotionQueries.valueType &&
       Object.values(StockPromotionValueType).includes(
@@ -93,12 +93,18 @@ export class StockPromotionService {
     const listData = await this.prisma.stock_Promotion.findMany({
       skip: skipData,
       take: stockPromotionQueries.limit,
-      where: filters.length > 0 ? { AND: filters } : {},
+      where: {
+        AND: [{ agencyId: agencyId }, ...filters],
+      },
       orderBy: {
         id: stockPromotionQueries.sort === 'newest' ? 'desc' : 'asc',
       },
     });
-    const totalPromotions = await this.getTotalStockPromotion(agencyId);
+    const totalPromotions = await this.prisma.stock_Promotion.count({
+      where: {
+        AND: [{ agencyId: agencyId }, ...filters],
+      },
+    });
     return {
       data: listData,
       paginationInfo: {
@@ -139,13 +145,17 @@ export class StockPromotionService {
       skip: skipData,
       take: stockPromotionQueries.limit,
       where: {
-        AND: [{ status: 'ACTIVE' }, ...filters],
+        AND: [{ agencyId: agencyId }, { status: 'ACTIVE' }, ...filters],
       },
       orderBy: {
         id: stockPromotionQueries.sort === 'newest' ? 'desc' : 'asc',
       },
     });
-    const totalPromotions = await this.getTotalStockPromotion(agencyId);
+    const totalPromotions = await this.prisma.stock_Promotion.count({
+      where: {
+        AND: [{ agencyId: agencyId }, { status: 'ACTIVE' }, ...filters],
+      },
+    });
     return {
       data: listData,
       paginationInfo: {

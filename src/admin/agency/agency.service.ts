@@ -51,7 +51,9 @@ export class AgencyService {
         id: agencyQueries.sort === 'newest' ? 'desc' : 'asc',
       },
     });
-    const totalAgencies = await this.getTotalAgency();
+    const totalAgencies = await this.prisma.agency.count({
+      where: filters.length > 0 ? { AND: filters } : {},
+    });
     return {
       dataList,
       paginationInfo: {

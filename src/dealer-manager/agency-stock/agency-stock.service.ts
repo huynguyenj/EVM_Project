@@ -48,7 +48,7 @@ export class AgencyStockService {
     agencyStockQueries: AgencyStockQueries,
   ) {
     const skipData = (agencyStockQueries.page - 1) * agencyStockQueries.limit;
-    const filters: any[] = [{ agencyId: agencyId }];
+    const filters: object[] = [];
     if (agencyStockQueries.motorbikeId) {
       filters.push({ motorbikeId: Number(agencyStockQueries.motorbikeId) });
     }
@@ -59,13 +59,17 @@ export class AgencyStockService {
       skip: skipData,
       take: agencyStockQueries.limit,
       where: {
-        AND: filters,
+        AND: [{ agencyId: agencyId }, ...filters],
       },
       orderBy: {
         id: agencyStockQueries.sort === 'newest' ? 'desc' : 'asc',
       },
     });
-    const totalAgencyStock = await this.getTotalAgencyStock(agencyId);
+    const totalAgencyStock = await this.prisma.agency_Stock.count({
+      where: {
+        AND: [{ agencyId: agencyId }, ...filters],
+      },
+    });
     return {
       data: listData,
       paginationInfo: {

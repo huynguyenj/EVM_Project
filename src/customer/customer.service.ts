@@ -138,7 +138,11 @@ export class CustomerService {
         id: quotationQueries.sort === 'newest' ? 'desc' : 'asc',
       },
     });
-    const totalQuotations = await this.getTotalCustomerQuotation(credentialId);
+    const totalQuotations = await this.prisma.quotation.count({
+      where: {
+        AND: [{ customer: { credentialId: credentialId } }, ...filters],
+      },
+    });
     return {
       data: listData,
       paginationInfo: {

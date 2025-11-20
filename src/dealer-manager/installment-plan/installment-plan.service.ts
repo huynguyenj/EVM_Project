@@ -43,8 +43,11 @@ export class InstallmentPlanService {
         id: installmentPlanQueries.sort === 'newest' ? 'desc' : 'asc',
       },
     });
-    const totalInstallmentPlans =
-      await this.getTotalAgencyInstallmentPlan(agencyId);
+    const totalInstallmentPlans = await this.prisma.installment_Plan.count({
+      where: {
+        AND: [{ agencyId: agencyId }, ...filters],
+      },
+    });
     return {
       data: listData,
       paginationInfo: {

@@ -48,7 +48,9 @@ export class MotorbikeService {
         id: motorbikeParams.sort === 'newest' ? 'desc' : 'asc',
       },
     });
-    const totalMotorbikes = await this.getTotalMotorbikeNotCountDeleted();
+    const totalMotorbikes = await this.prisma.electric_Motorbike.count({
+      where: filters.length > 0 ? { AND: filters } : {},
+    });
     return {
       motorbikeList,
       paginationInfo: {
@@ -89,7 +91,9 @@ export class MotorbikeService {
         id: motorbikeParams.sort === 'newest' ? 'desc' : 'asc',
       },
     });
-    const totalMotorbikes = await this.getTotalMotorbikeCountDeleted();
+    const totalMotorbikes = await this.prisma.electric_Motorbike.count({
+      where: filters.length > 0 ? { AND: filters } : {},
+    });
     return {
       motorbikeList,
       paginationInfo: {

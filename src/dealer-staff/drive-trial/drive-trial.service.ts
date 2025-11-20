@@ -77,7 +77,11 @@ export class DriveTrialService {
         id: driveTrialQueries.sort === 'newest' ? 'desc' : 'asc',
       },
     });
-    const totalDriveTrial = await this.getTotalDriveTrialAgency(agencyId);
+    const totalDriveTrial = await this.prisma.drive_Trial.count({
+      where: {
+        AND: [{ agencyId: agencyId }, ...filters],
+      },
+    });
     return {
       data: listDriveTrial,
       paginationInfo: {

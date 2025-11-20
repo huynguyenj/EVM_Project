@@ -37,7 +37,9 @@ export class BatchesManagementService {
         id: batchesQueries.sort === 'newest' ? 'desc' : 'asc',
       },
     });
-    const totalBatches = await this.getTotalBatches();
+    const totalBatches = await this.prisma.ap_Batches.count({
+      where: filters.length > 0 ? { AND: filters } : {},
+    });
     return {
       data: listData,
       paginationInfo: {
@@ -58,7 +60,7 @@ export class BatchesManagementService {
     batchesQueries: BatchesQueries,
   ) {
     const skipData = (batchesQueries.page - 1) * batchesQueries.limit;
-    const filters: any[] = [{ agencyId: agencyId }];
+    const filters: object[] = [];
     if (
       batchesQueries.status &&
       Object.values(BatchesStatus).includes(batchesQueries.status)
@@ -70,12 +72,18 @@ export class BatchesManagementService {
     const listData = await this.prisma.ap_Batches.findMany({
       skip: skipData,
       take: batchesQueries.limit,
-      where: filters.length > 0 ? { AND: filters } : {},
+      where: {
+        AND: [{ agencyId: agencyId }, ...filters],
+      },
       orderBy: {
         id: batchesQueries.sort === 'newest' ? 'desc' : 'asc',
       },
     });
-    const totalBatches = await this.getTotalBatchesOfAgency(agencyId);
+    const totalBatches = await this.prisma.ap_Batches.count({
+      where: {
+        AND: [{ agencyId: agencyId }, ...filters],
+      },
+    });
     return {
       data: listData,
       paginationInfo: {
