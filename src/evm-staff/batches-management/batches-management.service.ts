@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { BatchesQueries, CreateBatchesDto, UpdateBatchesDto } from './dto';
 import { BatchesStatus } from './types';
@@ -149,20 +153,28 @@ export class BatchesManagementService {
     return;
   }
 
-  async updateCompleteBatch(batchId: number, agencyId: number, amount: number) {
-    const updatedData = await this.prisma.ap_Batches.update({
+  async updateBatchPayment(
+    batchId: number,
+    agencyId: number,
+    paidAmount: number,
+  ) {
+    const batchData = await this.prisma.ap_Batches.findUnique({
       where: { id: batchId },
-      data: { status: 'CLOSED', amount: amount },
+    });
+    if (!batchData) throw new BadRequestException('Can not found batch');
+    const restAmount = batchData.amount - paidAmount;
+    const status =
+      restAmount > 0 ? BatchesStatus.PARTIAL : BatchesStatus.CLOSED;
+    await this.prisma.ap_Batches.update({
+      where: { id: batchId },
+      data: { status, amount: restAmount },
       include: {
         agencyOrder: {
           select: { agencyId: true, subtotal: true },
         },
       },
     });
-    await this.creditLineService.addCreditLimit(
-      agencyId,
-      updatedData.agencyOrder.subtotal,
-    );
+    await this.creditLineService.addCreditLimit(agencyId, paidAmount);
     return;
   }
 
