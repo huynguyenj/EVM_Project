@@ -131,8 +131,8 @@ export class OrderRestockManagementService {
         await this.warehouseInventoryService.updateInventoryQuantity(
           orderItem.electricMotorbikeId,
           orderItem.warehouseId,
-          orderItem.quantity,
           orderItem.colorId,
+          orderItem.quantity,
         );
       }
     }
