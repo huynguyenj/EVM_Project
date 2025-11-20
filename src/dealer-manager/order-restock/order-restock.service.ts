@@ -38,14 +38,16 @@ export class OrderRestockService {
       },
     });
 
-    //Insert order item to order_items table
     for (const orderItem of createOrderDto.orderItems) {
       await this.inventoryService.checkInventory(
         orderItem.motorbikeId,
         orderItem.warehouseId,
-        orderItem.quantity,
         orderItem.colorId,
+        orderItem.quantity,
       );
+    }
+    //Insert order item to order_items table
+    for (const orderItem of createOrderDto.orderItems) {
       const motorbikeData = await this.motorbikeService.getMotorbikePrice(
         orderItem.motorbikeId,
       );
