@@ -203,10 +203,16 @@ export class OrderRestockService {
 
   async getListOrdersAgency(agencyId: number, orderQuery: OrderQueries) {
     const skipData = (orderQuery.page - 1) * orderQuery.limit;
+    const filters: object[] = [];
+    if (orderQuery.status) {
+      filters.push({ status: orderQuery.status });
+    }
     const listData = await this.prisma.agency_Order.findMany({
       skip: skipData,
       take: orderQuery.limit,
-      where: orderQuery.status ? { status: orderQuery.status } : {},
+      where: orderQuery.status
+        ? { AND: { agencyId: agencyId, ...filters } }
+        : {},
       select: {
         id: true,
         orderType: true,
