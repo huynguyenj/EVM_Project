@@ -109,6 +109,35 @@ export class AgencyStockController {
     };
   }
 
+  @Get('/list/info/out-of-stock/:agencyId')
+  @ApiOperation({ summary: 'Get list stocks more information' })
+  @ApiResponseDocumentPagination(
+    HttpStatus.OK,
+    AgencyStockListDetailResponse,
+    'Get list agency out of stocks info success',
+  )
+  @ApiQueriesAndPagination(
+    { name: 'motorbikeId', example: 1, required: false },
+    { name: 'colorId', example: 1, required: false },
+    { name: 'sort', example: 'newest', required: false },
+  )
+  async getListAgencyOutOfStocksInfo(
+    @Param('agencyId', ParseIntPipe) agencyId: number,
+    @AgencyStockQuery() agencyQueries: AgencyStockQueries,
+  ) {
+    const listData =
+      await this.agencyStockService.getListAgencyOutOfStockMoreInfo(
+        agencyId,
+        agencyQueries,
+      );
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Get list agency stocks info success',
+      data: listData.data,
+      paginationInfo: listData.paginationInfo,
+    };
+  }
+
   @Get('/not-available/:agencyId')
   @ApiOperation({ summary: 'Get list vehicle not available' })
   @ApiResponseDocumentPagination(

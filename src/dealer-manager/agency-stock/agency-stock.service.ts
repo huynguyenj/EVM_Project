@@ -95,6 +95,43 @@ export class AgencyStockService {
         where "agencyId" = ${agencyId}
                ${agencyStockQueries.motorbikeId ? Prisma.sql`and "motorbikeId" = ${agencyStockQueries.motorbikeId}::integer` : Prisma.empty}
                ${agencyStockQueries.colorId ? Prisma.sql`and "colorId" = ${agencyStockQueries.colorId}::integer` : Prisma.empty}
+               and quantity > 0
+      ) as agst
+      on em.id = agst."motorbikeId"
+      join motorbike_color mc
+      on agst."motorbikeId" = mc."motorbikeId" and agst."colorId" = mc."colorId"
+      join colors cl on agst."colorId" = cl.id
+      order by agst.id ${agencyStockQueries.sort === 'newest' ? Prisma.sql`desc` : Prisma.sql`asc`}
+      offset ${skipData}
+      limit ${agencyStockQueries.limit}
+    `;
+    const totalAgencyStock = await this.getTotalAgencyStock(agencyId);
+    return {
+      data: listData,
+      paginationInfo: {
+        page: agencyStockQueries.page,
+        limit: agencyStockQueries.limit,
+        total: totalAgencyStock,
+        totalPages: Math.ceil(totalAgencyStock / agencyStockQueries.limit),
+      },
+    };
+  }
+
+  async getListAgencyOutOfStockMoreInfo(
+    agencyId: number,
+    agencyStockQueries: AgencyStockQueries,
+  ) {
+    const skipData = (agencyStockQueries.page - 1) * agencyStockQueries.limit;
+    const listData = await this.prisma.$queryRaw`
+      select agst.id, agst.price, agst.quantity, agst."createAt", agst."updateAt", agst."agencyId", agst."motorbikeId", agst."colorId", em.name, em.description, em.model, em."makeFrom", em.version, mc."imageUrl", cl."colorType"
+      from electric_motorbikes em 
+      join (
+        select id, price, quantity, "createAt", "updateAt", "agencyId", "motorbikeId", "colorId" 
+        from agency_stocks
+        where "agencyId" = ${agencyId}
+               ${agencyStockQueries.motorbikeId ? Prisma.sql`and "motorbikeId" = ${agencyStockQueries.motorbikeId}::integer` : Prisma.empty}
+               ${agencyStockQueries.colorId ? Prisma.sql`and "colorId" = ${agencyStockQueries.colorId}::integer` : Prisma.empty}
+               and quantity = 0
       ) as agst
       on em.id = agst."motorbikeId"
       join motorbike_color mc

@@ -11,6 +11,7 @@ import {
 } from './dto';
 import { StockPromotionStatus, StockPromotionValueType } from './types';
 import { AssignStockPromotionDto } from './dto/request/assign-stock-promotion-dto';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class StockPromotionService {
@@ -231,6 +232,7 @@ export class StockPromotionService {
     return;
   }
 
+  @Cron(CronExpression.EVERY_HOUR)
   async checkStockPromotionExpired(agencyId: number) {
     const today = new Date();
     const listPromotion = await this.prisma.stock_Promotion.findMany({
