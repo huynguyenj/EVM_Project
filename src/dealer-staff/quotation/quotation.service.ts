@@ -157,6 +157,13 @@ export class QuotationService {
   }
 
   async deleteQuotation(quotationId: number) {
+    const isQuotationUsed = await this.prisma.customer_Contract.findUnique({
+      where: {
+        quotationId: quotationId,
+      },
+    });
+    if (isQuotationUsed)
+      throw new BadRequestException('This quotation has been used');
     return await this.prisma.quotation.delete({
       where: { id: quotationId },
     });

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
   CreateInstallmentPlanDto,
@@ -93,6 +97,13 @@ export class InstallmentPlanService {
   }
 
   async deleteInstallmentPlan(installmentPlanId: number) {
+    const isInstallmentPlanUsed = await this.prisma.installment_Plan.findMany({
+      where: {
+        id: installmentPlanId,
+      },
+    });
+    if (isInstallmentPlanUsed.length > 0)
+      throw new BadRequestException('This installment plan has been used');
     await this.prisma.installment_Plan.delete({
       where: {
         id: installmentPlanId,
