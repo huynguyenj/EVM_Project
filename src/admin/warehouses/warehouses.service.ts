@@ -83,9 +83,12 @@ export class WarehousesService {
     return data;
   }
   async deleteWarehouse(warehouseId: number) {
-    await this.prisma.warehouse.delete({
+    await this.prisma.warehouse.update({
       where: {
         id: warehouseId,
+      },
+      data: {
+        isActive: false,
       },
     });
     return;

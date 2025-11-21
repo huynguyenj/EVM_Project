@@ -53,6 +53,15 @@ export class ColorService {
   }
 
   async deleteColor(colorId: number) {
+    const isColorUsed = await this.prisma.motorbike_Color.findMany({
+      where: {
+        colorId: colorId,
+      },
+    });
+    if (isColorUsed.length > 0)
+      throw new BadRequestException(
+        'This color has been used and can not be deleted.',
+      );
     await this.prisma.color.delete({
       where: {
         id: colorId,

@@ -86,6 +86,24 @@ export class CustomerService {
   }
 
   async deleteCustomer(customerId: number) {
+    const isCustomerHaveContract = await this.prisma.customer_Contract.findMany(
+      {
+        where: {
+          customerId: customerId,
+        },
+      },
+    );
+    if (isCustomerHaveContract.length > 0)
+      throw new BadRequestException('This customer already have contract');
+    const isCustomerHaveQuotation = await this.prisma.quotation.findMany({
+      where: {
+        customerId: customerId,
+      },
+    });
+    if (isCustomerHaveQuotation.length > 0)
+      throw new BadRequestException(
+        'This customer have quotations. Delete quotations of this customer first.',
+      );
     await this.prisma.customer.delete({
       where: {
         id: customerId,
