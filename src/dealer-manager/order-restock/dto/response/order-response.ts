@@ -1,5 +1,5 @@
 import { ApiResponseProperty } from '@nestjs/swagger';
-import { AgencyOrderType, OrderStatus } from '../../types';
+import { OrderStatus } from '../../types';
 import { OrderItemResponse } from './order-item-response';
 
 export class OrderResponseDto {
@@ -10,13 +10,19 @@ export class OrderResponseDto {
   itemsQuantity: number;
 
   @ApiResponseProperty({ example: 1276000 })
-  subTotal: number;
+  total: number;
+
+  @ApiResponseProperty({ example: 1276000 })
+  paidAmount: number;
 
   @ApiResponseProperty({ example: '2025-10-12T14:30:00.000Z' })
   orderAt: Date;
 
-  @ApiResponseProperty({ example: AgencyOrderType.FULL })
-  orderType: AgencyOrderType;
+  @ApiResponseProperty({ example: 'Note' })
+  note: Date;
+
+  // @ApiResponseProperty({ example: AgencyOrderType.FULL })
+  // orderType: AgencyOrderType;
 
   @ApiResponseProperty({ example: OrderStatus.DRAFT })
   status: OrderStatus;

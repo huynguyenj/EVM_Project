@@ -80,6 +80,14 @@ export class QuotationService {
     const listData = await this.prisma.quotation.findMany({
       skip: skipData,
       take: quotationQueries.limit,
+      include: {
+        customer: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+      },
       where: {
         AND: [{ agencyId: agencyId }, ...filters],
       },

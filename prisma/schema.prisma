@@ -115,7 +115,6 @@ model Agency {
   agencyStockPromotion Stock_Promotion[]
   installmentPlan Installment_Plan[]
   quotation Quotation[]
-  apBatches Ap_Batches[]
   creditLine Credit_Line?
   @@map("agencies")
 }
@@ -129,6 +128,7 @@ enum AgencyStatus {
 model Credit_Line {
   id Int @id @default(autoincrement())
   creditLimit Float
+  currentDebt Float @default(0)
   warningThreshold Int
   overDueThreshHoldDays Int
   isBlocked Boolean @default(false)
@@ -203,16 +203,19 @@ model Agency_Stock_Promotion {
 /**Contract table*/
 model Agency_Order {
   id Int @id @default(autoincrement())
-  subtotal Float
+  total Float
   itemQuantity Int
   orderAt DateTime @db.Date @default(now())
-  orderType AgencyOrderType
+  // orderType AgencyOrderType
   status AgencyOrderStatus @default(DRAFT)
-  creditChecked Boolean
+  // dueDate DateTime? @db.Date
+  paidAmount Float @default(0)
+  // partialAmount Float @default(0)
+  note String? @db.Text() 
   agencyId Int
   agency Agency @relation(fields: [agencyId], references: [id])
   orderItems Order_Items[]
-  apBatches Ap_Batches[]
+  orderPayments Order_Payment[]
   @@map("agency_orders")
 }
 
@@ -222,12 +225,13 @@ enum AgencyOrderStatus {
   APPROVED
   DELIVERED
   CANCELED
+  COMPLETED
 }
 
-enum AgencyOrderType {
-  FULL
-  DEFERRED
-}
+// enum AgencyOrderType {
+//   FULL
+//   DEFERRED
+// }
 
 model Order_Items {
   id Int @id @default(autoincrement())
@@ -249,42 +253,38 @@ model Order_Items {
   promotion Promotion? @relation(fields: [promotionId], references: [id])
   colorId Int
   color Color @relation(fields: [colorId], references: [id])
-  warehouseId Int
-  warehouse Warehouse @relation(fields: [warehouseId], references: [id])
+  warehouseId Int?
+  warehouse Warehouse? @relation(fields: [warehouseId], references: [id])
   @@map("order_items")
 }
 
 /**Ap batches*/
-model Ap_Batches {
+model Order_Payment {
   id Int @id @default(autoincrement())
   invoiceNumber Float
   amount Float
-  dueDate DateTime @db.Date
-  status Ap_BatchesStatus @default(OPEN)
-  createAt DateTime @db.Date @default(now())
-  agencyId Int
-  agency Agency @relation(fields: [agencyId], references: [id])
+  payAt DateTime @db.Date
   agencyOrderId Int
   agencyOrder Agency_Order @relation(fields: [agencyOrderId], references: [id])
-  apPayment Ap_Payments[]
-  @@map("ap_batches")
+  // apPayment Ap_Payments[]
+  @@map("order_payments")
 }
 
-enum Ap_BatchesStatus {
-  OPEN
-  PARTIAL
-  CLOSED
-  OVERDUE
-}
+// enum Ap_BatchesStatus {
+//   OPEN
+//   PARTIAL
+//   CLOSED
+//   OVERDUE
+// }
 
-model Ap_Payments {
-  id Int @id @default(autoincrement())
-  paidDate DateTime @db.Date
-  amount Float
-  apBatchesId Int
-  apBatches Ap_Batches @relation(fields: [apBatchesId], references: [id])
-  @@map("ap_payments")
-}
+// model Ap_Payments {
+//   id Int @id @default(autoincrement())
+//   paidDate DateTime @db.Date
+//   amount Float
+//   apBatchesId Int
+//   apBatches Ap_Batches @relation(fields: [apBatchesId], references: [id])
+//   @@map("ap_payments")
+// }
 
 /**Price policy*/
 model Price_Policy {

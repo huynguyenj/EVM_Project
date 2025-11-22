@@ -145,6 +145,10 @@ export class WarehouseInventoryService {
       warehouseId,
       colorId,
     );
+    if (requiredQuantity > inventoryData.quantity)
+      throw new BadRequestException(
+        `Required quantity ${requiredQuantity} is over the inventory quantity ${inventoryData.quantity}`,
+      );
     await this.prisma.inventory.update({
       where: {
         electricMotorbikeId_warehouseId_colorId: {

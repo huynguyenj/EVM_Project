@@ -1,13 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsArray,
-  IsEnum,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsPositive,
 } from 'class-validator';
-import { AgencyOrderType } from '../../types';
 
 export class CreateOrderItemDto {
   @ApiProperty({ example: 10 })
@@ -32,12 +30,6 @@ export class CreateOrderItemDto {
   @IsNumber()
   @IsPositive()
   @IsNotEmpty()
-  warehouseId: number;
-
-  @ApiProperty({ example: 1 })
-  @IsNumber()
-  @IsPositive()
-  @IsNotEmpty()
   motorbikeId: number;
 
   @ApiProperty({ example: 1 })
@@ -48,10 +40,10 @@ export class CreateOrderItemDto {
 }
 
 export class CreateAgencyOrderDto {
-  @ApiProperty({ example: AgencyOrderType.FULL })
-  @IsEnum(AgencyOrderType)
-  @IsNotEmpty()
-  orderType: AgencyOrderType;
+  // @ApiProperty({ example: AgencyOrderType.FULL })
+  // @IsEnum(AgencyOrderType)
+  // @IsNotEmpty()
+  // orderType: AgencyOrderType;
   @ApiProperty({ type: [CreateOrderItemDto] })
   @IsArray()
   orderItems: CreateOrderItemDto[];

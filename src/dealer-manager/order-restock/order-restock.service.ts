@@ -30,12 +30,6 @@ export class OrderRestockService {
     //Validate order items
     for (const orderItem of createOrderDto.orderItems) {
       const currentDate = new Date();
-      await this.inventoryService.checkInventory(
-        orderItem.motorbikeId,
-        orderItem.warehouseId,
-        orderItem.colorId,
-        orderItem.quantity,
-      );
       if (orderItem.discountId) {
         const discountData = await this.discountService.getDiscountPrice(
           orderItem.discountId,
@@ -80,11 +74,10 @@ export class OrderRestockService {
     //Create order with no subtotal and item quantity
     const createOrder = await this.prisma.agency_Order.create({
       data: {
-        creditChecked: false,
         itemQuantity: createOrderDto.orderItems.length,
-        orderType: createOrderDto.orderType,
+        // orderType: createOrderDto.orderType,
         agencyId: createOrderDto.agencyId,
-        subtotal: 0,
+        total: 0,
       },
     });
 
@@ -151,7 +144,6 @@ export class OrderRestockService {
           promotionId: orderItem.promotionId ?? null,
           discountId: orderItem.discountId ?? null,
           pricePolicyId: pricePolicy ? pricePolicy.id : null,
-          warehouseId: orderItem.warehouseId,
           orderId: createOrder.id,
         },
       });
@@ -162,30 +154,22 @@ export class OrderRestockService {
       where: { orderId: createOrder.id },
     });
     //Calculate all item price
-    const subtotal = orderItems.reduce((total, item) => {
+    const total = orderItems.reduce((total, item) => {
       return total + item.finalPrice;
     }, 0);
-    //Update subtotal, item quantity in order
+    //Update total, item quantity in order
     const updatedOrder = await this.prisma.agency_Order.update({
       where: {
         id: createOrder.id,
       },
       data: {
-        subtotal: subtotal,
+        total: total,
         itemQuantity: orderItems.length,
       },
       include: {
         orderItems: true,
       },
     });
-    //Check order deferred subtotal with credit limit
-    if (updatedOrder.orderType === 'DEFERRED') {
-      await this.checkOverCreditLimit(
-        updatedOrder.agencyId,
-        updatedOrder.subtotal,
-        updatedOrder.id,
-      );
-    }
     return updatedOrder;
   }
 
@@ -195,26 +179,30 @@ export class OrderRestockService {
       await this.creditLineService.getCreditLineByAgencyId(agencyId);
     if (creditLine.isBlocked)
       throw new BadRequestException('Your credit line has been blocked.');
+    if (creditLine.currentDebt >= creditLine.creditLimit)
+      throw new BadRequestException(
+        'Your credit line has reached the limit. Please pay off your debt to continue placing orders.',
+      );
   }
 
   // Check over credit limit
-  async checkOverCreditLimit(
-    agencyId: number,
-    subtotal: number,
-    orderId: number,
-  ) {
-    const creditLine =
-      await this.creditLineService.getCreditLineByAgencyId(agencyId);
-    if (!creditLine) throw new BadRequestException('Not found credit line');
-    if (creditLine.creditLimit <= subtotal) {
-      await this.deleteOrder(orderId);
-      throw new BadRequestException(
-        'Your order is over credit limit please try with smaller amount',
-      );
-    }
-    await this.creditLineService.minusCreditLimit(agencyId, subtotal);
-    return;
-  }
+  // async checkOverCreditLimit(
+  //   agencyId: number,
+  //   subtotal: number,
+  //   orderId: number,
+  // ) {
+  //   const creditLine =
+  //     await this.creditLineService.getCreditLineByAgencyId(agencyId);
+  //   if (!creditLine) throw new BadRequestException('Not found credit line');
+  //   if (creditLine.creditLimit <= subtotal) {
+  //     await this.deleteOrder(orderId);
+  //     throw new BadRequestException(
+  //       'Your order is over credit limit please try with smaller amount',
+  //     );
+  //   }
+  //   await this.creditLineService.minusCreditLimit(agencyId, subtotal);
+  //   return;
+  // }
 
   private calculatePriceWithSpecialDeal(
     wholesalePrice: number,
@@ -250,12 +238,13 @@ export class OrderRestockService {
       },
       select: {
         id: true,
-        orderType: true,
-        creditChecked: true,
         itemQuantity: true,
-        subtotal: true,
+        total: true,
         orderAt: true,
         status: true,
+        paidAmount: true,
+        note: true,
+        orderPayments: true,
         orderItems: true,
       },
       orderBy: {
@@ -364,20 +353,16 @@ export class OrderRestockService {
       throw new BadRequestException(
         'This order already in process so you can not delete anymore. Contact to EVM staff to canceled.',
       );
-    await this.prisma.order_Items.deleteMany({
-      where: {
-        orderId: orderId,
-      },
-    });
-    await this.prisma.agency_Order.delete({
-      where: { id: orderId },
-    });
-    if (orderRestock.orderType === 'DEFERRED') {
-      await this.creditLineService.addCreditLimit(
-        orderRestock.agencyId,
-        orderRestock.subtotal,
-      );
-    }
+    await this.prisma.$transaction([
+      this.prisma.order_Items.deleteMany({
+        where: {
+          orderId: orderId,
+        },
+      }),
+      this.prisma.agency_Order.delete({
+        where: { id: orderId },
+      }),
+    ]);
     return;
   }
 
@@ -394,13 +379,25 @@ export class OrderRestockService {
     return data;
   }
 
-  async updateCheckedOrder(orderId: number) {
-    const updatedData = await this.prisma.agency_Order.update({
-      where: { id: orderId },
-      data: {
-        creditChecked: true,
+  async getOrderById(orderId: number) {
+    const data = await this.prisma.agency_Order.findUnique({
+      where: {
+        id: orderId,
       },
     });
-    return updatedData;
+    if (!data) throw new NotFoundException('Not found order!');
+    return data;
+  }
+
+  async updatePaidAmount(orderId: number, paidAmount: number) {
+    const data = await this.prisma.agency_Order.update({
+      where: {
+        id: orderId,
+      },
+      data: {
+        paidAmount: paidAmount,
+      },
+    });
+    return data;
   }
 }

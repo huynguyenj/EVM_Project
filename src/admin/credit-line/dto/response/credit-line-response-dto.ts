@@ -14,6 +14,12 @@ export class CreditLineResponseDto {
   creditLimit: number;
 
   @ApiResponseProperty({
+    example: 400000,
+    type: Number,
+  })
+  currentDebt: number;
+
+  @ApiResponseProperty({
     example: 80,
     type: Number,
   })
