@@ -8,12 +8,14 @@ import { OrderManageQueries, UpdateOrderStock } from './dto';
 import { OrderRestockService } from 'src/dealer-manager/order-restock/order-restock.service';
 import { OrderStatus } from 'src/dealer-manager/order-restock/types';
 import { WarehouseInventoryService } from '../warehouse-inventory/warehouse-inventory.service';
+import { CreditLineService } from 'src/admin/credit-line/credit-line.service';
 
 @Injectable()
 export class OrderRestockManagementService {
   constructor(
     private orderRestockService: OrderRestockService,
     private warehouseInventoryService: WarehouseInventoryService,
+    private creditLineService: CreditLineService,
     private prisma: PrismaService,
   ) {}
 
@@ -29,6 +31,13 @@ export class OrderRestockManagementService {
     const listData = await this.prisma.agency_Order.findMany({
       skip: skipData,
       take: orderManageQueries.limit,
+      include: {
+        agency: {
+          select: {
+            name: true,
+          },
+        },
+      },
       where: filters.length > 0 ? { AND: filters } : {},
       orderBy: {
         id: orderManageQueries.sort === 'newest' ? 'desc' : 'asc',
@@ -57,6 +66,8 @@ export class OrderRestockManagementService {
         id: orderId,
       },
       include: {
+        agency: true,
+        orderPayments: true,
         orderItems: true,
       },
     });
@@ -106,9 +117,9 @@ export class OrderRestockManagementService {
     return data;
   }
 
-  async updateCheckCreditOrder(orderId: number) {
-    return await this.orderRestockService.updateCheckedOrder(orderId);
-  }
+  // async updateCheckCreditOrder(orderId: number) {
+  //   return await this.orderRestockService.updateCheckedOrder(orderId);
+  // }
 
   async updateStatusOrder(orderId: number, updateOrderDto: UpdateOrderStock) {
     const order = await this.orderRestockService.getOrderDetail(orderId);
@@ -119,49 +130,87 @@ export class OrderRestockManagementService {
         'This order is in draft status, just wait the agreement from agency to update',
       );
 
-    //Make sure EVM Staff is check credit before change status
-    if (updateOrderDto.status !== OrderStatus.PENDING && !order.creditChecked)
+    if (
+      updateOrderDto.status === OrderStatus.COMPLETED &&
+      order.paidAmount < order.total
+    )
       throw new BadRequestException(
-        'Please check credit of this order, make sure it is allowed.',
+        'Cannot complete the order until the order is fully paid',
       );
 
-    //Update inventory if EVM Staff delivered the order
-    if (updateOrderDto.status === OrderStatus.DELIVERED) {
-      const isApBatchesExisted = await this.prisma.ap_Batches.findMany({
-        where: { agencyOrderId: order.id },
-      });
-      if (isApBatchesExisted.length === 0)
-        throw new BadRequestException('Please create batch before delivery');
-      for (const orderItem of order.orderItems) {
-        await this.warehouseInventoryService.updateInventoryQuantity(
-          orderItem.electricMotorbikeId,
-          orderItem.warehouseId,
-          orderItem.colorId,
-          orderItem.quantity,
-        );
-      }
-    }
+    // Update debt to credit line when order is approved or canceled
+    if (updateOrderDto.status === OrderStatus.APPROVED)
+      await this.creditLineService.addDebt(order.agencyId, order.total);
+    if (updateOrderDto.status === OrderStatus.CANCELED)
+      await this.creditLineService.minusDebt(order.agencyId, order.total);
 
     const updatedData = await this.prisma.agency_Order.update({
       where: {
         id: orderId,
       },
       data: updateOrderDto,
+      include: {
+        agency: {
+          select: {
+            name: true,
+          },
+        },
+      },
     });
     return updatedData;
   }
 
   async deleteOrder(orderId: number) {
-    await this.prisma.order_Items.deleteMany({
-      where: {
-        orderId: orderId,
-      },
-    });
-    await this.prisma.agency_Order.delete({
-      where: {
-        id: orderId,
-      },
-    });
+    await this.prisma.$transaction([
+      this.prisma.order_Items.deleteMany({
+        where: {
+          orderId: orderId,
+        },
+      }),
+      this.prisma.order_Payment.deleteMany({
+        where: {
+          agencyOrderId: orderId,
+        },
+      }),
+      this.prisma.agency_Order.delete({
+        where: {
+          id: orderId,
+        },
+      }),
+    ]);
     return;
+  }
+
+  async updateWarehouseForOrderItem(
+    orderItemId: number,
+    motorbikeId: number,
+    colorId: number,
+    warehouseId: number,
+  ) {
+    const orderItem = await this.prisma.order_Items.findUnique({
+      where: {
+        id: orderItemId,
+      },
+    });
+    if (!orderItem) throw new NotFoundException('Not found order item!');
+    await this.warehouseInventoryService.getInventoryById(
+      motorbikeId,
+      warehouseId,
+      colorId,
+    );
+    await this.prisma.order_Items.update({
+      where: {
+        id: orderItemId,
+      },
+      data: {
+        warehouseId: warehouseId,
+      },
+    });
+    await this.warehouseInventoryService.updateInventoryQuantity(
+      motorbikeId,
+      warehouseId,
+      colorId,
+      orderItem.quantity,
+    );
   }
 }

@@ -141,25 +141,25 @@ export class CreditLineService {
   }
 
   // Update credit limit
-  async minusCreditLimit(agencyId: number, amount: number) {
-    const creditData = await this.getCreditLineByAgencyId(agencyId);
-    const restAmount = creditData.creditLimit - amount;
-    await this.prisma.credit_Line.update({
-      where: { agencyId: agencyId },
-      data: { creditLimit: restAmount },
-    });
-    return;
-  }
+  // async minusCreditLimit(agencyId: number, amount: number) {
+  //   const creditData = await this.getCreditLineByAgencyId(agencyId);
+  //   const restAmount = creditData.creditLimit - amount;
+  //   await this.prisma.credit_Line.update({
+  //     where: { agencyId: agencyId },
+  //     data: { creditLimit: restAmount },
+  //   });
+  //   return;
+  // }
 
-  async addCreditLimit(agencyId: number, amount: number) {
-    const creditData = await this.getCreditLineByAgencyId(agencyId);
-    const restAmount = creditData.creditLimit + amount;
-    await this.prisma.credit_Line.update({
-      where: { agencyId: agencyId },
-      data: { creditLimit: restAmount },
-    });
-    return;
-  }
+  // async addCreditLimit(agencyId: number, amount: number) {
+  //   const creditData = await this.getCreditLineByAgencyId(agencyId);
+  //   const restAmount = creditData.creditLimit + amount;
+  //   await this.prisma.credit_Line.update({
+  //     where: { agencyId: agencyId },
+  //     data: { creditLimit: restAmount },
+  //   });
+  //   return;
+  // }
 
   //Checking credit line
   async checkWarningThreshold(agencyId: number, currentUsage: number) {
@@ -179,5 +179,39 @@ export class CreditLineService {
       currentUsage,
       warningThreshold: creditLine.warningThreshold,
     };
+  }
+
+  async addDebt(agencyId: number, amount: number) {
+    const creditData = await this.getCreditLineByAgencyId(agencyId);
+    await this.prisma.credit_Line.update({
+      where: {
+        agencyId: agencyId,
+      },
+      data: {
+        currentDebt: creditData.currentDebt + amount,
+      },
+    });
+  }
+
+  async minusDebt(agencyId: number, amount: number) {
+    const creditData = await this.getCreditLineByAgencyId(agencyId);
+    if (creditData.currentDebt === 0) return;
+    await this.prisma.credit_Line.update({
+      where: {
+        agencyId: agencyId,
+      },
+      data: {
+        currentDebt: creditData.currentDebt - amount,
+      },
+    });
+  }
+
+  async updateCurrentDebtPaidOff(agencyId: number, amount: number) {
+    const creditData = await this.getCreditLineByAgencyId(agencyId);
+    await this.prisma.credit_Line.update({
+      where: { agencyId: agencyId },
+      data: { currentDebt: creditData.currentDebt - amount },
+    });
+    return;
   }
 }

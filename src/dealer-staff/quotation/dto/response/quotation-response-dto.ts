@@ -1,6 +1,11 @@
-import { ApiResponseProperty } from '@nestjs/swagger';
+import { ApiResponseProperty, PickType } from '@nestjs/swagger';
 import { QuotationStatus, QuotationType } from '../../types';
+import { CustomerResponseDto } from 'src/dealer-staff/customer/dto';
 
+class CustomerQuoteInfo extends PickType(CustomerResponseDto, [
+  'email',
+  'name',
+]) {}
 export class QuotationResponseDto {
   @ApiResponseProperty({ example: 1 })
   id: number;
@@ -24,4 +29,6 @@ export class QuotationResponseDto {
   colorId: number;
   @ApiResponseProperty({ example: 1 })
   dealerStaffId: number;
+  @ApiResponseProperty({ type: CustomerQuoteInfo })
+  customer: CustomerQuoteInfo;
 }

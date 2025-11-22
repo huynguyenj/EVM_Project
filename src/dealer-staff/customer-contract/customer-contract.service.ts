@@ -123,6 +123,14 @@ export class CustomerContractService {
     const listData = await this.prisma.customer_Contract.findMany({
       skip: skipData,
       take: customerContractQueries.limit,
+      include: {
+        customer: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+      },
       where: {
         AND: [{ agencyId: agencyId }, ...filters],
       },

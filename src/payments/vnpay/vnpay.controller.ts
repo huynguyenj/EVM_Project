@@ -41,7 +41,7 @@ export class VnpayController {
     @IpAddress() ipAddress: string,
     @Body() createAgencyBillPaymentUrl: CreatePaymentAgencyBill,
   ) {
-    const paymentData = await this.vnPayService.getApBatchPaymentInformation(
+    const paymentData = await this.vnPayService.getOrderPaymentInformation(
       platform,
       ipAddress,
       createAgencyBillPaymentUrl,
@@ -131,13 +131,13 @@ export class VnpayController {
     };
   }
 
-  @Get('check/batch')
+  @Get('check/order')
   @SetMetadata('public', true)
   async checkPayment(
     @VnpQueryQueries() query: VnpParamQuery,
     @Res() res: Response,
   ) {
-    const returnUrl = await this.vnPayService.updateAgencyBatchPayment(query);
+    const returnUrl = await this.vnPayService.updateAgencyOrderPayment(query);
     return res.redirect(returnUrl);
   }
 

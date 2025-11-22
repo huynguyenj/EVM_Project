@@ -14,12 +14,12 @@ import {
   ApiResponseDocumentArray,
 } from 'src/common/decorator';
 import {
-  ApBatchesQueries,
+  // ApBatchesQueries,
   ListTopMotorbikeOrderReport,
   QuarterContractRevenueResponse,
   QuarterRevenueContractAgencyQuery,
   TotalAgencyReportResponse,
-  TotalApBatchResponse,
+  // TotalApBatchResponse,
   TotalContractRevenueAgencyQuery,
   TotalMotorbikeReportResponse,
   TotalRevenueAgencyContractResponseDto,
@@ -27,7 +27,7 @@ import {
 } from './dto';
 import {
   AgencyContractReportQuery,
-  ApBatchesReportQuery,
+  // ApBatchesReportQuery,
   QuarterAgencyContractReportQuery,
 } from './decorators';
 
@@ -143,25 +143,25 @@ export class DashboardController {
     };
   }
 
-  @Get('total/ap-batches')
-  @ApiOperation({ summary: 'Get total ap batches' })
-  @ApiQuery({ name: 'agencyId', example: 1, required: false })
-  @ApiResponseDocument(
-    HttpStatus.OK,
-    TotalApBatchResponse,
-    'Get total ap batches success',
-  )
-  async getTotalBatches(
-    @ApBatchesReportQuery() apBatchesQueries: ApBatchesQueries,
-  ) {
-    const data =
-      await this.dashboardService.getApBatchesReport(apBatchesQueries);
-    return {
-      statusCode: HttpStatus.OK,
-      message: 'Get total ap batches success',
-      data: data,
-    };
-  }
+  // @Get('total/ap-batches')
+  // @ApiOperation({ summary: 'Get total ap batches' })
+  // @ApiQuery({ name: 'agencyId', example: 1, required: false })
+  // @ApiResponseDocument(
+  //   HttpStatus.OK,
+  //   TotalApBatchResponse,
+  //   'Get total ap batches success',
+  // )
+  // async getTotalBatches(
+  //   @ApBatchesReportQuery() apBatchesQueries: ApBatchesQueries,
+  // ) {
+  //   const data =
+  //     await this.dashboardService.getApBatchesReport(apBatchesQueries);
+  //   return {
+  //     statusCode: HttpStatus.OK,
+  //     message: 'Get total ap batches success',
+  //     data: data,
+  //   };
+  // }
 
   @Get('top-10/motorbikes')
   @ApiOperation({ summary: 'Get top 10 motorbike orders' })

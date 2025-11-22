@@ -114,19 +114,31 @@ export class OrderRestockManagementController {
     };
   }
 
-  @Patch('checked/:orderId')
-  @ApiOperation({ summary: 'Check credit order' })
+  @Patch(
+    'update/warehouse-item/:orderItemId/:motorbikeId/:warehouseId/:colorId',
+  )
+  @ApiOperation({ summary: 'Update warehouse for order item' })
   @ApiResponseDocument(
     HttpStatus.OK,
     OrderManageResponseDto,
-    'Check credit successfully!',
+    'Update warehouse for order item successfully!',
   )
-  async checkOrderForEvmStaff(@Param('orderId', ParseIntPipe) orderId: number) {
+  async checkOrderForEvmStaff(
+    @Param('orderItemId', ParseIntPipe) orderItemId: number,
+    @Param('motorbikeId', ParseIntPipe) motorbikeId: number,
+    @Param('warehouseId', ParseIntPipe) warehouseId: number,
+    @Param('colorId', ParseIntPipe) colorId: number,
+  ) {
     const updatedData =
-      await this.orderManageService.updateCheckCreditOrder(orderId);
+      await this.orderManageService.updateWarehouseForOrderItem(
+        orderItemId,
+        motorbikeId,
+        colorId,
+        warehouseId,
+      );
     return {
       statusCode: HttpStatus.OK,
-      message: 'Check credit successfully!',
+      message: 'Update warehouse for order item successfully!',
       data: updatedData,
     };
   }

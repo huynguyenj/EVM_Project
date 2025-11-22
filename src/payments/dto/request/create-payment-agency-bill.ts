@@ -5,7 +5,7 @@ export class CreatePaymentAgencyBill {
   @ApiProperty({ example: 1 })
   @IsNotEmpty()
   @IsNumber()
-  batchId: number;
+  orderId: number;
 
   @ApiProperty({ example: 1000 })
   @IsNotEmpty()

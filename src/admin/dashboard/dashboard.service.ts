@@ -1,7 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
-  ApBatchesQueries,
   QuarterRevenueContractAgencyQuery,
   TotalContractRevenueAgencyQuery,
 } from './dto';
@@ -95,21 +94,21 @@ export class DashboardService {
     };
   }
 
-  async getApBatchesReport(apBatchesQueries: ApBatchesQueries) {
-    const filters: object[] = [];
-    if (apBatchesQueries.agencyId) {
-      filters.push({ agencyId: Number(apBatchesQueries.agencyId) });
-    }
-    const apBatchesData = await this.prisma.ap_Batches.findMany({
-      where: filters.length > 0 ? { AND: filters } : {},
-    });
-    const totalApBatches = apBatchesData.reduce((total, apBatch) => {
-      return total + apBatch.amount;
-    }, 0);
-    return {
-      totalApBatches,
-    };
-  }
+  // async getApBatchesReport(apBatchesQueries: ApBatchesQueries) {
+  //   const filters: object[] = [];
+  //   if (apBatchesQueries.agencyId) {
+  //     filters.push({ agencyId: Number(apBatchesQueries.agencyId) });
+  //   }
+  //   const apBatchesData = await this.prisma.ap_Batches.findMany({
+  //     where: filters.length > 0 ? { AND: filters } : {},
+  //   });
+  //   const totalApBatches = apBatchesData.reduce((total, apBatch) => {
+  //     return total + apBatch.amount;
+  //   }, 0);
+  //   return {
+  //     totalApBatches,
+  //   };
+  // }
 
   async getTotalAgencyReport() {
     const totalAgencies = await this.prisma.agency.count();

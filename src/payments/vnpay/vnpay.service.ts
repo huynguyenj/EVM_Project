@@ -16,44 +16,39 @@ import {
 import QueryString from 'qs';
 import crypto from 'crypto';
 import { VnpParam, VnpParamResponse } from '../types';
-import { BatchesManagementService } from 'src/evm-staff/batches-management/batches-management.service';
+// import { BatchesManagementService } from 'src/evm-staff/batches-management/batches-management.service';
 import { sortObject } from './utils/vnpayHelper';
 import { DepositService } from 'src/dealer-staff/deposit/deposit.service';
 import { ContractFullPaymentService } from 'src/dealer-staff/contract-full-payment/contract-full-payment.service';
+import { OrderRestockService } from 'src/dealer-manager/order-restock/order-restock.service';
+import { CreditLineService } from 'src/admin/credit-line/credit-line.service';
 @Injectable()
 export class VnpayService {
   constructor(
     private prisma: PrismaService,
     @Inject(vnpayConfig.KEY)
     private vnPaySetting: ConfigType<typeof vnpayConfig>,
-    private batchesService: BatchesManagementService,
+    // private batchesService: BatchesManagementService,
     private depositService: DepositService,
+    private orderService: OrderRestockService,
     private contractFullPaymentService: ContractFullPaymentService,
+    private credirtLineService: CreditLineService,
   ) {}
 
-  async getApBatchPaymentInformation(
+  async getOrderPaymentInformation(
     platform: string,
     ipAddress: string,
     createPaymentBill: CreatePaymentAgencyBill,
   ) {
-    const data = await this.prisma.ap_Batches.findUnique({
-      where: { id: createPaymentBill.batchId },
-      include: {
-        agencyOrder: true,
-      },
-    });
-    if (!data) throw new NotFoundException('This batch is not existed');
-    if (data.amount === 0)
-      throw new BadRequestException('This batch is already paid');
-    if (
-      data.agencyOrder.orderType === 'FULL' &&
-      (createPaymentBill.amount < data.amount ||
-        createPaymentBill.amount > data.amount)
-    )
+    const data = await this.orderService.getOrderById(
+      createPaymentBill.orderId,
+    );
+    if (data.paidAmount === data.total)
+      throw new BadRequestException('This order is already paid');
+    if (createPaymentBill.amount > data.total - data.paidAmount)
       throw new BadRequestException(
-        'Your order is full type so you must pay exactly the price',
+        'Payment amount exceeds the remaining amount to be paid',
       );
-
     const vnpUrl = this.createPaymentUrl(
       platform,
       ipAddress,
@@ -161,14 +156,15 @@ export class VnpayService {
     }
   }
 
-  async updateAgencyBatchPayment(vnp_Params: VnpParamResponse) {
+  async updateAgencyOrderPayment(vnp_Params: VnpParamResponse) {
     const vnpData = this.checkPaymentReturn(vnp_Params);
     if (!vnpData)
       return `${this.vnPaySetting.vnpayClientReturn + '/payment?status=invalid'}`;
-    const { vnp_ResponseCode, vnp_OrderInfo, vnp_Amount } = vnpData;
+    const { vnp_ResponseCode, vnp_OrderInfo, vnp_Amount, vnp_TransactionNo } =
+      vnpData;
     const orderInfoListInfo = vnp_OrderInfo.split('-'); //vnp_OrderInfo = 1&web
     //Batch id
-    const batchId = Number(orderInfoListInfo[0]);
+    const orderId = Number(orderInfoListInfo[0]);
     //Platform type
     const platform = orderInfoListInfo[1];
     //Return client url
@@ -178,17 +174,18 @@ export class VnpayService {
         : this.vnPaySetting.vnpayClientMobileReturn;
     //Check payment response
     if (vnp_ResponseCode === '00') {
-      const apBatches = await this.batchesService.getBatchWithOrder(batchId);
-      await this.prisma.ap_Payments.create({
+      const order = await this.orderService.getOrderById(orderId);
+      await this.prisma.order_Payment.create({
         data: {
+          invoiceNumber: vnp_TransactionNo,
+          agencyOrderId: order.id,
           amount: vnp_Amount / 100,
-          paidDate: new Date(),
-          apBatchesId: apBatches.id,
+          payAt: new Date(),
         },
       });
-      await this.batchesService.updateBatchPayment(
-        batchId,
-        apBatches.agencyId,
+      await this.orderService.updatePaidAmount(order.id, vnp_Amount / 100);
+      await this.credirtLineService.updateCurrentDebtPaidOff(
+        order.agencyId,
         vnp_Amount / 100,
       );
       return `${returnClientUrl + '/payment?status=success'}`;

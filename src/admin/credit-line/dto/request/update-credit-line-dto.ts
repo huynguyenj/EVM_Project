@@ -13,6 +13,16 @@ export class UpdateCreditLineDto {
   creditLimit?: number;
 
   @ApiPropertyOptional({
+    description: 'The credit limit amount for the agency',
+    example: 750000,
+    type: Number,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  currentDebt?: number;
+
+  @ApiPropertyOptional({
     description:
       'Warning threshold percentage (0-100) to alert when credit usage reaches this level',
     example: 85,
