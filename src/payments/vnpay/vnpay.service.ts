@@ -177,7 +177,7 @@ export class VnpayService {
       const order = await this.orderService.getOrderById(orderId);
       await this.prisma.order_Payment.create({
         data: {
-          invoiceNumber: vnp_TransactionNo,
+          invoiceNumber: String(vnp_TransactionNo),
           agencyOrderId: order.id,
           amount: vnp_Amount / 100,
           payAt: new Date(),

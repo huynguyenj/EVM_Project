@@ -261,7 +261,7 @@ model Order_Items {
 /**Ap batches*/
 model Order_Payment {
   id Int @id @default(autoincrement())
-  invoiceNumber Float
+  invoiceNumber String @db.Text()
   amount Float
   payAt DateTime @db.Date
   agencyOrderId Int
