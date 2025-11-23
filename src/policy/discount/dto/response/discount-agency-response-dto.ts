@@ -1,14 +1,7 @@
-import { ApiResponseProperty, PickType } from '@nestjs/swagger';
+import { ApiResponseProperty } from '@nestjs/swagger';
 import { DiscountType, DiscountStatus, ValueType } from '../../types';
-import { AgencyResponseDto } from 'src/admin/agency/dto';
-import { MotorbikeResponseDto } from 'src/vehicle/electric-motorbike/dto';
-class DiscountAgencyNameResponseDto extends PickType(AgencyResponseDto, [
-  'name',
-] as const) {}
-class DiscountMotorbikeNameResponseDto extends PickType(MotorbikeResponseDto, [
-  'name',
-] as const) {}
-export class DiscountResponseDto {
+
+export class DiscountAgencyResponseDto {
   @ApiResponseProperty({
     example: 1,
   })
@@ -67,10 +60,4 @@ export class DiscountResponseDto {
     example: 1,
   })
   motorbikeId: number;
-
-  @ApiResponseProperty({ type: DiscountAgencyNameResponseDto })
-  agency: DiscountAgencyNameResponseDto;
-
-  @ApiResponseProperty({ type: DiscountMotorbikeNameResponseDto })
-  motorbike: DiscountMotorbikeNameResponseDto;
 }

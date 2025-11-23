@@ -19,6 +19,7 @@ import {
 } from 'src/common/decorator';
 import {
   CreatePriceDto,
+  PriceDetailResponseDto,
   PriceQueries,
   PriceResponseDto,
   UpdatePriceDto,
@@ -73,7 +74,7 @@ export class PriceController {
   @ApiOperation({ summary: 'Get price policy detail' })
   @ApiResponseDocument(
     HttpStatus.OK,
-    PriceResponseDto,
+    PriceDetailResponseDto,
     'Get price policy detail success!',
   )
   async getPricePolicyDetail(

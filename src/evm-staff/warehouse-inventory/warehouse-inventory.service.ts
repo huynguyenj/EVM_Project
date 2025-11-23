@@ -47,6 +47,18 @@ export class WarehouseInventoryService {
     const dataList = await this.prisma.inventory.findMany({
       skip: skipData,
       take: inventoryQuery.limit,
+      include: {
+        electricMotorbike: {
+          select: {
+            name: true,
+          },
+        },
+        color: {
+          select: {
+            colorType: true,
+          },
+        },
+      },
     });
     const totalInventory = await this.getTotalInventory();
     return {

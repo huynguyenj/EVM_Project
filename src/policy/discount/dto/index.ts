@@ -3,3 +3,4 @@ export * from './request/update-discount-dto';
 export * from './response/discount-response-dto';
 export * from './request/discount.query';
 export * from './response/discount-detail-response-dto';
+export * from './response/discount-agency-response-dto';

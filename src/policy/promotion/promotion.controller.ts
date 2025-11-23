@@ -19,6 +19,7 @@ import {
 } from 'src/common/decorator';
 import {
   CreatePromotionDto,
+  PromotionAgencyResponseDto,
   PromotionQueries,
   PromotionResponseDto,
   UpdatePromotionDto,
@@ -91,7 +92,7 @@ export class PromotionController {
   )
   @ApiResponseDocumentPagination(
     HttpStatus.OK,
-    PromotionResponseDto,
+    PromotionAgencyResponseDto,
     'Get promotion list for agency successfully',
   )
   async getAgencyPromotionList(
@@ -119,7 +120,7 @@ export class PromotionController {
   })
   @ApiResponseDocumentPagination(
     HttpStatus.OK,
-    PromotionResponseDto,
+    PromotionAgencyResponseDto,
     'Get promotion list for agency successfully',
   )
   async getMotorbikePromotionList(

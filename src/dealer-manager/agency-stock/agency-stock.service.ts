@@ -58,6 +58,18 @@ export class AgencyStockService {
     const listData = await this.prisma.agency_Stock.findMany({
       skip: skipData,
       take: agencyStockQueries.limit,
+      include: {
+        motorbike: {
+          select: {
+            name: true,
+          },
+        },
+        color: {
+          select: {
+            colorType: true,
+          },
+        },
+      },
       where: {
         AND: [{ agencyId: agencyId }, ...filters],
       },

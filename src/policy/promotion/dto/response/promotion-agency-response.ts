@@ -1,12 +1,7 @@
-import { ApiResponseProperty, PickType } from '@nestjs/swagger';
+import { ApiResponseProperty } from '@nestjs/swagger';
 import { PromotionValueType, PromotionStatus } from '../../types';
-import { MotorbikeResponseDto } from 'src/vehicle/electric-motorbike/dto';
 
-class PromotionWithMotorbikeNameResponseDto extends PickType(
-  MotorbikeResponseDto,
-  ['name'],
-) {}
-export class PromotionResponseDto {
+export class PromotionAgencyResponseDto {
   @ApiResponseProperty({ example: 'Woman day celebrate' })
   name: string;
 
@@ -45,9 +40,9 @@ export class PromotionResponseDto {
   })
   status: PromotionStatus;
 
+  // @ApiResponseProperty({ example: 1 })
+  // agencyId?: number;
+
   @ApiResponseProperty({ example: 1 })
   motorbikeId?: number;
-
-  @ApiResponseProperty({ type: PromotionWithMotorbikeNameResponseDto })
-  motorbike?: PromotionWithMotorbikeNameResponseDto;
 }
