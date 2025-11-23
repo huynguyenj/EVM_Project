@@ -143,6 +143,11 @@ export class OrderRestockManagementService {
       await this.creditLineService.addDebt(order.agencyId, order.total);
     if (updateOrderDto.status === OrderStatus.CANCELED)
       await this.creditLineService.minusDebt(order.agencyId, order.total);
+    if (
+      updateOrderDto.status === OrderStatus.CANCELED &&
+      order.orderPayments.length > 0
+    )
+      throw new BadRequestException('This order has payment, cannot cancel it');
 
     const updatedData = await this.prisma.agency_Order.update({
       where: {
