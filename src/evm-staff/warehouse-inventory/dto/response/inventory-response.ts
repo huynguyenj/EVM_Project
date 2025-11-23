@@ -1,5 +1,13 @@
-import { ApiResponseProperty } from '@nestjs/swagger';
+import { ApiResponseProperty, PickType } from '@nestjs/swagger';
+import { ColorResponseDto } from 'src/vehicle/color/dto';
+import { MotorbikeResponseDto } from 'src/vehicle/electric-motorbike/dto';
 
+class InventoryMotorbikeNameResponseDto extends PickType(MotorbikeResponseDto, [
+  'name',
+] as const) {}
+class InventoryColorTypeResponseDto extends PickType(ColorResponseDto, [
+  'colorType',
+] as const) {}
 export class InventoryResponseDto {
   @ApiResponseProperty({ example: 1 })
   electricMotorbikeId: number;
@@ -19,4 +27,10 @@ export class InventoryResponseDto {
     type: String,
   })
   lastUpdate: Date;
+
+  @ApiResponseProperty({ type: InventoryMotorbikeNameResponseDto })
+  electricMotorbike: InventoryMotorbikeNameResponseDto;
+
+  @ApiResponseProperty({ type: InventoryColorTypeResponseDto })
+  color: InventoryColorTypeResponseDto;
 }

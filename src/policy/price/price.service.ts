@@ -41,6 +41,18 @@ export class PriceService {
     const listData = await this.prisma.price_Policy.findMany({
       skip: skipData,
       take: priceQuery.limit,
+      include: {
+        agency: {
+          select: {
+            name: true,
+          },
+        },
+        motorbike: {
+          select: {
+            name: true,
+          },
+        },
+      },
     });
     return {
       data: listData,
@@ -75,6 +87,10 @@ export class PriceService {
     const data = await this.prisma.price_Policy.findUnique({
       where: {
         id: pricePolicyId,
+      },
+      include: {
+        agency: true,
+        motorbike: true,
       },
     });
     if (!data) throw new NotFoundException('Not found price policy!');

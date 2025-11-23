@@ -77,6 +77,18 @@ export class DiscountService {
     const listData = await this.prisma.discount_Policy.findMany({
       skip: skipData,
       take: discountQuery.limit,
+      include: {
+        agency: {
+          select: {
+            name: true,
+          },
+        },
+        motorbike: {
+          select: {
+            name: true,
+          },
+        },
+      },
       where: filters.length > 0 ? { AND: filters } : {},
     });
     return {

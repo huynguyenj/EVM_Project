@@ -65,6 +65,13 @@ export class PromotionService {
     const listData = await this.prisma.promotion.findMany({
       skip: skipData,
       take: promotionQueries.limit,
+      include: {
+        motorbike: {
+          select: {
+            name: true,
+          },
+        },
+      },
       where: filters.length > 0 ? { AND: filters } : {},
     });
     console.log(filters);

@@ -19,6 +19,7 @@ import {
 } from 'src/common/decorator';
 import {
   CreateDiscountDto,
+  DiscountAgencyResponseDto,
   DiscountDetailResponseDto,
   DiscountQueries,
   DiscountResponseDto,
@@ -86,7 +87,7 @@ export class DiscountController {
   )
   @ApiResponseDocumentPagination(
     HttpStatus.OK,
-    DiscountResponseDto,
+    DiscountAgencyResponseDto,
     'Get agency discount list successfully',
   )
   async getAgencyDiscountList(
@@ -114,7 +115,7 @@ export class DiscountController {
   )
   @ApiResponseDocumentPagination(
     HttpStatus.OK,
-    DiscountResponseDto,
+    DiscountAgencyResponseDto,
     'Get motorbike discount list for agency successfully',
   )
   async getMotorbikeDiscountList(

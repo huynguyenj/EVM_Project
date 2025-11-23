@@ -1,5 +1,11 @@
-import { ApiResponseProperty } from '@nestjs/swagger';
+import { ApiResponseProperty, PickType } from '@nestjs/swagger';
+import { AgencyResponseDto } from 'src/admin/agency/dto';
+import { MotorbikeResponseDto } from 'src/vehicle/electric-motorbike/dto';
 
+class PricePolicyAgencyName extends PickType(AgencyResponseDto, ['name']) {}
+class PricePolicyMotorbikeName extends PickType(MotorbikeResponseDto, [
+  'name',
+]) {}
 export class PriceResponseDto {
   @ApiResponseProperty({ example: 'Wholesale price for the agency' })
   title: string;
@@ -18,4 +24,10 @@ export class PriceResponseDto {
 
   @ApiResponseProperty({ example: 1 })
   motorbikeId: number;
+
+  @ApiResponseProperty({ type: PricePolicyAgencyName })
+  agency: PricePolicyAgencyName;
+
+  @ApiResponseProperty({ type: PricePolicyMotorbikeName })
+  motorbike: PricePolicyMotorbikeName;
 }
