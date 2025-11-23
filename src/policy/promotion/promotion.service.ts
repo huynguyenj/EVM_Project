@@ -128,6 +128,7 @@ export class PromotionService {
       skip: skipData,
       take: promotionQueries.limit,
       where: {
+        motorbikeId: null,
         status: 'ACTIVE',
         endAt: {
           gte: new Date(),
@@ -149,6 +150,51 @@ export class PromotionService {
     return await this.prisma.promotion.count({
       where: {
         status: 'ACTIVE',
+      },
+    });
+  }
+
+  async getPromotionsWithMotorbike(
+    motorbikeId: number,
+    promotionQueries: PromotionQueries,
+  ) {
+    const skipData = (promotionQueries.page - 1) * promotionQueries.limit;
+    const filters: any[] = [];
+    if (
+      promotionQueries.valueType &&
+      Object.values(PromotionValueType).includes(promotionQueries.valueType)
+    ) {
+      filters.push({
+        valueType: promotionQueries.valueType.toUpperCase(),
+      });
+    }
+    const listData = await this.prisma.promotion.findMany({
+      skip: skipData,
+      take: promotionQueries.limit,
+      where: {
+        motorbikeId: motorbikeId,
+        status: 'ACTIVE',
+        endAt: {
+          gte: new Date(),
+        },
+        ...filters,
+      },
+    });
+    return {
+      data: listData,
+      paginationInfo: {
+        page: promotionQueries.page,
+        limit: promotionQueries.limit,
+        total: await this.getTotalMotorbikePromotion(motorbikeId),
+      },
+    };
+  }
+
+  async getTotalMotorbikePromotion(motorbikeId: number) {
+    return await this.prisma.promotion.count({
+      where: {
+        status: 'ACTIVE',
+        motorbikeId: motorbikeId,
       },
     });
   }

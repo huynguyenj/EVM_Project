@@ -373,6 +373,7 @@ export class OrderRestockService {
       },
       include: {
         orderItems: true,
+        orderPayments: true,
       },
     });
     if (!data) throw new NotFoundException('Not found order!');
@@ -390,14 +391,28 @@ export class OrderRestockService {
   }
 
   async updatePaidAmount(orderId: number, paidAmount: number) {
-    const data = await this.prisma.agency_Order.update({
-      where: {
-        id: orderId,
-      },
-      data: {
-        paidAmount: paidAmount,
-      },
-    });
-    return data;
+    const orderData = await this.getOrderById(orderId);
+    const paidOffAmount = orderData.paidAmount + paidAmount;
+    if (paidOffAmount === orderData.total) {
+      await this.prisma.agency_Order.update({
+        where: {
+          id: orderId,
+        },
+        data: {
+          status: OrderStatus.COMPLETED,
+          paidAmount: paidOffAmount,
+        },
+      });
+    } else {
+      await this.prisma.agency_Order.update({
+        where: {
+          id: orderId,
+        },
+        data: {
+          paidAmount: orderData.paidAmount + paidAmount,
+        },
+      });
+    }
+    return;
   }
 }

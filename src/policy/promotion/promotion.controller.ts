@@ -107,6 +107,37 @@ export class PromotionController {
     };
   }
 
+  @Get('agency/list/with-motorbike/:motorbikeId')
+  @Roles(Role.DEALER_MANAGER)
+  @ApiOperation({
+    summary: 'Get list promotion for specific motorbike for agency',
+  })
+  @ApiQueriesAndPagination({
+    name: 'valueType',
+    example: 'percent',
+    required: false,
+  })
+  @ApiResponseDocumentPagination(
+    HttpStatus.OK,
+    PromotionResponseDto,
+    'Get promotion list for agency successfully',
+  )
+  async getMotorbikePromotionList(
+    @Param('motorbikeId', ParseIntPipe) motorbikeId: number,
+    @PromotionQuery() promotionQueries: PromotionQueries,
+  ) {
+    const dataList = await this.promotionService.getPromotionsWithMotorbike(
+      motorbikeId,
+      promotionQueries,
+    );
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Get promotion list for agency successfully!',
+      data: dataList.data,
+      paginationInfo: dataList.paginationInfo,
+    };
+  }
+
   @Get('detail/:promotionId')
   @ApiResponseDocument(
     HttpStatus.OK,

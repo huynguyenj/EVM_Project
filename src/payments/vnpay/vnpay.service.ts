@@ -32,7 +32,7 @@ export class VnpayService {
     private depositService: DepositService,
     private orderService: OrderRestockService,
     private contractFullPaymentService: ContractFullPaymentService,
-    private credirtLineService: CreditLineService,
+    private creditLineService: CreditLineService,
   ) {}
 
   async getOrderPaymentInformation(
@@ -184,7 +184,7 @@ export class VnpayService {
         },
       });
       await this.orderService.updatePaidAmount(order.id, vnp_Amount / 100);
-      await this.credirtLineService.updateCurrentDebtPaidOff(
+      await this.creditLineService.updateCurrentDebtPaidOff(
         order.agencyId,
         vnp_Amount / 100,
       );
