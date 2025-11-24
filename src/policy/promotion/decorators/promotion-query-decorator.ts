@@ -4,13 +4,14 @@ import { Request } from 'express';
 export const PromotionQuery = createParamDecorator(
   (data: unknown, ctx: ExecutionContext) => {
     const request = ctx.switchToHttp().getRequest<Request>();
-    const { page, limit, valueType, motorbikeId, status } = request.query;
+    const { page, limit, valueType, motorbikeId, status, sort } = request.query;
     return {
       page: page ? +page : 1,
       limit: limit ? +limit : 5,
       motorbikeId,
       status,
       valueType,
+      sort: sort ? sort : 'newest',
     };
   },
 );

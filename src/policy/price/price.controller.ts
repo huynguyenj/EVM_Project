@@ -53,7 +53,7 @@ export class PriceController {
 
   @Get('list')
   @ApiOperation({ summary: 'Get list price policies ' })
-  @ApiQueriesAndPagination()
+  @ApiQueriesAndPagination({ name: 'sort', example: 'newest', required: false })
   @ApiResponseDocumentPagination(
     HttpStatus.OK,
     PriceResponseDto,

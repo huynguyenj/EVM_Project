@@ -7,4 +7,5 @@ export class PromotionQueries implements PaginationRequestQuery {
   valueType?: PromotionValueType;
   motorbikeId?: number;
   status?: PromotionStatus;
+  sort: string;
 }

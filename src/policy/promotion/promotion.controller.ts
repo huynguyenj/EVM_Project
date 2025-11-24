@@ -62,6 +62,7 @@ export class PromotionController {
     },
     { name: 'motorbikeId', example: 1, required: false },
     { name: 'status', example: PromotionStatus.ACTIVE, required: false },
+    { name: 'sort', example: 'newest', required: false },
   )
   @ApiResponseDocumentPagination(
     HttpStatus.OK,

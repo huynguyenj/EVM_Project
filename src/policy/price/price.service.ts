@@ -53,6 +53,9 @@ export class PriceService {
           },
         },
       },
+      orderBy: {
+        id: priceQuery.sort === 'newest' ? 'desc' : 'asc',
+      },
     });
     return {
       data: listData,

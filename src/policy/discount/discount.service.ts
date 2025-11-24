@@ -90,6 +90,9 @@ export class DiscountService {
         },
       },
       where: filters.length > 0 ? { AND: filters } : {},
+      orderBy: {
+        id: discountQuery.sort === 'newest' ? 'desc' : 'asc',
+      },
     });
     return {
       data: listData,

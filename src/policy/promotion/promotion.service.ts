@@ -73,8 +73,10 @@ export class PromotionService {
         },
       },
       where: filters.length > 0 ? { AND: filters } : {},
+      orderBy: {
+        id: promotionQueries.sort === 'newest' ? 'desc' : 'asc',
+      },
     });
-    console.log(filters);
     return {
       data: listData,
       paginationInfo: {
