@@ -218,7 +218,7 @@ export class DiscountService {
       take: discountQuery.limit,
       where: {
         status: 'ACTIVE',
-        agencyId: undefined,
+        agencyId: null,
         motorbikeId: motorbikeId,
         ...filters,
       },
