@@ -4,8 +4,16 @@ import { Request } from 'express';
 export const DiscountQuery = createParamDecorator(
   (data: unknown, ctx: ExecutionContext) => {
     const request = ctx.switchToHttp().getRequest<Request>();
-    const { page, limit, type, valueType, motorbikeId, agencyId, status } =
-      request.query;
+    const {
+      page,
+      limit,
+      type,
+      valueType,
+      motorbikeId,
+      agencyId,
+      status,
+      sort,
+    } = request.query;
     return {
       page: page ? +page : 1,
       limit: limit ? +limit : 5,
@@ -14,6 +22,7 @@ export const DiscountQuery = createParamDecorator(
       motorbikeId,
       agencyId,
       status,
+      sort: sort ? sort : 'newest',
     };
   },
 );

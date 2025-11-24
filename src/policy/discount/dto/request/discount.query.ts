@@ -9,4 +9,5 @@ export class DiscountQueries implements PaginationRequestQuery {
   agencyId?: number;
   motorbikeId?: number;
   status?: DiscountStatus;
+  sort: string;
 }

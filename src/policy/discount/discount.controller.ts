@@ -61,6 +61,7 @@ export class DiscountController {
     { name: 'agencyId', example: 1, required: false },
     { name: 'motorbikeId', example: 1, required: false },
     { name: 'status', example: DiscountStatus.ACTIVE, required: false },
+    { name: 'sort', example: 'newest', required: false },
   )
   @ApiResponseDocumentPagination(
     HttpStatus.OK,
