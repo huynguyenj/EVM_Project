@@ -30,6 +30,8 @@ export class OrderRestockService {
     //Validate order items
     for (const orderItem of createOrderDto.orderItems) {
       const currentDate = new Date();
+
+      // Discount validation checks
       if (orderItem.discountId) {
         const discountData = await this.discountService.getDiscountPrice(
           orderItem.discountId,
@@ -54,6 +56,8 @@ export class OrderRestockService {
             `This discount is required at least ${discountData.min_quantity} of motorbike to have the usage`,
           );
       }
+
+      // Promotion validation checks
       if (orderItem.promotionId) {
         const promotion = await this.promotionService.getPromotionPrice(
           orderItem.promotionId,
