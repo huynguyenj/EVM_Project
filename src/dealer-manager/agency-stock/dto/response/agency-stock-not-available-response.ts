@@ -34,4 +34,7 @@ export class AgencyStockNotAvailableResponse {
   imageUrl: string;
   @ApiResponseProperty({ example: 1 })
   colorId: number;
+
+  @ApiResponseProperty({ example: 'Red' })
+  colorType: string;
 }
