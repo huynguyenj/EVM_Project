@@ -171,7 +171,7 @@ export class AgencyStockService {
   ) {
     const skipData = (agencyStockQueries.page - 1) * agencyStockQueries.limit;
     const listData = await this.prisma.$queryRaw`
-       select em.*, mc."imageUrl", mc."colorId"
+       select em.*, mc."imageUrl", mc."colorId", clrs."colorType"
        from electric_motorbikes em
        join (
         SELECT *
@@ -184,6 +184,7 @@ export class AgencyStockService {
         ) 
       ) as mc
       on em.id = mc."motorbikeId"
+      join colors clrs on clrs.id = mc."colorId"
       where em."isDeleted" = false
       ${agencyStockQueries.makeFrom ? Prisma.sql`and em."makeFrom" = ${agencyStockQueries.makeFrom}` : Prisma.empty}
       ${agencyStockQueries.version ? Prisma.sql`and em.version = ${agencyStockQueries.version}` : Prisma.empty}
@@ -239,6 +240,11 @@ export class AgencyStockService {
             safeFeature: true,
             configuration: true,
             images: true,
+          },
+        },
+        color: {
+          select: {
+            colorType: true,
           },
         },
         imageUrl: true,
