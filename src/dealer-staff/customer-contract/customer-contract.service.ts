@@ -229,6 +229,12 @@ export class CustomerContractService {
 
     //Update quantity of stock if it has.
     if (updateCustomerContractDto.status === ContractStatus.COMPLETED) {
+      await this.prisma.customer_Contract.update({
+        where: { id: contractId },
+        data: {
+          deliveryDate: new Date(),
+        },
+      });
       await this.agencyStockService.updateAgencyStockQuantity(
         customerContract.electricMotorbikeId,
         customerContract.agencyId,
