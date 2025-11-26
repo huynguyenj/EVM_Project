@@ -71,7 +71,7 @@ export class InstallmentContractService {
     prePaidPercent: number,
     processFee: number,
   ) {
-    const finalPrice = finalAmount * (prePaidPercent / 100) - processFee;
+    const finalPrice = finalAmount * (prePaidPercent / 100) + processFee;
     return finalPrice > 0 ? finalPrice : 0;
   }
 
@@ -116,6 +116,17 @@ export class InstallmentContractService {
       );
     const createdData = await this.prisma.installment_Schedule.createMany({
       data: interestPaymentData,
+    });
+    const totalDebtWithInterest = interestPaymentData.reduce(
+      (sum, payment) => sum + payment.amountDue,
+      0,
+    );
+    await this.prisma.installment_Contract.update({
+      where: { id: installmentContractId },
+      data: {
+        totalInterestPaid:
+          totalDebtWithInterest - interestContract.totalDebtPaid,
+      },
     });
     return createdData;
   }

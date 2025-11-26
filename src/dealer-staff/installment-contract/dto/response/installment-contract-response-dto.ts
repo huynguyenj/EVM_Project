@@ -20,6 +20,9 @@ export class InstallmentContractResponseDto {
   @ApiResponseProperty({ example: 14000 })
   totalDebtPaid: number;
 
+  @ApiResponseProperty({ example: 500 })
+  totalInterestPaid: number;
+
   @ApiResponseProperty({ example: PenaltyType.FIXED })
   penaltyType: PenaltyType;
 

@@ -161,6 +161,16 @@ export class OrderRestockService {
     const total = orderItems.reduce((total, item) => {
       return total + item.finalPrice;
     }, 0);
+    const isOrderOverCredit = await this.checkCredit(
+      createOrderDto.agencyId,
+      total,
+    );
+    if (!isOrderOverCredit.result) {
+      await this.deleteOrder(createOrder.id);
+      throw new BadRequestException(
+        `Your current debt ${isOrderOverCredit.creditLine.currentDebt.toLocaleString()} with this order total ${total.toLocaleString()} has exceeded the credit limit ${isOrderOverCredit.creditLine.creditLimit.toLocaleString()}. Please pay off your debt to continue placing orders.`,
+      );
+    }
     //Update total, item quantity in order
     const updatedOrder = await this.prisma.agency_Order.update({
       where: {
@@ -178,35 +188,22 @@ export class OrderRestockService {
   }
 
   //Check credit line is blocked or not
-  async checkCredit(agencyId: number) {
+  async checkCredit(agencyId: number, finalPrice?: number) {
     const creditLine =
       await this.creditLineService.getCreditLineByAgencyId(agencyId);
     if (creditLine.isBlocked)
       throw new BadRequestException('Your credit line has been blocked.');
     if (creditLine.currentDebt >= creditLine.creditLimit)
       throw new BadRequestException(
-        'Your credit line has reached the limit. Please pay off your debt to continue placing orders.',
+        `Your current debt ${creditLine.currentDebt.toLocaleString()} has reached the credit limit ${creditLine.creditLimit.toLocaleString()}. Please pay off your debt to continue placing orders.`,
       );
+    if (
+      finalPrice &&
+      creditLine.currentDebt + finalPrice > creditLine.creditLimit
+    )
+      return { creditLine, result: false };
+    else return { creditLine, result: true };
   }
-
-  // Check over credit limit
-  // async checkOverCreditLimit(
-  //   agencyId: number,
-  //   subtotal: number,
-  //   orderId: number,
-  // ) {
-  //   const creditLine =
-  //     await this.creditLineService.getCreditLineByAgencyId(agencyId);
-  //   if (!creditLine) throw new BadRequestException('Not found credit line');
-  //   if (creditLine.creditLimit <= subtotal) {
-  //     await this.deleteOrder(orderId);
-  //     throw new BadRequestException(
-  //       'Your order is over credit limit please try with smaller amount',
-  //     );
-  //   }
-  //   await this.creditLineService.minusCreditLimit(agencyId, subtotal);
-  //   return;
-  // }
 
   private calculatePriceWithSpecialDeal(
     wholesalePrice: number,
